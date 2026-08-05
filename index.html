@@ -6,198 +6,187 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#06070b">
 <title>Rajit Sinha · Aerospace Engineering</title>
-<meta name="description" content="High school aerospace portfolio — competition rocket avionics, lunar EVA glove CAD for NASA Texas Aerospace Scholars, and youth entrepreneurship.">
+<meta name="description" content="High school aerospace portfolio — competition rocket avionics, a lunar EVA glove designed for NASA Texas Aerospace Scholars, and youth entrepreneurship work.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --void:#06070b;
-  --panel:#0b0d13;
-  --panel-2:#0f121a;
-  --line:#191d27;
-  --line-lit:#2b3242;
-  --text:#e8ebf2;
-  --dim:#868fa3;
-  --dimmer:#5b6376;
+  --panel:rgba(13,16,24,.72);
+  --panel-solid:#0c0f16;
+  --line:rgba(255,255,255,.07);
+  --line-lit:rgba(255,255,255,.15);
+  --text:#e9ecf3;
+  --dim:#98a1b4;
+  --dimmer:#646d80;
   --blue:#4d8dff;
   --blue-soft:rgba(77,141,255,.12);
   --sans:"Instrument Sans",system-ui,sans-serif;
   --serif:"Instrument Serif",Georgia,serif;
   --mono:"JetBrains Mono",ui-monospace,monospace;
   --pad:clamp(1.15rem,4vw,4rem);
-  --maxw:1180px;
+  --maxw:1160px;
+  --r-lg:20px;
+  --r-md:14px;
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:var(--void);color:var(--text);
-  font-family:var(--sans);font-size:16px;line-height:1.65;
-  -webkit-font-smoothing:antialiased;overflow-x:hidden;
-}
+body{margin:0;background:var(--void);color:var(--text);
+  font-family:var(--sans);font-size:16px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
 img,video{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 
-/* ---------- background canvas ---------- */
-#bg{position:fixed;inset:0;z-index:0;pointer-events:none}
-.veil{
-  position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(120% 80% at 50% -10%,rgba(77,141,255,.10),transparent 60%);
-}
-.shell{position:relative;z-index:2}
+#sky{position:fixed;inset:0;z-index:0;pointer-events:none}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(110% 80% at 14% 45%,rgba(6,7,11,.7),rgba(6,7,11,.28) 48%,transparent 72%)}
 
-/* ---------- cursor ---------- */
-.cursor-dot,.cursor-ring{
-  position:fixed;top:0;left:0;z-index:9999;pointer-events:none;
-  border-radius:50%;opacity:0;transition:opacity .3s ease;
-}
+#smooth{position:relative;z-index:2}
+html.smooth #smooth{position:fixed;top:0;left:0;width:100%;will-change:transform}
+
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;z-index:9999;pointer-events:none;
+  border-radius:50%;opacity:0;transition:opacity .3s ease}
 .cursor-dot{width:6px;height:6px;background:var(--blue);margin:-3px 0 0 -3px;
-  box-shadow:0 0 12px rgba(77,141,255,.9)}
-.cursor-ring{width:32px;height:32px;margin:-16px 0 0 -16px;border:1px solid rgba(77,141,255,.45);
+  box-shadow:0 0 14px rgba(77,141,255,.9)}
+.cursor-ring{width:30px;height:30px;margin:-15px 0 0 -15px;border:1px solid rgba(77,141,255,.45);
   transition:opacity .3s ease,width .25s ease,height .25s ease,margin .25s ease,border-color .25s ease,background .25s ease}
-body.cursor-on .cursor-dot,body.cursor-on .cursor-ring{opacity:1}
 body.cursor-on{cursor:none}
 body.cursor-on a,body.cursor-on button,body.cursor-on video{cursor:none}
-body.cursor-on.hot .cursor-ring{width:56px;height:56px;margin:-28px 0 0 -28px;
+body.cursor-on .cursor-dot,body.cursor-on .cursor-ring{opacity:1}
+body.cursor-on.hot .cursor-ring{width:54px;height:54px;margin:-27px 0 0 -27px;
   border-color:rgba(77,141,255,.8);background:var(--blue-soft)}
 
-/* ---------- scroll progress ---------- */
-.progress{position:fixed;top:0;left:0;height:1px;width:0;background:var(--blue);z-index:9998;
-  box-shadow:0 0 10px rgba(77,141,255,.8)}
+.progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--blue);z-index:9998;
+  border-radius:0 2px 2px 0;box-shadow:0 0 12px rgba(77,141,255,.8)}
 
-/* ---------- boot ---------- */
-#boot{position:fixed;inset:0;z-index:9997;background:var(--void);
-  display:grid;place-items:center;transition:opacity .6s ease,visibility .6s}
+#boot{position:fixed;inset:0;z-index:9997;background:var(--void);display:grid;place-items:center;
+  transition:opacity .6s ease,visibility .6s}
 #boot.done{opacity:0;visibility:hidden}
-#boot .bar{width:min(180px,40vw);height:1px;background:var(--line);overflow:hidden}
-#boot .bar i{display:block;height:100%;width:0;background:var(--blue);animation:fill 1s ease forwards}
+#boot .bar{width:min(170px,40vw);height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+#boot .bar i{display:block;height:100%;width:0;background:var(--blue);border-radius:2px;animation:fill 1s ease forwards}
 @keyframes fill{to{width:100%}}
 
-/* ---------- nav ---------- */
-.nav{
-  position:fixed;top:0;left:0;right:0;z-index:60;
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;
-  padding:1rem var(--pad);
-  font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;
-  background:linear-gradient(to bottom,rgba(6,7,11,.92),rgba(6,7,11,0));
-  backdrop-filter:blur(6px);
-}
-.nav .mark{color:var(--text);font-weight:500}
+.nav{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;
+  justify-content:space-between;gap:1rem;padding:.9rem var(--pad);
+  font-family:var(--mono);font-size:.7rem;letter-spacing:.05em;
+  background:linear-gradient(to bottom,rgba(6,7,11,.94),rgba(6,7,11,0));backdrop-filter:blur(8px)}
 .nav .mark span{color:var(--blue)}
-.nav ul{display:flex;gap:1.4rem;list-style:none;margin:0;padding:0}
-.nav ul a{color:var(--dim);transition:color .2s ease}
-.nav ul a:hover{color:var(--text)}
+.nav ul{display:flex;gap:.3rem;list-style:none;margin:0;padding:0}
+.nav ul a{color:var(--dim);padding:.4rem .7rem;border-radius:999px;transition:.22s ease;display:block}
+.nav ul a:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .nav ul a i{font-style:normal;color:var(--dimmer);margin-right:.4rem}
-.nav .cta{border:1px solid var(--line-lit);padding:.42rem .8rem;color:var(--dim);transition:.2s ease}
-.nav .cta:hover{color:var(--text);border-color:var(--blue)}
-@media (max-width:760px){ .nav ul{display:none} }
+.nav .cta{border:1px solid var(--line-lit);padding:.45rem .9rem;border-radius:999px;color:var(--dim);transition:.22s ease}
+.nav .cta:hover{color:var(--void);background:var(--blue);border-color:var(--blue)}
+@media (max-width:860px){ .nav ul{display:none} }
 
-/* ---------- layout ---------- */
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
-section{position:relative}
-.band{padding:clamp(5rem,13vh,9rem) 0;border-top:1px solid var(--line)}
+.band{padding:clamp(4.5rem,11vh,7.5rem) 0}
 
-.eyebrow{
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--dimmer);display:flex;align-items:center;gap:.7rem;margin:0 0 1.6rem;
-}
+.eyebrow{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dimmer);display:inline-flex;align-items:center;gap:.6rem;margin:0 0 1.4rem;
+  border:1px solid var(--line);border-radius:999px;padding:.4rem .95rem;background:var(--panel)}
 .eyebrow::before{content:"";width:5px;height:5px;background:var(--blue);border-radius:50%;flex:none}
 
-h2.head{
-  font-size:clamp(1.9rem,4.6vw,3.2rem);line-height:1.06;font-weight:500;letter-spacing:-.02em;
-  margin:0 0 1.1rem;max-width:18ch;
-}
+h2.head{font-size:clamp(1.8rem,4.2vw,2.9rem);line-height:1.12;font-weight:500;letter-spacing:-.025em;
+  margin:0 0 1.9rem;max-width:21ch}
 h2.head em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--blue)}
-.sub{color:var(--dim);max-width:60ch;margin:0}
-.sub + .sub{margin-top:.9rem}
 
-/* ---------- hero ---------- */
-.hero{min-height:100svh;display:flex;align-items:center;padding:7rem 0 4rem}
-.hero .status{
-  font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--dim);display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;
+.card{border:1px solid var(--line);background:var(--panel);border-radius:var(--r-lg);
+  padding:clamp(1.3rem,2.8vw,2rem);backdrop-filter:blur(10px)}
+.card p{color:var(--dim);margin:0 0 1rem}
+.card p:last-child{margin-bottom:0}
+.card strong{color:var(--text);font-weight:500}
+.card h3{font-size:1.12rem;font-weight:500;letter-spacing:-.01em;margin:0 0 .9rem}
+.card .tag{display:inline-block;font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--blue);border:1px solid rgba(77,141,255,.3);
+  border-radius:999px;padding:.25rem .75rem;margin-bottom:1rem;background:var(--blue-soft)}
+
+figure{margin:0}
+.shot{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--panel-solid)}
+.shot img,.shot video{width:100%;display:block}
+.shot.crop img,.shot.crop video{aspect-ratio:4/3;object-fit:cover}
+.shot.portrait img{aspect-ratio:3/4;object-fit:cover;object-position:50% 20%;max-height:560px}
+.shot.reel video{aspect-ratio:9/16;object-fit:cover;max-height:540px}
+.shot figcaption{font-family:var(--mono);font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dimmer);padding:.7rem .95rem;border-top:1px solid var(--line)}
+.shot.plate{background:#08090d}
+.shot.plate img{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(1.05);padding:.7rem}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.9rem,2.2vw,1.4rem);align-items:start}
+.g-text-media{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:start}
+.g-media-text{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:start}
+.g-reel{display:grid;grid-template-columns:minmax(0,290px) 1fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:start}
+.mt{margin-top:clamp(.9rem,2.2vw,1.4rem)}
+@media (max-width:840px){
+  .g2,.g-text-media,.g-media-text,.g-reel{grid-template-columns:1fr}
+  .shot.reel video{max-height:none}
+  .shot.portrait img{max-height:none}
 }
+
+.rows{margin:0}
+.rows div{display:flex;gap:1.1rem;padding:.7rem 0;border-bottom:1px solid var(--line)}
+.rows div:last-child{border-bottom:none;padding-bottom:0}
+.rows dt{font-family:var(--mono);font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--dimmer);width:8.2rem;flex:none;padding-top:.3rem}
+.rows dd{margin:0;color:var(--dim);font-size:.92rem;line-height:1.55}
+
+.hero{min-height:100svh;display:flex;align-items:center;padding:7rem 0 4rem}
+.hero .status{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);display:inline-flex;align-items:center;gap:.6rem;margin-bottom:1.8rem;
+  border:1px solid var(--line);border-radius:999px;padding:.45rem 1rem;background:var(--panel)}
 .hero .status b{width:6px;height:6px;border-radius:50%;background:var(--blue);
   box-shadow:0 0 0 0 rgba(77,141,255,.6);animation:pulse 2.6s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 9px rgba(77,141,255,0)}100%{box-shadow:0 0 0 0 rgba(77,141,255,0)}}
-.hero h1{
-  font-size:clamp(2.6rem,7.6vw,5.6rem);line-height:1.02;font-weight:500;letter-spacing:-.035em;
-  margin:0 0 1.6rem;max-width:16ch;
-}
+.hero h1{font-size:clamp(2.3rem,6.2vw,4.7rem);line-height:1.06;font-weight:500;letter-spacing:-.035em;
+  margin:0 0 1.4rem;max-width:17ch}
 .hero h1 em{font-family:var(--serif);font-style:italic;font-weight:400}
-.hero p{color:var(--dim);max-width:54ch;font-size:1.02rem;margin:0}
-.hero .btns{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:2.4rem}
-.btn{
-  font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
-  padding:.8rem 1.3rem;border:1px solid var(--line-lit);color:var(--dim);transition:.25s ease;
-}
+.hero .intro{color:var(--dim);max-width:52ch;font-size:1.01rem;margin:0}
+.btns{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:2rem}
+.btn{font-family:var(--mono);font-size:.71rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:.85rem 1.4rem;border:1px solid var(--line-lit);border-radius:999px;color:var(--dim);transition:.25s ease}
 .btn:hover{color:var(--void);background:var(--blue);border-color:var(--blue)}
 .btn.solid{background:var(--text);color:var(--void);border-color:var(--text)}
 .btn.solid:hover{background:var(--blue);border-color:var(--blue);color:var(--void)}
 
-/* ---------- stats ---------- */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
-  border:1px solid var(--line);margin-top:clamp(2.4rem,6vw,4rem)}
-.stats div{background:var(--void);padding:1.3rem 1.2rem}
-.stats dt{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);margin:0 0 .5rem}
-.stats dd{margin:0;font-size:clamp(1.15rem,2.4vw,1.6rem);letter-spacing:-.02em;line-height:1.15}
-@media (max-width:760px){ .stats{grid-template-columns:1fr 1fr} }
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:clamp(2.2rem,5vw,3rem)}
+.stats div{border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel);
+  padding:1.05rem 1.15rem;backdrop-filter:blur(10px)}
+.stats dt{font-family:var(--mono);font-size:.61rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--dimmer);margin:0 0 .4rem}
+.stats dd{margin:0;font-size:clamp(1.05rem,2vw,1.35rem);letter-spacing:-.02em;line-height:1.25}
+.stats dd small{display:block;font-size:.74rem;color:var(--dimmer);letter-spacing:0;margin-top:.15rem;line-height:1.45}
+@media (max-width:760px){ .stats{grid-template-columns:1fr} }
 
-/* ---------- media ---------- */
-.media{border:1px solid var(--line);background:var(--panel);overflow:hidden}
-.media img,.media video{width:100%;height:auto;display:block}
-.media figcaption{
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--dimmer);padding:.75rem .95rem;border-top:1px solid var(--line);
-}
-.media.plate img{filter:invert(1) hue-rotate(180deg) brightness(.94) contrast(1.05)}
-.media.tall{max-width:420px}
-.grid-tall{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:clamp(1.4rem,3.4vw,3rem);align-items:start}
-figure{margin:0}
+.award{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.award:last-child{border-bottom:none;padding-bottom:0}
+.award .yr{font-family:var(--mono);font-size:.68rem;color:var(--dimmer);width:3.6rem;flex:none;padding-top:.28rem}
+.award .body h4{margin:0 0 .2rem;font-size:.97rem;font-weight:500}
+.award .body p{margin:0;color:var(--dim);font-size:.89rem;line-height:1.55}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+.chips span{font-family:var(--mono);font-size:.65rem;color:var(--dim);border:1px solid var(--line);
+  border-radius:999px;padding:.28rem .7rem;background:rgba(255,255,255,.03)}
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.6vw,1.6rem);align-items:start}
-.grid-wide{display:grid;grid-template-columns:1.35fr .65fr;gap:clamp(1.4rem,3.4vw,3rem);align-items:start}
-.mt{margin-top:clamp(2rem,5vw,3.4rem)}
-@media (max-width:820px){ .grid2,.grid-wide,.grid-tall{grid-template-columns:1fr} .media.tall{max-width:100%} }
+.stack{display:grid;gap:clamp(.9rem,2.2vw,1.4rem);align-content:start}
 
-/* ---------- spec rows ---------- */
-.rows{border-top:1px solid var(--line);margin:0}
-.rows div{display:flex;gap:1.2rem;padding:.85rem 0;border-bottom:1px solid var(--line)}
-.rows dt{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--dimmer);width:9.5rem;flex:none;padding-top:.15rem}
-.rows dd{margin:0;color:var(--dim);font-size:.94rem}
-
-/* ---------- note ---------- */
-.note{border:1px solid var(--line-lit);background:linear-gradient(180deg,var(--panel-2),var(--panel));
-  padding:clamp(1.4rem,3.4vw,2.2rem)}
-.note .tag{font-family:var(--mono);font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--blue);display:block;margin-bottom:1rem}
-.note h3{font-size:clamp(1.3rem,2.8vw,1.75rem);font-weight:500;letter-spacing:-.02em;margin:0 0 1rem;line-height:1.15}
-.note p{color:var(--dim);margin:0 0 .85rem;max-width:62ch}
-.note p:last-child{margin-bottom:0}
-.note strong{color:var(--text);font-weight:500}
-
-/* ---------- contact ---------- */
-.contact{padding:clamp(5rem,13vh,9rem) 0 4rem;border-top:1px solid var(--line)}
-.contact h2{font-size:clamp(2rem,5.4vw,3.6rem);font-weight:500;letter-spacing:-.03em;margin:0 0 2rem;line-height:1.05}
+.contact{padding:clamp(4.5rem,11vh,7.5rem) 0 4rem}
+.contact h2{font-size:clamp(1.85rem,4.6vw,3.1rem);font-weight:500;letter-spacing:-.03em;margin:0 0 2rem;line-height:1.14;max-width:22ch}
 .contact h2 em{font-family:var(--serif);font-style:italic;color:var(--blue)}
-.links{display:flex;flex-wrap:wrap;gap:2rem;font-family:var(--mono);font-size:.8rem}
-.links a{color:var(--dim);border-bottom:1px solid var(--line-lit);padding-bottom:.2rem;transition:.2s ease}
-.links a:hover{color:var(--blue);border-color:var(--blue)}
-.colophon{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);
-  font-family:var(--mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer);
+.links{display:flex;flex-wrap:wrap;gap:.6rem}
+.links a{font-family:var(--mono);font-size:.75rem;color:var(--dim);border:1px solid var(--line-lit);
+  border-radius:999px;padding:.7rem 1.2rem;transition:.22s ease}
+.links a:hover{color:var(--blue);border-color:var(--blue);background:var(--blue-soft)}
+.colophon{margin-top:3.5rem;padding-top:1.2rem;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer);
   display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 
-/* ---------- reveal ---------- */
-.rv{opacity:0;transform:translateY(14px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.rv{opacity:0;transform:translateY(16px);transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
-.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}
+.d1{transition-delay:.07s}.d2{transition-delay:.14s}.d3{transition-delay:.21s}
 
-:focus-visible{outline:1px solid var(--blue);outline-offset:4px}
+:focus-visible{outline:1px solid var(--blue);outline-offset:4px;border-radius:6px}
 
 @media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
   .rv{opacity:1;transform:none;transition:none}
   .hero .status b{animation:none}
   #boot{display:none}
@@ -211,10 +200,8 @@ figure{margin:0}
 <div class="cursor-dot" aria-hidden="true"></div>
 <div class="progress" aria-hidden="true"></div>
 
-<canvas id="bg" aria-hidden="true"></canvas>
-<div class="veil" aria-hidden="true"></div>
-
-<div class="shell">
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
 
 <nav class="nav">
   <a class="mark" href="#top">rajit<span>.</span>sinha</a>
@@ -222,144 +209,232 @@ figure{margin:0}
     <li><a href="#rocketry"><i>01</i>Rocketry</a></li>
     <li><a href="#glove"><i>02</i>EVA Glove</a></li>
     <li><a href="#outreach"><i>03</i>Outreach</a></li>
+    <li><a href="#awards"><i>04</i>Awards</a></li>
   </ul>
   <a class="cta" href="assets/rajit-sinha-resume.pdf">Résumé</a>
 </nav>
 
+<div id="smooth">
 <main id="top">
 
-<!-- ================= HERO ================= -->
 <section class="wrap hero">
   <div>
     <div class="status rv"><b></b> Plano, Texas · Class of 2027</div>
-    <h1 class="rv d1">Some things only get <em>one flight</em> to prove the work was right.</h1>
-    <p class="rv d2">I'm a high school senior headed for aerospace engineering. I build at the seam where software meets hardware — a flight computer that has to fire at exactly the right instant, a pressure glove that has to protect a hand and still let it close around a tool.</p>
+    <h1 class="rv d1">I like building things that only get <em>one try</em>.</h1>
+    <p class="intro rv d2">I'm a high school senior going into aerospace engineering. Most of what I've made sits right where the code meets the hardware — a flight computer that gets one chance to fire, a glove that has to hold pressure in and still let you bend a finger.</p>
     <div class="btns rv d3">
       <a class="btn solid" href="#rocketry">See the work</a>
       <a class="btn" href="assets/rajit-sinha-resume.pdf">Résumé</a>
     </div>
 
     <dl class="stats rv d3">
-      <div><dt>Selected</dt><dd>1 of 62<br><span style="font-size:.8rem;color:var(--dimmer)">from 1,014 applicants</span></dd></div>
-      <div><dt>Test flights</dt><dd>470–509 g<br><span style="font-size:.8rem;color:var(--dimmer)">across 3 motor types</span></dd></div>
-      <div><dt>Fairs run</dt><dd>10<br><span style="font-size:.8rem;color:var(--dimmer)">200+ young founders</span></dd></div>
-      <div><dt>Intended major</dt><dd>Aerospace<br><span style="font-size:.8rem;color:var(--dimmer)">engineering</span></dd></div>
+      <div><dt>Texas Aerospace Scholars</dt><dd>1 of 62<small>picked out of 1,014 applicants</small></dd></div>
+      <div><dt>Rocket test flights</dt><dd>470–509 g<small>across three different motors</small></dd></div>
+      <div><dt>Business fairs run</dt><dd>10<small>200+ kids started a business</small></dd></div>
     </dl>
   </div>
 </section>
 
-<!-- ================= 01 ROCKETRY ================= -->
 <section class="wrap band" id="rocketry">
   <p class="eyebrow rv">01 — American Rocketry Challenge</p>
-  <h2 class="head rv">Airframe, avionics, and <em>one shot</em> at apogee.</h2>
-  <p class="sub rv d1">The competition scores you on flying as close as possible to a target altitude and flight time with the payload intact. After a year on the team as a member, I ran it as captain — airframe, mass trimming, recovery, and the electronics.</p>
-  <p class="sub rv d2">Rather than trusting motor ejection alone, I built an onboard flight computer to detect apogee and release the parachute itself. That meant writing the software, soldering the board, and proving it on the bench before it ever left the pad.</p>
+  <h2 class="head rv">Two years of rockets. The second year I was <em>running it</em>.</h2>
 
-  <div class="grid-tall mt">
-    <figure class="media tall rv">
+  <div class="g-reel">
+    <figure class="shot reel rv">
       <video src="assets/video/launch.mp4" poster="assets/img/launch-poster.jpg"
              autoplay muted loop playsinline preload="metadata"
-             aria-label="Competition rocket launching and descending under parachute"></video>
-      <figcaption>Competition flight — boost, apogee, recovery</figcaption>
+             aria-label="Competition rocket launching and coming down under parachute"></video>
+      <figcaption>Launch, apogee, chute open</figcaption>
     </figure>
-    <dl class="rows rv d1">
-      <div><dt>Controller</dt><dd>Arduino Nano</dd></div>
-      <div><dt>Sensor</dt><dd>DPS310 barometric pressure</dd></div>
-      <div><dt>Actuator</dt><dd>Micro servo, parachute release</dd></div>
-      <div><dt>Software</dt><dd>Pressure→altitude conversion, low-pass noise filtering, apogee detection, arming safety check</dd></div>
-      <div><dt>Airframe</dt><dd>3D printed in sections, printed fin can</dd></div>
-      <div><dt>Test range</dt><dd>470–509 g on Estes F50, AeroTech F30 and F32</dd></div>
-    </dl>
+
+    <div class="card rv d1">
+      <p>The contest gives you a target altitude and a target flight time, then scores you on how close you get to both with the payload in one piece. I spent sophomore year on the team and ran it as captain junior year — airframe, weight, recovery, and all the electronics.</p>
+      <p>Most teams let the motor's ejection charge pop the parachute and hope the timing works out. I wanted the rocket to figure it out on its own, so I built a flight computer that watches air pressure and fires the chute at the top of the arc. I wrote the software, soldered the board, and ran it on the bench until I actually trusted it.</p>
+      <p>Then we flew it over and over, changing one thing at a time so every launch told us something the last one didn't.</p>
+    </div>
   </div>
 
-  <div class="grid2 mt">
-    <figure class="media rv">
-      <img src="assets/img/rocket-assembled.jpg" alt="Assembled 3D-printed competition rocket">
-      <figcaption>Assembled airframe</figcaption>
+  <div class="g-media-text mt">
+    <figure class="shot crop rv">
+      <img src="assets/img/avionics-bench.jpg" alt="Flight computer laid out on a bench: microcontroller, pressure sensor, battery, and servo">
+      <figcaption>The whole flight computer, laid out</figcaption>
     </figure>
-    <figure class="media rv d1">
-      <img src="assets/img/avionics-bench.jpg" alt="Flight computer laid out on the bench: microcontroller, barometric sensor, battery, and servo">
-      <figcaption>Avionics stack, wired for bench testing</figcaption>
-    </figure>
-  </div>
-
-  <div class="grid-wide mt">
-  <div class="note rv">
-    <span class="tag">Failure analysis</span>
-    <h3>The chute that stayed in the tube.</h3>
-    <p>On one flight the parachute never came out. The obvious assumption was that the code had missed apogee — which would have meant rewriting the detection logic.</p>
-    <p>I checked the avionics first. The board powered through the flight, the sensor read cleanly, and the deployment command fired on time. <strong>The software had done its job.</strong> What hadn't happened was motion: the servo didn't have the torque to pull the retainer free once the parachute was packed tight against it.</p>
-    <p>Mechanical, not computational. That changed the fix entirely — a stronger actuator and a lower-friction retainer, instead of rewriting code that was already correct.</p>
-  </div>
-  <figure class="media rv d1">
-    <video src="assets/video/deployment.mp4" poster="assets/img/deployment-poster.jpg"
-           muted loop playsinline preload="metadata" controls
-           aria-label="Servo release mechanism inside the airframe during a bench test"></video>
-    <figcaption>Bench test — servo releasing the retainer</figcaption>
-  </figure>
-  </div>
-</section>
-
-<!-- ================= 02 GLOVE ================= -->
-<section class="wrap band" id="glove">
-  <p class="eyebrow rv">02 — NASA Texas High School Aerospace Scholars</p>
-  <h2 class="head rv">A glove is a stack of <em>compromises</em>.</h2>
-  <p class="sub rv d1">Texas Aerospace Scholars runs a five-month online aerospace course and brings a small group to Johnson Space Center. I was selected for the residential Base Camp as one of 62 students statewide out of 1,014 applicants.</p>
-  <p class="sub rv d2">Our mission — <em>Moonshot</em> — was a helmet and glove system for lunar EVAs, carried to a Preliminary Design Review with a NASA consultant advising the team. As Design Engineer on a nine-person team, I owned the glove: the CAD assembly, and the research behind what each layer is actually for.</p>
-
-  <figure class="media plate mt rv">
-    <img src="assets/img/glove-exploded.png" alt="Exploded CAD view of the EVA glove: main glove, finger covers, glove entrance, and coupler">
-    <figcaption>Exploded assembly — main glove, finger covers, entrance, coupler</figcaption>
-  </figure>
-
-  <div class="grid-wide mt">
-    <figure class="media plate rv">
-      <img src="assets/img/glove-layers.png" alt="Cutaway CAD drawing of the glove's five layers: bladder, restraint, coil, thermal, TMG">
-      <figcaption>Layer stack-up — cutaway through the wrist</figcaption>
-    </figure>
-    <div class="rv d1">
-      <p class="sub" style="margin-bottom:1.4rem">Every layer solves a different problem, and each one you add for protection is something the astronaut then has to bend a finger through.</p>
+    <div class="card rv d1">
+      <h3>What's inside it</h3>
       <dl class="rows">
-        <div><dt>01 Bladder</dt><dd>Holds pressure</dd></div>
-        <div><dt>02 Restraint</dt><dd>Takes the load so the bladder can't balloon</dd></div>
-        <div><dt>03 Coil</dt><dd>Heating element</dd></div>
-        <div><dt>04 Thermal</dt><dd>Insulation and regulation</dd></div>
-        <div><dt>05 TMG</dt><dd>Outer shield — dust, abrasion, micrometeoroids</dd></div>
+        <div><dt>Brain</dt><dd>Arduino Nano R4</dd></div>
+        <div><dt>Sensor</dt><dd>DPS310 barometric pressure sensor</dd></div>
+        <div><dt>Release</dt><dd>Micro servo holding the parachute retainer shut</dd></div>
+        <div><dt>Code</dt><dd>Turns pressure into altitude, filters the noise so one bad reading can't fake an early peak, watches for apogee, and stays locked until the rocket is really flying</dd></div>
+        <div><dt>Airframe</dt><dd>3D printed in sections, fin can printed as one piece</dd></div>
+        <div><dt>Flown at</dt><dd>470–509 g on Estes F50 and AeroTech F30 and F32 motors</dd></div>
       </dl>
     </div>
   </div>
 
-  <div class="grid-wide mt">
-    <figure class="media rv">
-      <img src="assets/img/poster-jsc.jpg" alt="Presenting the Foxtrot-01 mission poster at Johnson Space Center">
-      <figcaption>Poster session — Johnson Space Center</figcaption>
+  <div class="g2 mt">
+    <figure class="shot crop rv">
+      <img src="assets/img/rocket-assembled.jpg" alt="The assembled 3D-printed competition rocket">
+      <figcaption>Assembled and ready to fly</figcaption>
     </figure>
-    <p class="sub rv d1">At the closing session we presented to NASA engineers and scientists: mission objective, lunar surface hazards, quality-of-life features, and how the design would be validated. Being asked in person why you chose a material is a different exercise from writing it down.</p>
+    <figure class="shot crop rv d1">
+      <video src="assets/video/deployment.mp4" poster="assets/img/deployment-poster.jpg"
+             muted loop playsinline preload="metadata" controls
+             aria-label="Servo release mechanism inside the airframe during a bench test"></video>
+      <figcaption>Bench test — the servo letting go</figcaption>
+    </figure>
+  </div>
+
+  <div class="card mt rv">
+    <span class="tag">The one that didn't work</span>
+    <h3 style="font-size:clamp(1.2rem,2.4vw,1.5rem)">The parachute that stayed in the tube</h3>
+    <p>On one flight the chute never came out. The easy thing to assume is that the code missed apogee, and if I'd gone with that I would have burned a week rewriting logic that wasn't broken.</p>
+    <p>So I checked the electronics first. Power held the whole way up, the sensor readings were clean, and the release command went out exactly when it should have. <strong>The software did its job.</strong> The servo just couldn't pull hard enough — the parachute was packed in tight against the retainer and that little servo didn't have the torque to move it.</p>
+    <p>Which makes it a mechanical problem, not a software one. The fix is a stronger servo and less friction in the retainer, not new code.</p>
   </div>
 </section>
 
-<!-- ================= 03 OUTREACH ================= -->
+<section class="wrap band" id="glove">
+  <p class="eyebrow rv">02 — NASA Texas High School Aerospace Scholars</p>
+  <h2 class="head rv">A Moon glove is five layers of <em>arguing with yourself</em>.</h2>
+
+  <div class="g-text-media">
+    <div class="card rv">
+      <p>Texas Aerospace Scholars is a NASA program: five months of coursework online, then they bring a small group down to Johnson Space Center for a week. 1,014 people applied and 62 of us got to go.</p>
+      <p>My team's job was a helmet and a set of gloves for walking around on the Moon, taken all the way to a Preliminary Design Review with a NASA consultant sitting in on our meetings. I was the design engineer for the glove, so I built the CAD model and worked out what every layer of it is actually doing.</p>
+      <p>At the end of the week we presented the whole thing to NASA engineers and scientists. Having someone who does this for a living ask why you picked a material is a lot harder than writing it on a poster.</p>
+    </div>
+    <figure class="shot portrait rv d1">
+      <img src="assets/img/poster-jsc.jpg" alt="Presenting the Foxtrot-01 mission poster at Johnson Space Center">
+      <figcaption>Poster session at Johnson Space Center</figcaption>
+    </figure>
+  </div>
+
+  <figure class="shot plate mt rv">
+    <img src="assets/img/glove-exploded.png" alt="Exploded CAD view of the glove: main glove, finger covers, glove entrance, and coupler">
+    <figcaption>Every part of the glove, pulled apart</figcaption>
+  </figure>
+
+  <div class="g-media-text mt">
+    <figure class="shot plate rv">
+      <img src="assets/img/glove-layers.png" alt="Cutaway CAD drawing showing the glove's five layers">
+      <figcaption>Cut through the wrist, layer by layer</figcaption>
+    </figure>
+    <div class="card rv d1">
+      <h3>Why five layers</h3>
+      <p>Each one is there for a different reason, and the annoying part is that everything you add to keep the astronaut safe is one more thing they have to bend a finger through.</p>
+      <dl class="rows">
+        <div><dt>01 Bladder</dt><dd>Holds the pressure in</dd></div>
+        <div><dt>02 Restraint</dt><dd>Takes the load so the bladder doesn't balloon out</dd></div>
+        <div><dt>03 Coil</dt><dd>Heating element</dd></div>
+        <div><dt>04 Thermal</dt><dd>Insulation and temperature regulation</dd></div>
+        <div><dt>05 TMG</dt><dd>The outer shield — lunar dust, abrasion, micrometeoroids</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
 <section class="wrap band" id="outreach">
   <p class="eyebrow rv">03 — Young Tech Pioneers</p>
-  <h2 class="head rv">Teaching kids to <em>sell to strangers</em>.</h2>
-  <p class="sub rv d1">I joined as a member in tenth grade and took over fundraising the following summer, raising money and lining up sponsors so the programs stay free for the families who show up.</p>
-  <p class="sub rv d2">The centerpiece is the Children's Business Fair. Kids research a product, build it, price it, then stand behind a table and sell it. Across ten fairs, 200+ kids have launched a business and earned over $10,000 between them, with crowds of 150 to 200 at each one.</p>
+  <h2 class="head rv">Getting a ten-year-old to <em>sell to a stranger</em>.</h2>
 
-  <div class="grid-wide mt">
-    <figure class="media rv">
-      <img src="assets/img/ytp-fair.jpg" alt="Young entrepreneurs and families at a Children's Business Fair">
-      <figcaption>Children's Business Fair — young founders and families</figcaption>
+  <div class="g-text-media">
+    <div class="card rv">
+      <p>I joined Young Tech Pioneers in tenth grade and took over fundraising the summer after. It's a nonprofit that teaches business and tech to elementary and middle schoolers, and my job as VP of Fundraising is finding the money and the sponsors that keep it running.</p>
+      <p>The big one is the Children's Business Fair. Kids come up with a product, build it, price it, and then stand at a table and sell it to people they've never met. We've run ten of them. More than 200 kids have started a business that way and made over $10,000 between them, with 150 to 200 people showing up to each fair.</p>
+      <p>Most of my time goes to vendors, volunteers, and making sure it all lands on one specific Saturday. The part I actually like is sitting with a middle schooler while they figure out how to explain their product out loud.</p>
+    </div>
+    <figure class="shot crop rv d1">
+      <img src="assets/img/ytp-fair.jpg" alt="Young entrepreneurs and their families at a Children's Business Fair">
+      <figcaption>Children's Business Fair</figcaption>
     </figure>
-    <p class="sub rv d1">Behind each fair is vendor coordination, volunteers, and logistics that have to land on one specific Saturday. The part I'd keep is sitting with a middle schooler working out how to explain their product out loud to someone who might not buy it.</p>
   </div>
 </section>
 
-<!-- ================= CONTACT ================= -->
+<section class="wrap band" id="awards">
+  <p class="eyebrow rv">04 — Awards &amp; recognition</p>
+  <h2 class="head rv">Mostly <em>business and computer science</em> competitions.</h2>
+
+  <div class="g2">
+    <div class="card rv">
+      <h3>Business Professionals of America</h3>
+      <div class="award">
+        <span class="yr">2026</span>
+        <div class="body">
+          <h4>Four state placements</h4>
+          <p>Four events at the Texas state conference, four placements.</p>
+          <div class="chips">
+            <span>1st · Digital Marketing</span>
+            <span>2nd · Digital Communication &amp; Design</span>
+            <span>3rd · Information Tech</span>
+            <span>5th · Computer Programming</span>
+          </div>
+        </div>
+      </div>
+      <div class="award">
+        <span class="yr">2025</span>
+        <div class="body">
+          <h4>State qualifier</h4>
+          <p>Made it to the state conference again.</p>
+        </div>
+      </div>
+      <div class="award">
+        <span class="yr">2024</span>
+        <div class="body">
+          <h4>Regional placements</h4>
+          <p>My first year competing.</p>
+          <div class="chips">
+            <span>3rd · Computer Science Concepts</span>
+            <span>7th · Information Technology Concepts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack rv d1">
+      <div class="card">
+        <h3>Academic</h3>
+        <div class="award">
+          <span class="yr">2026</span>
+          <div class="body"><h4>AP Scholar with Distinction</h4></div>
+        </div>
+        <div class="award">
+          <span class="yr">2025</span>
+          <div class="body"><h4>AP Scholar with Honor</h4></div>
+        </div>
+        <div class="award">
+          <span class="yr">2024</span>
+          <div class="body"><h4>UIL Solo &amp; Ensemble — state qualifier</h4></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>School</h3>
+        <dl class="rows">
+          <div><dt>High school</dt><dd>Lebanon Trail High School, Frisco ISD — Frisco, TX</dd></div>
+          <div><dt>Graduating</dt><dd>May 2027</dd></div>
+          <div><dt>Coursework</dt><dd>12 AP classes</dd></div>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3>What I work with</h3>
+        <dl class="rows">
+          <div><dt>Languages</dt><dd>Python, Java, C++</dd></div>
+          <div><dt>Tools</dt><dd>Fusion 360, Arduino IDE, 3D printing</dd></div>
+          <div><dt>Areas</dt><dd>Embedded systems, sensor filtering, flight simulation, data analysis, design and failure analysis</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="wrap contact" id="contact">
   <p class="eyebrow rv">Contact</p>
-  <h2 class="rv">Building something that has to <em>hold</em>? Let's talk.</h2>
+  <h2 class="rv">If you're building something that has to <em>hold</em>, I'd like to hear about it.</h2>
   <div class="links rv d1">
     <a href="mailto:rajit.viral@gmail.com">rajit.viral@gmail.com</a>
+    <a href="https://www.linkedin.com/in/rajit-sinha-20aa69394/">LinkedIn</a>
     <a href="https://github.com/rajitsinha">GitHub</a>
     <a href="assets/rajit-sinha-resume.pdf">Résumé (PDF)</a>
   </div>
@@ -374,112 +449,240 @@ figure{margin:0}
 
 <script>
 (function(){
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var fine   = matchMedia('(pointer: fine)').matches;
 
-  /* ---- boot ---- */
-  var boot = document.getElementById('boot');
-  if(reduce){ boot.classList.add('done'); }
-  else { window.setTimeout(function(){ boot.classList.add('done'); }, 1050); }
+var boot=document.getElementById('boot');
+if(reduce) boot.classList.add('done');
+else setTimeout(function(){ boot.classList.add('done'); },1050);
 
-  /* ---- cursor ---- */
-  var fine = window.matchMedia('(pointer: fine)').matches;
-  if(fine){
-    var dot = document.querySelector('.cursor-dot');
-    var ring = document.querySelector('.cursor-ring');
-    var mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
-    document.body.classList.add('cursor-on');
-    addEventListener('mousemove',function(e){
-      mx=e.clientX; my=e.clientY;
-      dot.style.transform='translate('+mx+'px,'+my+'px)';
-      if(reduce) ring.style.transform='translate('+mx+'px,'+my+'px)';
-    },{passive:true});
-    if(!reduce){
-      (function loop(){
-        rx += (mx-rx)*0.16; ry += (my-ry)*0.16;
-        ring.style.transform='translate('+rx+'px,'+ry+'px)';
-        requestAnimationFrame(loop);
-      })();
-    }
-    var hot='a,button,video,summary,[role="button"]';
-    document.addEventListener('mouseover',function(e){
-      if(e.target.closest(hot)) document.body.classList.add('hot');
-    });
-    document.addEventListener('mouseout',function(e){
-      if(e.target.closest(hot)) document.body.classList.remove('hot');
-    });
-    addEventListener('mouseleave',function(){ document.body.classList.remove('cursor-on'); });
-    addEventListener('mouseenter',function(){ document.body.classList.add('cursor-on'); });
+/* ---------- cursor ---------- */
+if(fine){
+  var dot=document.querySelector('.cursor-dot'), ring=document.querySelector('.cursor-ring');
+  var mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+  document.body.classList.add('cursor-on');
+  addEventListener('mousemove',function(e){
+    mx=e.clientX; my=e.clientY;
+    dot.style.transform='translate('+mx+'px,'+my+'px)';
+    if(reduce) ring.style.transform='translate('+mx+'px,'+my+'px)';
+  },{passive:true});
+  if(!reduce)(function ringLoop(){
+    rx+=(mx-rx)*.16; ry+=(my-ry)*.16;
+    ring.style.transform='translate('+rx+'px,'+ry+'px)';
+    requestAnimationFrame(ringLoop);
+  })();
+  var HOT='a,button,video,[role="button"]';
+  document.addEventListener('mouseover',function(e){ if(e.target.closest(HOT)) document.body.classList.add('hot'); });
+  document.addEventListener('mouseout', function(e){ if(e.target.closest(HOT)) document.body.classList.remove('hot'); });
+  addEventListener('mouseleave',function(){ document.body.classList.remove('cursor-on'); });
+  addEventListener('mouseenter',function(){ document.body.classList.add('cursor-on'); });
+}
+
+/* ---------- smooth scroll with momentum ---------- */
+var smoothEl=document.getElementById('smooth');
+var useSmooth = !reduce && fine && innerWidth>900;
+var current=0, docH=0;
+
+function setHeight(){
+  docH=smoothEl.getBoundingClientRect().height;
+  document.body.style.height=docH+'px';
+}
+if(useSmooth){
+  document.documentElement.classList.add('smooth');
+  setHeight();
+  addEventListener('resize',setHeight);
+  addEventListener('load',setHeight);
+  if('ResizeObserver' in window) new ResizeObserver(setHeight).observe(smoothEl);
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var id=a.getAttribute('href'); if(id.length<2) return;
+    var el=document.querySelector(id); if(!el) return;
+    e.preventDefault();
+    var y=el.getBoundingClientRect().top + (useSmooth?current:scrollY) - 68;
+    if(useSmooth) scrollTo(0,y);
+    else scrollTo({top:y,behavior:reduce?'auto':'smooth'});
+  });
+});
+
+/* ---------- reveals ---------- */
+var items=[].slice.call(document.querySelectorAll('.rv'));
+function checkReveals(){
+  for(var i=items.length-1;i>=0;i--){
+    var r=items[i].getBoundingClientRect();
+    if(r.top<innerHeight*0.9 && r.bottom>-200){ items[i].classList.add('in'); items.splice(i,1); }
   }
+}
+if(reduce) items.forEach(function(n){ n.classList.add('in'); });
 
-  /* ---- scroll progress ---- */
-  var prog=document.querySelector('.progress');
-  function onScroll(){
-    var h=document.documentElement.scrollHeight-innerHeight;
-    prog.style.width=(h>0 ? (scrollY/h)*100 : 0)+'%';
+var prog=document.querySelector('.progress');
+
+/* ---------- the sky: launch, Earth orbit, Moon orbit, landing ---------- */
+var cv=document.getElementById('sky'), ctx=cv.getContext('2d');
+var W=0,H=0,DPR=Math.min(devicePixelRatio||1,2),stars=[],craters=[],trail=[];
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function clamp01(v){ return v<0?0:(v>1?1:v); }
+function ease(t){ return t*t*(3-2*t); }
+function seg(v,a,b){ return ease(clamp01((v-a)/(b-a))); }
+
+function sizeSky(){
+  W=innerWidth; H=innerHeight;
+  cv.width=W*DPR; cv.height=H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  stars=[];
+  var n=Math.round(Math.min(165,(W*H)/11000));
+  for(var i=0;i<n;i++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()*.85+.15,r:Math.random()*1.2+.3,t:Math.random()*6.283});
+  if(!craters.length) for(var j=0;j<9;j++) craters.push({a:Math.random()*6.283,d:Math.random()*.7,r:Math.random()*.12+.04});
+}
+
+function drawRocket(x,y,ang,scale,flame){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.scale(scale*1.55,scale*1.55);
+  if(flame>0.02){
+    var g=ctx.createLinearGradient(0,6,0,6+30*flame);
+    g.addColorStop(0,'rgba(160,198,255,'+(.8*flame)+')');
+    g.addColorStop(.45,'rgba(77,141,255,'+(.42*flame)+')');
+    g.addColorStop(1,'rgba(77,141,255,0)');
+    ctx.beginPath(); ctx.moveTo(-4.5,6); ctx.lineTo(0,6+32*flame); ctx.lineTo(4.5,6); ctx.closePath();
+    ctx.fillStyle=g; ctx.fill();
   }
-  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  ctx.beginPath();
+  ctx.moveTo(0,-13); ctx.quadraticCurveTo(5.5,-2,5,7); ctx.lineTo(-5,7); ctx.quadraticCurveTo(-5.5,-2,0,-13);
+  ctx.closePath(); ctx.fillStyle='rgba(228,236,250,.94)'; ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-5,7); ctx.lineTo(-9.5,13); ctx.lineTo(-5,13); ctx.closePath();
+  ctx.moveTo(5,7); ctx.lineTo(9.5,13); ctx.lineTo(5,13); ctx.closePath();
+  ctx.fillStyle='rgba(77,141,255,.9)'; ctx.fill();
+  ctx.restore();
+}
 
-  /* ---- reveals ---- */
-  var items=document.querySelectorAll('.rv');
-  if(!('IntersectionObserver' in window)||reduce){
-    items.forEach(function(n){n.classList.add('in')});
+function drawBody(x,y,r,kind,alpha){
+  if(r<=.5||alpha<=.01) return;
+  ctx.save(); ctx.globalAlpha=alpha;
+  var g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r);
+  if(kind==='earth'){ g.addColorStop(0,'#63a4f5'); g.addColorStop(.5,'#2a63bd'); g.addColorStop(1,'#0d2350'); }
+  else { g.addColorStop(0,'#b6bfd0'); g.addColorStop(.55,'#626b7e'); g.addColorStop(1,'#1a202b'); }
+  ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.fillStyle=g; ctx.fill();
+  if(kind==='earth'){
+    ctx.beginPath(); ctx.arc(x,y,r*1.05,0,6.2832);
+    ctx.strokeStyle='rgba(120,175,255,'+(.42*alpha)+')'; ctx.lineWidth=Math.max(1.5,r*.075); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x,y,r*1.16,0,6.2832);
+    ctx.strokeStyle='rgba(77,141,255,'+(.14*alpha)+')'; ctx.lineWidth=Math.max(2,r*.12); ctx.stroke();
   } else {
-    var io=new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-    },{threshold:0.15,rootMargin:'0px 0px -8% 0px'});
-    items.forEach(function(n){io.observe(n)});
-  }
-
-  /* ---- starfield ---- */
-  var cv=document.getElementById('bg'), ctx=cv.getContext('2d');
-  var dpr=Math.min(devicePixelRatio||1,2), stars=[], W=0,H=0, target=0, cur=0, running=!reduce;
-
-  function size(){
-    W=innerWidth; H=innerHeight;
-    cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    build();
-  }
-  function build(){
-    var n=Math.round(Math.min(150,(W*H)/12000));
-    stars=[];
-    for(var i=0;i<n;i++){
-      stars.push({
-        x:Math.random()*W,
-        y:Math.random()*H*1.6-H*0.3,
-        z:Math.random()*0.85+0.15,
-        r:Math.random()*1.25+0.25,
-        t:Math.random()*Math.PI*2
-      });
+    ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.clip();
+    for(var i=0;i<craters.length;i++){
+      var c=craters[i];
+      ctx.beginPath();
+      ctx.arc(x+Math.cos(c.a)*c.d*r, y+Math.sin(c.a)*c.d*r, c.r*r, 0, 6.2832);
+      ctx.fillStyle='rgba(0,0,0,.18)'; ctx.fill();
     }
+    ctx.restore();
   }
-  function frame(){
-    target=scrollY;
-    cur += (target-cur)*0.075;
+  ctx.restore();
+}
+
+function frame(){
+  if(useSmooth){
+    current = lerp(current, scrollY, .085);
+    if(Math.abs(scrollY-current)<.08) current = scrollY;
+    smoothEl.style.transform='translate3d(0,'+(-current)+'px,0)';
+  } else {
+    current = scrollY;
+  }
+
+  var maxScroll = (useSmooth ? docH : document.documentElement.scrollHeight) - innerHeight;
+  var p = maxScroll>0 ? clamp01(current/maxScroll) : 0;
+  prog.style.width=(p*100)+'%';
+  checkReveals();
+
+  if(!reduce){
     ctx.clearRect(0,0,W,H);
+    var R=Math.min(W,H), cx=W*.76;
+
+    /* stars, brighter once we're off the ground */
+    var starA=lerp(.4,1,seg(p,0,.15));
     for(var i=0;i<stars.length;i++){
       var s=stars[i];
-      var y=s.y - cur*s.z*0.22;
-      var span=H*1.6;
-      y=((y % span)+span)%span - H*0.3;
-      s.t+=0.008;
-      var tw=0.55+Math.sin(s.t)*0.3;
-      var a=(0.14+s.z*0.4)*tw;
-      ctx.beginPath();
-      ctx.arc(s.x,y,s.r*s.z+0.15,0,6.2832);
-      ctx.fillStyle= s.z>0.72 ? 'rgba(120,165,255,'+a+')' : 'rgba(200,214,240,'+(a*0.7)+')';
+      var sy=((s.y - p*s.z*.5)%1+1)%1;
+      s.t+=.008;
+      var a=(.12+s.z*.42)*(.62+Math.sin(s.t)*.26)*starA;
+      ctx.beginPath(); ctx.arc(s.x*W, sy*H, s.r*s.z+.15, 0, 6.2832);
+      ctx.fillStyle = s.z>.72 ? 'rgba(135,178,255,'+a+')' : 'rgba(206,219,245,'+(a*.72)+')';
       ctx.fill();
     }
-    if(running) requestAnimationFrame(frame);
+
+    /* ground haze at the very start */
+    var launch=seg(p,0,.15);
+    if(launch<1){
+      var gh=H*.17;
+      ctx.save(); ctx.globalAlpha=(1-launch)*.85;
+      var gg=ctx.createLinearGradient(0,H-gh,0,H);
+      gg.addColorStop(0,'rgba(18,24,38,0)'); gg.addColorStop(1,'rgba(26,34,54,.9)');
+      ctx.fillStyle=gg; ctx.fillRect(0,H-gh,W,gh); ctx.restore();
+    }
+
+    /* Earth swells in, then falls away behind us */
+    var eIn=seg(p,.09,.32), eOut=seg(p,.50,.68);
+    var eR=lerp(0,R*.33,eIn)*lerp(1,.15,eOut);
+    var eX=lerp(W*.60,cx,eIn);
+    var eY=lerp(H*1.4,H*.54,eIn) - H*.24*eOut;
+    drawBody(eX,eY,eR,'earth',eIn*lerp(1,.4,eOut)*.82);
+
+    /* Moon grows in for the back half */
+    var mIn=seg(p,.56,.80);
+    var mR=lerp(0,R*.29,mIn);
+    var mX=lerp(W*1.2,cx,mIn), mY=lerp(H*.3,H*.52,mIn);
+    drawBody(mX,mY,mR,'moon',mIn*.85);
+
+    /* rocket */
+    var rx,ry,ang,scale=1,flame=0;
+    if(p<.15){
+      var t=seg(p,0,.15);
+      rx=W*.5; ry=lerp(H*1.05,H*.44,t); ang=0; flame=1-t*.3; scale=lerp(1.4,1.12,t);
+    } else if(p<.50){
+      var t2=(p-.15)/(.50-.15), th=-Math.PI*.5+t2*Math.PI*2.1, orb=Math.max(eR*1.45,60);
+      rx=eX+Math.cos(th)*orb*1.12; ry=eY+Math.sin(th)*orb*.72;
+      ang=th+Math.PI*.5; flame=.3; scale=1.05;
+    } else if(p<.60){
+      var t3=(p-.50)/.10;
+      rx=lerp(eX+Math.max(eR*1.5,60),W*.4,t3); ry=lerp(eY,H*.46,t3);
+      ang=lerp(Math.PI*.5,Math.PI*.3,t3); flame=lerp(.3,1,t3); scale=lerp(1.05,1.18,t3);
+    } else if(p<.90){
+      var t4=(p-.60)/(.90-.60), th2=Math.PI*.85+t4*Math.PI*1.9, orb2=Math.max(mR*1.5,55);
+      rx=mX+Math.cos(th2)*orb2*1.12; ry=mY+Math.sin(th2)*orb2*.7;
+      ang=th2+Math.PI*.5; flame=.26; scale=1;
+    } else {
+      var t5=seg(p,.90,1);
+      var thL=Math.PI*.85+Math.PI*1.9, orbL=Math.max(mR*1.5,55);
+      var sx=mX+Math.cos(thL)*orbL*1.12, sy=mY+Math.sin(thL)*orbL*.7;
+      var lx=mX-mR*.3, ly=mY-mR*.93;
+      rx=lerp(sx,lx,t5); ry=lerp(sy,ly,t5);
+      ang=lerp(thL+Math.PI*.5,0,t5); flame=(1-t5)*.65; scale=lerp(1,.92,t5);
+      if(t5>.7){
+        ctx.save(); ctx.globalAlpha=(t5-.7)/.3*.45;
+        ctx.beginPath(); ctx.arc(lx,ly,12,0,6.2832);
+        ctx.fillStyle='rgba(77,141,255,.45)'; ctx.fill(); ctx.restore();
+      }
+    }
+
+    trail.push({x:rx,y:ry});
+    if(trail.length>44) trail.shift();
+    if(trail.length>2){
+      ctx.beginPath(); ctx.moveTo(trail[0].x,trail[0].y);
+      for(var k=1;k<trail.length;k++) ctx.lineTo(trail[k].x,trail[k].y);
+      ctx.strokeStyle='rgba(120,175,255,.22)'; ctx.lineWidth=1.6; ctx.stroke();
+    }
+    drawRocket(rx,ry,ang,scale,flame);
   }
-  if(!reduce){
-    size(); requestAnimationFrame(frame);
-    addEventListener('resize',size);
-    document.addEventListener('visibilitychange',function(){
-      if(document.hidden){ running=false; }
-      else if(!running){ running=true; requestAnimationFrame(frame); }
-    });
-  }
+
+  requestAnimationFrame(frame);
+}
+
+sizeSky();
+addEventListener('resize',function(){ sizeSky(); trail.length=0; });
+checkReveals();
+requestAnimationFrame(frame);
 })();
 </script>
 </body>
