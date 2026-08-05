@@ -78,6 +78,10 @@ body.cursor-on.hot .cursor-ring{width:54px;height:54px;margin:-27px 0 0 -27px;
 .nav ul a i{font-style:normal;color:var(--dimmer);margin-right:.4rem}
 .nav .cta{border:1px solid var(--line-lit);padding:.45rem .9rem;border-radius:999px;color:var(--dim);transition:.22s ease}
 .nav .cta:hover{color:var(--void);background:var(--blue);border-color:var(--blue)}
+.nav-actions{display:flex;align-items:center;gap:.45rem}
+.nav .cta.solid{background:var(--blue);border-color:var(--blue);color:#04070f;font-weight:500}
+.nav .cta.solid:hover{background:#74a8ff;border-color:#74a8ff;color:#04070f}
+@media (max-width:620px){ .nav .cta.mail{display:none} }
 @media (max-width:860px){ .nav ul{display:none} }
 
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
@@ -113,10 +117,11 @@ figure{margin:0}
 .shot.plate{background:#08090d}
 .shot.plate img{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(1.05);padding:.7rem}
 
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.9rem,2.2vw,1.4rem);align-items:start}
-.g-text-media{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:start}
-.g-media-text{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:start}
-.g-reel{display:grid;grid-template-columns:minmax(0,290px) 1fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:start}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.9rem,2.2vw,1.4rem);align-items:stretch}
+.g2 > .card{height:100%}
+.g-text-media{display:grid;grid-template-columns:1.12fr .88fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:center}
+.g-media-text{display:grid;grid-template-columns:.88fr 1.12fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:center}
+.g-reel{display:grid;grid-template-columns:minmax(0,290px) 1fr;gap:clamp(1.1rem,2.6vw,1.7rem);align-items:center}
 .mt{margin-top:clamp(.9rem,2.2vw,1.4rem)}
 @media (max-width:840px){
   .g2,.g-text-media,.g-media-text,.g-reel{grid-template-columns:1fr}
@@ -211,7 +216,11 @@ figure{margin:0}
     <li><a href="#outreach"><i>03</i>Outreach</a></li>
     <li><a href="#awards"><i>04</i>Awards</a></li>
   </ul>
-  <a class="cta" href="assets/rajit-sinha-resume.pdf">Résumé</a>
+  <div class="nav-actions">
+    <a class="cta" href="assets/rajit-sinha-resume.pdf">Résumé</a>
+    <a class="cta mail" href="mailto:rajit.viral@gmail.com">Email</a>
+    <a class="cta solid" href="https://www.linkedin.com/in/rajit-sinha-20aa69394/" target="_blank" rel="noopener">Connect</a>
+  </div>
 </nav>
 
 <div id="smooth">
@@ -391,40 +400,50 @@ figure{margin:0}
       </div>
     </div>
 
-    <div class="stack rv d1">
-      <div class="card">
-        <h3>Academic</h3>
-        <div class="award">
-          <span class="yr">2026</span>
-          <div class="body"><h4>AP Scholar with Distinction</h4></div>
-        </div>
-        <div class="award">
-          <span class="yr">2025</span>
-          <div class="body"><h4>AP Scholar with Honor</h4></div>
-        </div>
-        <div class="award">
-          <span class="yr">2024</span>
-          <div class="body"><h4>UIL Solo &amp; Ensemble — state qualifier</h4></div>
+    <div class="card rv d1">
+      <h3>Academic</h3>
+      <div class="award">
+        <span class="yr">2026</span>
+        <div class="body">
+          <h4>AP Scholar with Distinction</h4>
+          <p>Awarded junior year.</p>
         </div>
       </div>
+      <div class="award">
+        <span class="yr">2025</span>
+        <div class="body">
+          <h4>AP Scholar with Honor</h4>
+          <p>Awarded sophomore year.</p>
+        </div>
+      </div>
+      <div class="award">
+        <span class="yr">2024</span>
+        <div class="body">
+          <h4>UIL Solo &amp; Ensemble</h4>
+          <p>Qualified for the state contest freshman year.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <div class="card">
-        <h3>School</h3>
-        <dl class="rows">
-          <div><dt>High school</dt><dd>Lebanon Trail High School, Frisco ISD — Frisco, TX</dd></div>
-          <div><dt>Graduating</dt><dd>May 2027</dd></div>
-          <div><dt>Coursework</dt><dd>12 AP classes</dd></div>
-        </dl>
-      </div>
+  <div class="g2 mt">
+    <div class="card rv">
+      <h3>School</h3>
+      <dl class="rows">
+        <div><dt>High school</dt><dd>Lebanon Trail High School, Frisco ISD — Frisco, TX</dd></div>
+        <div><dt>Graduating</dt><dd>May 2027</dd></div>
+        <div><dt>Coursework</dt><dd>12 AP classes</dd></div>
+        <div><dt>Going into</dt><dd>Aerospace engineering</dd></div>
+      </dl>
+    </div>
 
-      <div class="card">
-        <h3>What I work with</h3>
-        <dl class="rows">
-          <div><dt>Languages</dt><dd>Python, Java, C++</dd></div>
-          <div><dt>Tools</dt><dd>Fusion 360, Arduino IDE, 3D printing</dd></div>
-          <div><dt>Areas</dt><dd>Embedded systems, sensor filtering, flight simulation, data analysis, design and failure analysis</dd></div>
-        </dl>
-      </div>
+    <div class="card rv d1">
+      <h3>What I work with</h3>
+      <dl class="rows">
+        <div><dt>Languages</dt><dd>Python, Java, C++</dd></div>
+        <div><dt>Tools</dt><dd>Fusion 360, Arduino IDE, 3D printing</dd></div>
+        <div><dt>Areas</dt><dd>Embedded systems, sensor filtering, flight simulation, data analysis, design and failure analysis</dd></div>
+      </dl>
     </div>
   </div>
 </section>
@@ -433,10 +452,10 @@ figure{margin:0}
   <p class="eyebrow rv">Contact</p>
   <h2 class="rv">If you're building something that has to <em>hold</em>, I'd like to hear about it.</h2>
   <div class="links rv d1">
-    <a href="mailto:rajit.viral@gmail.com">rajit.viral@gmail.com</a>
-    <a href="https://www.linkedin.com/in/rajit-sinha-20aa69394/">LinkedIn</a>
-    <a href="https://github.com/rajitsinha">GitHub</a>
-    <a href="assets/rajit-sinha-resume.pdf">Résumé (PDF)</a>
+    <a href="mailto:rajit.viral@gmail.com">Email</a>
+    <a href="https://www.linkedin.com/in/rajit-sinha-20aa69394/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/rajitsinha" target="_blank" rel="noopener">GitHub</a>
+    <a href="assets/rajit-sinha-resume.pdf">Résumé</a>
   </div>
   <div class="colophon">
     <span>Rajit Sinha · Plano, Texas</span>
@@ -520,12 +539,211 @@ var prog=document.querySelector('.progress');
 
 /* ---------- the sky: launch, Earth orbit, Moon orbit, landing ---------- */
 var cv=document.getElementById('sky'), ctx=cv.getContext('2d');
-var W=0,H=0,DPR=Math.min(devicePixelRatio||1,2),stars=[],craters=[],trail=[];
+var W=0,H=0,DPR=Math.min(devicePixelRatio||1,2),stars=[],trail=[],craters=[],spin=0;
+var TAU=6.283185307;
 
 function lerp(a,b,t){ return a+(b-a)*t; }
 function clamp01(v){ return v<0?0:(v>1?1:v); }
 function ease(t){ return t*t*(3-2*t); }
 function seg(v,a,b){ return ease(clamp01((v-a)/(b-a))); }
+
+/* landmasses: overlapping blobs (longitude, latitude, size) that merge into continents */
+var LAND=[
+  /* Africa */
+  [.32,.42,.11],[.38,.30,.13],[.44,.16,.14],[.46,.02,.14],[.50,-.14,.13],
+  [.54,-.30,.11],[.58,-.44,.09],[.62,-.56,.07],[.30,.16,.11],[.66,-.12,.09],
+  /* Europe */
+  [.22,.72,.10],[.36,.80,.09],[.10,.66,.08],[.48,.74,.08],
+  /* Asia */
+  [.85,.78,.14],[1.05,.86,.15],[1.30,.80,.15],[1.55,.72,.13],[1.80,.64,.11],
+  [1.00,.62,.14],[1.28,.56,.13],[1.52,.48,.11],[1.72,.40,.09],[2.00,.52,.09],
+  [1.42,.30,.10],[1.62,.22,.08],
+  /* North America */
+  [-1.95,.86,.14],[-1.70,.92,.13],[-2.20,.78,.13],[-1.80,.68,.13],[-2.05,.60,.12],
+  [-1.66,.52,.11],[-1.88,.44,.10],[-1.60,.34,.09],[-1.72,.22,.08],
+  /* Central + South America */
+  [-1.52,.10,.07],[-1.40,-.04,.08],[-1.28,-.18,.11],[-1.20,-.34,.12],
+  [-1.16,-.50,.11],[-1.22,-.66,.09],[-1.32,-.80,.07],[-1.06,-.30,.09],
+  /* Australia */
+  [2.32,-.52,.12],[2.50,-.46,.10],[2.18,-.60,.09],
+];
+var POLES=[[-.40,1.16,.30],[1.60,1.14,.28],[.60,-1.18,.32],[-1.80,-1.16,.30],
+           [2.60,1.12,.24],[-2.40,-1.14,.26]];
+var CLOUD=[
+  [-1.15,.46,.19],[-.28,-.20,.17],[.64,.38,.18],[1.36,-.26,.20],
+  [2.08,.22,.16],[-2.34,-.44,.17],[.18,.64,.14],[1.88,.58,.13],
+  [-.85,-.62,.15],[2.60,.10,.14]
+];
+var MARIA=[[-.52,.36,.30],[-.18,.56,.22],[.24,.32,.26],[-.02,.04,.20],
+           [.54,-.22,.17],[-.74,-.02,.16],[.10,.48,.18],[-.36,-.34,.15]];
+
+function makeCraters(){
+  craters=[];
+  for(var i=0;i<44;i++){
+    craters.push([ (Math.random()*2-1)*Math.PI, (Math.random()*2-1)*1.3,
+                   Math.pow(Math.random(),1.9)*.055+.011 ]);
+  }
+}
+
+/* one surface feature, projected onto the sphere and foreshortened toward the limb */
+function feature(cx,cy,R,lon,lat,size,phase,fill,fadeAtLimb,sx,sy){
+  var l=lon+phase, cl=Math.cos(lat);
+  var sz=cl*Math.cos(l);
+  if(sz<=.06) return;
+  var edge = fadeAtLimb ? clamp01((sz-.05)/.24) : 1;
+  if(edge<=0) return;
+  ctx.save();
+  if(edge<1) ctx.globalAlpha*=edge;
+  ctx.translate(cx+cl*Math.sin(l)*R, cy-Math.sin(lat)*R);
+  ctx.scale(Math.max(sz,.06)*(sx||1), Math.max(Math.cos(lat*.42),.38)*(sy||1));
+  ctx.beginPath(); ctx.arc(0,0,size*R,0,TAU);
+  ctx.fillStyle=fill; ctx.fill();
+  ctx.restore();
+}
+
+function shade(x,y,r,alpha){
+  /* day/night terminator + limb darkening */
+  ctx.save(); ctx.globalAlpha=alpha;
+  ctx.beginPath(); ctx.arc(x,y,r,0,TAU); ctx.clip();
+  var g=ctx.createLinearGradient(x-r*.55,y-r*.65,x+r*.95,y+r*.9);
+  g.addColorStop(0,'rgba(0,0,0,0)');
+  g.addColorStop(.45,'rgba(0,0,0,.12)');
+  g.addColorStop(.78,'rgba(2,4,10,.62)');
+  g.addColorStop(1,'rgba(2,4,10,.86)');
+  ctx.fillStyle=g; ctx.fillRect(x-r,y-r,r*2,r*2);
+  ctx.restore();
+}
+
+function drawEarth(x,y,r,alpha,phase){
+  if(r<=.5||alpha<=.01) return;
+  ctx.save(); ctx.globalAlpha=alpha;
+
+  /* atmosphere halo */
+  var halo=ctx.createRadialGradient(x,y,r*.96,x,y,r*1.28);
+  halo.addColorStop(0,'rgba(110,170,255,.30)');
+  halo.addColorStop(.45,'rgba(80,140,235,.13)');
+  halo.addColorStop(1,'rgba(60,120,220,0)');
+  ctx.beginPath(); ctx.arc(x,y,r*1.28,0,TAU); ctx.fillStyle=halo; ctx.fill();
+
+  /* ocean */
+  var oc=ctx.createRadialGradient(x-r*.34,y-r*.38,r*.06,x,y,r);
+  oc.addColorStop(0,'#3f86d8'); oc.addColorStop(.55,'#1d549f'); oc.addColorStop(1,'#0d2a55');
+  ctx.beginPath(); ctx.arc(x,y,r,0,TAU); ctx.fillStyle=oc; ctx.fill();
+
+  ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,TAU); ctx.clip();
+  /* land */
+  for(var i=0;i<LAND.length;i++){
+    var L=LAND[i];
+    feature(x,y,r,L[0],L[1],L[2],phase,'#3c7a52',false);
+  }
+  for(var q=0;q<POLES.length;q++){
+    var P=POLES[q];
+    feature(x,y,r,P[0],P[1],P[2],phase,'#dfe9f2',false,2.2,.5);
+  }
+  /* interior shading so the masses aren't flat */
+  for(var j=0;j<LAND.length;j+=3){
+    var M=LAND[j];
+    if(Math.abs(M[1])>1.05) continue;
+    feature(x,y,r,M[0]+.05,M[1]-.06,M[2]*.55,phase,'rgba(122,152,92,.55)',true);
+  }
+  /* clouds */
+  for(var k=0;k<CLOUD.length;k++){
+    var C=CLOUD[k];
+    feature(x,y,r,C[0],C[1],C[2]*.62,phase*1.4,'rgba(238,245,255,.26)',true,2.4,.48);
+    feature(x,y,r,C[0]+.20,C[1]+.05,C[2]*.44,phase*1.4,'rgba(248,251,255,.22)',true,2.0,.42);
+    feature(x,y,r,C[0]-.16,C[1]-.06,C[2]*.36,phase*1.4,'rgba(240,247,255,.18)',true,1.8,.40);
+  }
+  ctx.restore();
+
+  shade(x,y,r,alpha);
+
+  /* thin bright limb on the lit side */
+  ctx.save(); ctx.globalAlpha=alpha*.55;
+  ctx.beginPath(); ctx.arc(x,y,r*.995,Math.PI*.95,Math.PI*1.85);
+  ctx.strokeStyle='rgba(150,200,255,.75)'; ctx.lineWidth=Math.max(1,r*.018); ctx.stroke();
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function drawMoon(x,y,r,alpha,phase){
+  if(r<=.5||alpha<=.01) return;
+  if(!craters.length) makeCraters();
+  ctx.save(); ctx.globalAlpha=alpha;
+
+  var g=ctx.createRadialGradient(x-r*.32,y-r*.36,r*.06,x,y,r);
+  g.addColorStop(0,'#c2c8d2'); g.addColorStop(.55,'#7e8593'); g.addColorStop(1,'#3a404c');
+  ctx.beginPath(); ctx.arc(x,y,r,0,TAU); ctx.fillStyle=g; ctx.fill();
+
+  ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,TAU); ctx.clip();
+
+  for(var i=0;i<MARIA.length;i++){
+    var M=MARIA[i];
+    feature(x,y,r,M[0],M[1],M[2]*.78,phase,'#5f6675',false,1.25,.85);
+    feature(x,y,r,M[0]+M[2]*.7,M[1]-M[2]*.5,M[2]*.5,phase,'#5f6675',false,1.1,.9);
+    feature(x,y,r,M[0]-M[2]*.6,M[1]+M[2]*.4,M[2]*.42,phase,'#626978',false,1.0,.95);
+  }
+  for(var c=0;c<craters.length;c++){
+    var C=craters[c], l=C[0]+phase, cl=Math.cos(C[1]);
+    var sz=cl*Math.cos(l);
+    if(sz<=.06) continue;
+    var px=x+cl*Math.sin(l)*r, py=y-Math.sin(C[1])*r, rad=C[2]*r*sz;
+    if(rad<.6) continue;
+    ctx.save(); ctx.globalAlpha*=clamp01((sz-.05)/.25);
+    ctx.beginPath(); ctx.ellipse(px+rad*.16,py+rad*.18,rad*1.06,rad*.98,0,0,TAU);
+    ctx.fillStyle='rgba(196,204,218,.30)'; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(px,py,rad,rad*.94,0,0,TAU);
+    ctx.fillStyle='rgba(46,52,64,.62)'; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(px-rad*.18,py-rad*.20,rad*.66,rad*.60,0,0,TAU);
+    ctx.fillStyle='rgba(120,128,144,.35)'; ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+
+  shade(x,y,r,alpha);
+  ctx.restore();
+}
+
+function drawRocket(x,y,ang,scale,flame,fade){
+  ctx.save(); ctx.globalAlpha=fade;
+  ctx.translate(x,y); ctx.rotate(ang); ctx.scale(scale,scale);
+  if(flame>.02){
+    var g=ctx.createLinearGradient(0,6,0,6+30*flame);
+    g.addColorStop(0,'rgba(175,208,255,'+(.85*flame)+')');
+    g.addColorStop(.45,'rgba(77,141,255,'+(.42*flame)+')');
+    g.addColorStop(1,'rgba(77,141,255,0)');
+    ctx.beginPath(); ctx.moveTo(-4.5,6); ctx.lineTo(0,6+32*flame); ctx.lineTo(4.5,6); ctx.closePath();
+    ctx.fillStyle=g; ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.moveTo(0,-13); ctx.quadraticCurveTo(5.5,-2,5,7); ctx.lineTo(-5,7); ctx.quadraticCurveTo(-5.5,-2,0,-13);
+  ctx.closePath(); ctx.fillStyle='rgba(230,238,252,.95)'; ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-5,7); ctx.lineTo(-9.5,13); ctx.lineTo(-5,13); ctx.closePath();
+  ctx.moveTo(5,7); ctx.lineTo(9.5,13); ctx.lineTo(5,13); ctx.closePath();
+  ctx.fillStyle='rgba(77,141,255,.92)'; ctx.fill();
+  ctx.restore();
+}
+
+/* orbit maths: a circle in 3D, tilted toward the viewer */
+var SIN_I=.36, COS_I=Math.sqrt(1-.36*.36);
+function orbitAt(cx,cy,a,th){
+  var ct=Math.cos(th), st=Math.sin(th);
+  return {
+    x: cx + a*ct,
+    y: cy + a*SIN_I*st,
+    depth: a*COS_I*st,                       /* >0 = in front of the body */
+    ang: Math.atan2(a*SIN_I*ct, -a*st) + Math.PI/2,
+    persp: 1 + (a*COS_I*st)/(a*4)            /* nearer = slightly bigger */
+  };
+}
+function orbitArc(cx,cy,a,front,alpha){
+  ctx.save(); ctx.globalAlpha=alpha;
+  ctx.beginPath();
+  ctx.ellipse(cx,cy,a,a*SIN_I,0, front?0:Math.PI, front?Math.PI:TAU);
+  ctx.strokeStyle='rgba(125,175,255,.55)'; ctx.lineWidth=1.1; ctx.stroke();
+  ctx.restore();
+}
 
 function sizeSky(){
   W=innerWidth; H=innerHeight;
@@ -534,52 +752,75 @@ function sizeSky(){
   stars=[];
   var n=Math.round(Math.min(165,(W*H)/11000));
   for(var i=0;i<n;i++) stars.push({x:Math.random(),y:Math.random(),z:Math.random()*.85+.15,r:Math.random()*1.2+.3,t:Math.random()*6.283});
-  if(!craters.length) for(var j=0;j<9;j++) craters.push({a:Math.random()*6.283,d:Math.random()*.7,r:Math.random()*.12+.04});
+  if(!craters.length) makeCraters();
 }
 
-function drawRocket(x,y,ang,scale,flame){
-  ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.scale(scale*1.55,scale*1.55);
-  if(flame>0.02){
-    var g=ctx.createLinearGradient(0,6,0,6+30*flame);
-    g.addColorStop(0,'rgba(160,198,255,'+(.8*flame)+')');
-    g.addColorStop(.45,'rgba(77,141,255,'+(.42*flame)+')');
-    g.addColorStop(1,'rgba(77,141,255,0)');
-    ctx.beginPath(); ctx.moveTo(-4.5,6); ctx.lineTo(0,6+32*flame); ctx.lineTo(4.5,6); ctx.closePath();
-    ctx.fillStyle=g; ctx.fill();
-  }
-  ctx.beginPath();
-  ctx.moveTo(0,-13); ctx.quadraticCurveTo(5.5,-2,5,7); ctx.lineTo(-5,7); ctx.quadraticCurveTo(-5.5,-2,0,-13);
-  ctx.closePath(); ctx.fillStyle='rgba(228,236,250,.94)'; ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(-5,7); ctx.lineTo(-9.5,13); ctx.lineTo(-5,13); ctx.closePath();
-  ctx.moveTo(5,7); ctx.lineTo(9.5,13); ctx.lineTo(5,13); ctx.closePath();
-  ctx.fillStyle='rgba(77,141,255,.9)'; ctx.fill();
-  ctx.restore();
+/* ---- everything below is a pure function of scroll position p ----
+   the rocket path is one continuous curve: bodies move, orbits advance, and
+   each stage cross-fades into the next, so there are no jumps to hide ---- */
+function bodies(p){
+  var R=Math.min(W,H);
+  var eIn=seg(p,.05,.26), eOut=seg(p,.48,.72);
+  var eR=lerp(0,R*.30,eIn)*lerp(1,.12,eOut);
+  var eX=lerp(W*.72,W*.79,eIn);
+  var eY=lerp(H*1.45,H*.50,eIn) - H*.28*eOut;
+  var eA=eIn*lerp(1,.28,eOut)*.92;
+
+  var mIn=seg(p,.50,.78);
+  var mR=lerp(0,R*.27,mIn);
+  var mX=lerp(-W*.30,W*.23,mIn);
+  var mY=lerp(H*.26,H*.52,mIn);
+  var mA=mIn*.92;
+
+  return {eX:eX,eY:eY,eR:eR,eA:eA,aE:Math.max(eR*1.55,76),
+          mX:mX,mY:mY,mR:mR,mA:mA,aM:Math.max(mR*1.60,70)};
 }
 
-function drawBody(x,y,r,kind,alpha){
-  if(r<=.5||alpha<=.01) return;
-  ctx.save(); ctx.globalAlpha=alpha;
-  var g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r);
-  if(kind==='earth'){ g.addColorStop(0,'#63a4f5'); g.addColorStop(.5,'#2a63bd'); g.addColorStop(1,'#0d2350'); }
-  else { g.addColorStop(0,'#b6bfd0'); g.addColorStop(.55,'#626b7e'); g.addColorStop(1,'#1a202b'); }
-  ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.fillStyle=g; ctx.fill();
-  if(kind==='earth'){
-    ctx.beginPath(); ctx.arc(x,y,r*1.05,0,6.2832);
-    ctx.strokeStyle='rgba(120,175,255,'+(.42*alpha)+')'; ctx.lineWidth=Math.max(1.5,r*.075); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x,y,r*1.16,0,6.2832);
-    ctx.strokeStyle='rgba(77,141,255,'+(.14*alpha)+')'; ctx.lineWidth=Math.max(2,r*.12); ctx.stroke();
-  } else {
-    ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.clip();
-    for(var i=0;i<craters.length;i++){
-      var c=craters[i];
-      ctx.beginPath();
-      ctx.arc(x+Math.cos(c.a)*c.d*r, y+Math.sin(c.a)*c.d*r, c.r*r, 0, 6.2832);
-      ctx.fillStyle='rgba(0,0,0,.18)'; ctx.fill();
-    }
-    ctx.restore();
-  }
-  ctx.restore();
+function posAt(p){
+  var B=bodies(p);
+
+  /* orbit angles ease to a stop, so a frozen orbit can't drag the transfer arc */
+  var fe=clamp01((p-.11)/.37), the=-Math.PI*.5 + TAU*1.85*ease(fe);
+  var fm=clamp01((p-.62)/.28), thm=-.42 + TAU*1.65*ease(fm);
+
+  /* ascent */
+  var ta=clamp01(p/.26);
+  var ax=lerp(W*.52,W*.63,ease(ta)), ay=lerp(H*.86,H*.06,ta);
+
+  /* parking orbit around Earth */
+  var ce=Math.cos(the), se=Math.sin(the);
+  var ex=B.eX+B.aE*ce, ey=B.eY+B.aE*SIN_I*se, ed=B.aE*COS_I*se;
+
+  /* capture orbit around the Moon */
+  var cm=Math.cos(thm), sm=Math.sin(thm);
+  var mx=B.mX+B.aM*cm, my=B.mY+B.aM*SIN_I*sm, md=B.aM*COS_I*sm;
+
+  /* touchdown */
+  var lx=B.mX-B.mR*.30, ly=B.mY-B.mR*.94;
+
+  var w1=seg(p,.09,.26);   /* ascent  → Earth orbit */
+  var w2=seg(p,.44,.72);   /* Earth   → trans-lunar → Moon orbit */
+  var w3=seg(p,.90,1);     /* Moon orbit → landing */
+
+  var x=lerp(ax,ex,w1), y=lerp(ay,ey,w1), d=ed*w1;
+  x=lerp(x,mx,w2); y=lerp(y,my,w2); d=lerp(d,md,w2);
+  x=lerp(x,lx,w3); y=lerp(y,ly,w3); d=lerp(d,0,w3);
+
+  return {x:x,y:y,d:d,B:B,w1:w1,w2:w2,w3:w3};
+}
+
+/* fade the rocket out only while it is genuinely behind a body */
+function eclipse(x,y,bx,by,br,depth,weight){
+  if(br<2||weight<=.01) return 1;
+  var d=Math.hypot(x-bx,y-by)/br;
+  var inside=1-clamp01((d-.88)/.26);
+  var behind=clamp01(-depth/(br*.55));
+  return 1 - (inside*behind*.97 + (1-inside)*behind*.30)*weight;
+}
+function visibility(P){
+  var B=P.B;
+  return Math.max(0, eclipse(P.x,P.y,B.eX,B.eY,B.eR,P.d,1-P.w2)
+                   * eclipse(P.x,P.y,B.mX,B.mY,B.mR,P.d,P.w2));
 }
 
 function frame(){
@@ -597,22 +838,21 @@ function frame(){
   checkReveals();
 
   if(!reduce){
+    spin += .0016;
     ctx.clearRect(0,0,W,H);
     var R=Math.min(W,H), cx=W*.76;
 
-    /* stars, brighter once we're off the ground */
     var starA=lerp(.4,1,seg(p,0,.15));
     for(var i=0;i<stars.length;i++){
       var s=stars[i];
       var sy=((s.y - p*s.z*.5)%1+1)%1;
       s.t+=.008;
       var a=(.12+s.z*.42)*(.62+Math.sin(s.t)*.26)*starA;
-      ctx.beginPath(); ctx.arc(s.x*W, sy*H, s.r*s.z+.15, 0, 6.2832);
+      ctx.beginPath(); ctx.arc(s.x*W, sy*H, s.r*s.z+.15, 0, TAU);
       ctx.fillStyle = s.z>.72 ? 'rgba(135,178,255,'+a+')' : 'rgba(206,219,245,'+(a*.72)+')';
       ctx.fill();
     }
 
-    /* ground haze at the very start */
     var launch=seg(p,0,.15);
     if(launch<1){
       var gh=H*.17;
@@ -622,58 +862,49 @@ function frame(){
       ctx.fillStyle=gg; ctx.fillRect(0,H-gh,W,gh); ctx.restore();
     }
 
-    /* Earth swells in, then falls away behind us */
-    var eIn=seg(p,.09,.32), eOut=seg(p,.50,.68);
-    var eR=lerp(0,R*.33,eIn)*lerp(1,.15,eOut);
-    var eX=lerp(W*.60,cx,eIn);
-    var eY=lerp(H*1.4,H*.54,eIn) - H*.24*eOut;
-    drawBody(eX,eY,eR,'earth',eIn*lerp(1,.4,eOut)*.82);
+    var P  = posAt(p);
+    var Pa = posAt(Math.max(0,p-.0014));
+    var Pb = posAt(Math.min(1,p+.0014));
+    var B  = P.B;
 
-    /* Moon grows in for the back half */
-    var mIn=seg(p,.56,.80);
-    var mR=lerp(0,R*.29,mIn);
-    var mX=lerp(W*1.2,cx,mIn), mY=lerp(H*.3,H*.52,mIn);
-    drawBody(mX,mY,mR,'moon',mIn*.85);
+    /* orbit paths */
+    if(B.eR>2) orbitArc(B.eX,B.eY,B.aE,false,.09*B.eA*(1-P.w2));
+    if(B.mR>2) orbitArc(B.mX,B.mY,B.aM,false,.09*B.mA*P.w2);
 
-    /* rocket */
-    var rx,ry,ang,scale=1,flame=0;
-    if(p<.15){
-      var t=seg(p,0,.15);
-      rx=W*.5; ry=lerp(H*1.05,H*.44,t); ang=0; flame=1-t*.3; scale=lerp(1.4,1.12,t);
-    } else if(p<.50){
-      var t2=(p-.15)/(.50-.15), th=-Math.PI*.5+t2*Math.PI*2.1, orb=Math.max(eR*1.45,60);
-      rx=eX+Math.cos(th)*orb*1.12; ry=eY+Math.sin(th)*orb*.72;
-      ang=th+Math.PI*.5; flame=.3; scale=1.05;
-    } else if(p<.60){
-      var t3=(p-.50)/.10;
-      rx=lerp(eX+Math.max(eR*1.5,60),W*.4,t3); ry=lerp(eY,H*.46,t3);
-      ang=lerp(Math.PI*.5,Math.PI*.3,t3); flame=lerp(.3,1,t3); scale=lerp(1.05,1.18,t3);
-    } else if(p<.90){
-      var t4=(p-.60)/(.90-.60), th2=Math.PI*.85+t4*Math.PI*1.9, orb2=Math.max(mR*1.5,55);
-      rx=mX+Math.cos(th2)*orb2*1.12; ry=mY+Math.sin(th2)*orb2*.7;
-      ang=th2+Math.PI*.5; flame=.26; scale=1;
-    } else {
-      var t5=seg(p,.90,1);
-      var thL=Math.PI*.85+Math.PI*1.9, orbL=Math.max(mR*1.5,55);
-      var sx=mX+Math.cos(thL)*orbL*1.12, sy=mY+Math.sin(thL)*orbL*.7;
-      var lx=mX-mR*.3, ly=mY-mR*.93;
-      rx=lerp(sx,lx,t5); ry=lerp(sy,ly,t5);
-      ang=lerp(thL+Math.PI*.5,0,t5); flame=(1-t5)*.65; scale=lerp(1,.92,t5);
-      if(t5>.7){
-        ctx.save(); ctx.globalAlpha=(t5-.7)/.3*.45;
-        ctx.beginPath(); ctx.arc(lx,ly,12,0,6.2832);
-        ctx.fillStyle='rgba(77,141,255,.45)'; ctx.fill(); ctx.restore();
-      }
+    drawEarth(B.eX,B.eY,B.eR,B.eA,spin);
+    drawMoon(B.mX,B.mY,B.mR,B.mA,spin*.45);
+
+    if(B.eR>2) orbitArc(B.eX,B.eY,B.aE,true,.17*B.eA*(1-P.w2));
+    if(B.mR>2) orbitArc(B.mX,B.mY,B.aM,true,.17*B.mA*P.w2);
+
+    /* trail: sampled from the same path, so it can never kink */
+    ctx.save();
+    for(var t=1;t<26;t++){
+      var q=p-t*.0016; if(q<0) break;
+      var T=posAt(q), T2=posAt(Math.max(0,q-.0016));
+      ctx.beginPath(); ctx.moveTo(T2.x,T2.y); ctx.lineTo(T.x,T.y);
+      ctx.strokeStyle='rgba(130,180,255,'+(.20*(1-t/26))+')';
+      ctx.lineWidth=1.5; ctx.stroke();
     }
+    ctx.restore();
 
-    trail.push({x:rx,y:ry});
-    if(trail.length>44) trail.shift();
-    if(trail.length>2){
-      ctx.beginPath(); ctx.moveTo(trail[0].x,trail[0].y);
-      for(var k=1;k<trail.length;k++) ctx.lineTo(trail[k].x,trail[k].y);
-      ctx.strokeStyle='rgba(120,175,255,.22)'; ctx.lineWidth=1.6; ctx.stroke();
+    /* heading always comes from the direction of travel */
+    var vx=Pb.x-Pa.x, vy=Pb.y-Pa.y;
+    var ang = (vx*vx+vy*vy)>1e-7 ? Math.atan2(vy,vx)+Math.PI/2 : 0;
+
+    var flame=.22;
+    flame=Math.max(flame,(1-seg(p,0,.15))*1.0);
+    flame=Math.max(flame,Math.sin(Math.PI*clamp01((p-.44)/.17))*.95);
+    if(p>.90) flame=Math.min(flame,(1-seg(p,.90,1))*.55);
+
+    var scale=2.15*(1+P.d/1100);
+    drawRocket(P.x,P.y,ang,scale,flame,visibility(P));
+
+    if(p>.965){
+      ctx.save(); ctx.globalAlpha=seg(p,.965,1)*.45;
+      ctx.beginPath(); ctx.arc(B.mX-B.mR*.30,B.mY-B.mR*.94,13,0,TAU);
+      ctx.fillStyle='rgba(77,141,255,.45)'; ctx.fill(); ctx.restore();
     }
-    drawRocket(rx,ry,ang,scale,flame);
   }
 
   requestAnimationFrame(frame);
