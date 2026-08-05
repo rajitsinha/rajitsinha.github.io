@@ -2,52 +2,29 @@
 
 Static site. No build step, no dependencies.
 
+Dark theme, custom blue cursor, smooth scroll with momentum, and a canvas
+background where a rocket launches, orbits Earth, transfers to the Moon, and
+flies a free-return trajectory as you scroll: launch, slanted loops around
+Earth, a coast out to the Moon, a loop around it, and a return into Earth
+orbit. The path is generated as continuous curves — cubic Hermite
+coasts and precessing elliptical orbits, with position and heading matched at
+every join — then resampled to equal-length steps, so there are no kinks
+anywhere and the rocket travels at a constant speed; the rocket pays out the line behind itself, and both the line
+and the rocket cut out entirely where they pass behind a body.
+
+Everything degrades gracefully: the momentum scroll and the animation switch
+off on phones and on `prefers-reduced-motion`, and all the content is plain
+HTML so it still reads with JavaScript disabled.
+
 ## Before you publish
-
-### 1. GitHub link — already done
-
-Both GitHub links now point to `https://github.com/rajitsinha`. Nothing to edit.
-
-### 2. Check the résumé
-
-Confirm `assets/rajit-sinha-resume.pdf` is the version you want people downloading.
+1. Search `index.html` for `data-todo="github"` (two places) and replace `href="#"` with your GitHub URL.
+2. Confirm `assets/rajit-sinha-resume.pdf` is the version you want people downloading.
 
 ## Publish on GitHub Pages (free)
-
-You do not need to install anything or use the command line. All of this happens in the browser.
-
-**Step 1 — make the repository**
-1. Go to https://github.com/new (sign in as `rajitsinha`)
-2. Repository name: `rajitsinha.github.io` — type it exactly, including the `.github.io`
-3. Leave it **Public**
-4. Do NOT check "Add a README file"
-5. Click **Create repository**
-
-**Step 2 — upload the site**
-1. On the empty repo page, click **uploading an existing file** (in the "quick setup" text)
-2. Unzip `portfolio-site.zip` on your computer, then open the `portfolio` folder
-3. Drag `index.html`, `README.md`, and the whole `assets` folder into the browser window
-
-   Important: drag the *contents* of the `portfolio` folder, not the folder itself. `index.html` has to end up at the top level of the repo.
-4. Scroll down, click **Commit changes**
-5. Wait for the upload to finish — the videos are the slow part, give it a few minutes
-
-**Step 3 — turn on Pages**
-1. In the repo, click **Settings** (top right)
-2. In the left sidebar, click **Pages**
-3. Under "Build and deployment", set Source to **Deploy from a branch**
-4. Branch: `main`, folder: `/ (root)` — click **Save**
-
-**Step 4 — check it**
-
-Wait about two minutes, then open:
-
-    https://rajitsinha.github.io
-
-If you see a 404, wait another minute and refresh — the first build takes a moment.
-
-### Fixing things later
-Open the file in the repo, click the pencil icon, edit, then **Commit changes**. The live site updates on its own within a minute.
+1. Create a repo named `<your-username>.github.io`
+2. Upload everything in this folder to the repo root (`index.html` must be at the top level)
+3. Settings -> Pages -> Source: `main` branch, `/ (root)` -> Save
+4. Live in a minute or two at `https://<your-username>.github.io`
 
 ## Editing
 - All copy is plain text in `index.html`

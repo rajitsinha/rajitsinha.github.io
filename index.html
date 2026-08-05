@@ -39,6 +39,12 @@ img,video{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 
 #sky{position:fixed;inset:0;z-index:0;pointer-events:none}
+.grid{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:linear-gradient(rgba(150,180,230,.042) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(150,180,230,.042) 1px,transparent 1px);
+  background-size:68px 68px;
+  -webkit-mask-image:radial-gradient(125% 95% at 50% 42%,#000 30%,transparent 80%);
+  mask-image:radial-gradient(125% 95% at 50% 42%,#000 30%,transparent 80%)}
 .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(110% 80% at 14% 45%,rgba(6,7,11,.7),rgba(6,7,11,.28) 48%,transparent 72%)}
 
@@ -116,6 +122,40 @@ figure{margin:0}
   color:var(--dimmer);padding:.7rem .95rem;border-top:1px solid var(--line)}
 .shot.plate{background:#08090d}
 .shot.plate img{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(1.05);padding:.7rem}
+
+.codecard{padding:0;overflow:hidden}
+.codehead{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;
+  padding:.85rem 1.1rem;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.fname{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+.fname i{font-style:normal;color:var(--blue)}
+.tabs{display:flex;gap:.3rem;margin-left:auto;flex-wrap:wrap}
+.tab{font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;color:var(--dimmer);
+  background:transparent;border:1px solid transparent;border-radius:999px;
+  padding:.35rem .75rem;cursor:pointer;transition:.2s ease}
+.tab:hover{color:var(--text)}
+.tab.is-on{color:var(--blue);border-color:rgba(77,141,255,.35);background:var(--blue-soft)}
+.copy{font-family:var(--mono);font-size:.66rem;color:var(--dimmer);background:transparent;
+  border:1px solid var(--line-lit);border-radius:999px;padding:.35rem .8rem;cursor:pointer;transition:.2s ease}
+.copy:hover{color:var(--blue);border-color:var(--blue)}
+.codewrap{max-height:430px;overflow:auto;background:rgba(0,0,0,.28)}
+.codewrap::-webkit-scrollbar{width:9px;height:9px}
+.codewrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:9px}
+pre.code{margin:0;padding:1.1rem 1.1rem 1.2rem;counter-reset:ln;
+  font-family:var(--mono);font-size:.76rem;line-height:1.72;color:#c6cede}
+pre.code .line{display:block;padding-left:2.9rem;position:relative;white-space:pre}
+pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolute;left:0;
+  width:2.1rem;text-align:right;color:var(--dimmer);opacity:.5}
+.tk-c{color:#5f6b80;font-style:italic}
+.tk-s{color:#8fd6a8}
+.tk-p{color:#c08cd8}
+.tk-n{color:#e2b169}
+.tk-k{color:#4d8dff}
+.codefoot{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  padding:.85rem 1.1rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--dim)}
+.codefoot a{font-family:var(--mono);font-size:.7rem;color:var(--dim);margin-left:auto;
+  border-bottom:1px solid var(--line-lit);padding-bottom:.15rem;transition:.2s ease}
+.codefoot a:hover{color:var(--blue);border-color:var(--blue)}
+@media (max-width:640px){ .tabs{margin-left:0;width:100%} .codefoot a{margin-left:0} }
 
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(.9rem,2.2vw,1.4rem);align-items:stretch}
 .g2 > .card{height:100%}
@@ -206,6 +246,7 @@ figure{margin:0}
 <div class="progress" aria-hidden="true"></div>
 
 <canvas id="sky" aria-hidden="true"></canvas>
+<div class="grid" aria-hidden="true"></div>
 <div class="vignette" aria-hidden="true"></div>
 
 <nav class="nav">
@@ -258,7 +299,7 @@ figure{margin:0}
 
     <div class="card rv d1">
       <p>The contest gives you a target altitude and a target flight time, then scores you on how close you get to both with the payload in one piece. I spent sophomore year on the team and ran it as captain junior year — airframe, weight, recovery, and all the electronics.</p>
-      <p>Most teams let the motor's ejection charge pop the parachute and hope the timing works out. I wanted the rocket to figure it out on its own, so I built a flight computer that watches air pressure and fires the chute at the top of the arc. I wrote the software, soldered the board, and ran it on the bench until I actually trusted it.</p>
+      <p>Most teams let the motor's ejection charge pop the parachute and hope the timing works out. I wanted the rocket to figure it out on its own, so I built a flight computer that reads air pressure, works out how high it's still going to coast, and releases the chute early enough to stop at the target. I wrote the software, soldered the board, and ran it on the bench until I actually trusted it.</p>
       <p>Then we flew it over and over, changing one thing at a time so every launch told us something the last one didn't.</p>
     </div>
   </div>
@@ -274,10 +315,46 @@ figure{margin:0}
         <div><dt>Brain</dt><dd>Arduino Nano R4</dd></div>
         <div><dt>Sensor</dt><dd>DPS310 barometric pressure sensor</dd></div>
         <div><dt>Release</dt><dd>Micro servo holding the parachute retainer shut</dd></div>
-        <div><dt>Code</dt><dd>Turns pressure into altitude, filters the noise so one bad reading can't fake an early peak, watches for apogee, and stays locked until the rocket is really flying</dd></div>
+        <div><dt>Code</dt><dd>Turns pressure into altitude at 50 Hz, filters the noise so one bad reading can't fake a peak, and predicts apogee from a drag model — then deploys early enough to hit 750 ft</dd></div>
         <div><dt>Airframe</dt><dd>3D printed in sections, fin can printed as one piece</dd></div>
         <div><dt>Flown at</dt><dd>470–509 g on Estes F50 and AeroTech F30 and F32 motors</dd></div>
       </dl>
+    </div>
+  </div>
+
+  <div class="g-text-media mt">
+    <div class="card rv">
+      <h3>The part I'm proudest of</h3>
+      <p>Detecting apogee is the easy version — by the time the rocket has stopped climbing, you've already overshot. The contest scores you on hitting a target altitude, so the useful question is <strong>where is it going to stop</strong>, not where is it now.</p>
+      <p>So the loop runs the physics forward every cycle. It takes the current speed, models the drag it still has to push through, adds the half second the servo needs to actually move, and works out the altitude it would coast to if it did nothing. When that predicted number reaches the target, it fires — early, on purpose.</p>
+      <p>Two backstops sit behind it in case the prediction is wrong: one watches for a full second of falling, the other just trips if the raw altitude gets close to target. Either one alone would deploy the chute.</p>
+    </div>
+    <div class="card rv d1" style="align-self:stretch;display:flex;flex-direction:column;justify-content:center">
+      <h3>Written and flown on</h3>
+      <dl class="rows">
+        <div><dt>Board</dt><dd>Arduino Nano R4</dd></div>
+        <div><dt>Sensor</dt><dd>Adafruit DPS310 over I²C, sampled at 50 Hz</dd></div>
+        <div><dt>Target</dt><dd>750 ft, with a 10 ft prediction tolerance</dd></div>
+        <div><dt>Logged to</dt><dd>EEPROM, so peak altitude survives a power cut</dd></div>
+        <div><dt>Language</dt><dd>C++ / Arduino, about 320 lines</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="card codecard mt rv">
+    <div class="codehead">
+      <span class="fname"><i>&#9679;</i> altitude_sensor.ino</span>
+      <div class="tabs">
+        <button class="tab is-on" data-tab="0" type="button">Filtering</button>
+        <button class="tab" data-tab="1" type="button">Apogee prediction</button>
+        <button class="tab" data-tab="2" type="button">Deploy logic</button>
+      </div>
+      <button class="copy" id="copyBtn" type="button">Copy</button>
+    </div>
+    <div class="codewrap"><pre class="code"><code id="codeOut"></code></pre></div>
+    <div class="codefoot">
+      <span id="codeNote"></span>
+      <a href="assets/altitude_sensor.ino" download>Download the full file</a>
     </div>
   </div>
 
@@ -288,7 +365,7 @@ figure{margin:0}
     </figure>
     <figure class="shot crop rv d1">
       <video src="assets/video/deployment.mp4" poster="assets/img/deployment-poster.jpg"
-             muted loop playsinline preload="metadata" controls
+             autoplay muted loop playsinline preload="metadata"
              aria-label="Servo release mechanism inside the airframe during a bench test"></video>
       <figcaption>Bench test — the servo letting go</figcaption>
     </figure>
@@ -530,7 +607,7 @@ var items=[].slice.call(document.querySelectorAll('.rv'));
 function checkReveals(){
   for(var i=items.length-1;i>=0;i--){
     var r=items[i].getBoundingClientRect();
-    if(r.top<innerHeight*0.9 && r.bottom>-200){ items[i].classList.add('in'); items.splice(i,1); }
+    if(r.top<innerHeight*0.92 && r.bottom>-2000){ items[i].classList.add('in'); items.splice(i,1); }
   }
 }
 if(reduce) items.forEach(function(n){ n.classList.add('in'); });
@@ -755,72 +832,153 @@ function sizeSky(){
   if(!craters.length) makeCraters();
 }
 
-/* ---- everything below is a pure function of scroll position p ----
-   the rocket path is one continuous curve: bodies move, orbits advance, and
-   each stage cross-fades into the next, so there are no jumps to hide ---- */
-function bodies(p){
+/* ------------------------------------------------------------------
+   One fixed trajectory, drawn the way mission planners draw it:
+   ascent, two slanted loops around Earth, a long coast out to the
+   Moon, a loop around it, and a free return back into Earth orbit.
+   The path is a Catmull-Rom spline through control points, so it is
+   smooth everywhere; the rocket rides it and pays out the line
+   behind itself as you scroll.
+   ------------------------------------------------------------------ */
+var PATH=null, PATH_W=0, PATH_H=0;
+
+function ell(cx,cy,a,b,phi,th){
+  var x=a*Math.cos(th), y=b*Math.sin(th);
+  var c=Math.cos(phi), sn=Math.sin(phi);
+  return {x:cx+x*c-y*sn, y:cy+x*sn+y*c, d:Math.sin(th)};
+}
+function ellT(a,b,phi,th){
+  var dx=-a*Math.sin(th), dy=b*Math.cos(th);
+  var c=Math.cos(phi), sn=Math.sin(phi);
+  var x=dx*c-dy*sn, y=dx*sn+dy*c;
+  var m=Math.hypot(x,y)||1;
+  return {x:x/m,y:y/m};
+}
+/* cubic Hermite: matches position AND direction at both ends, and a single
+   cubic physically cannot contain a corner */
+function herm(P0,M0,P1,M1,t){
+  var t2=t*t,t3=t2*t;
+  var h00=2*t3-3*t2+1, h10=t3-2*t2+t, h01=-2*t3+3*t2, h11=t3-t2;
+  return { x:h00*P0.x+h10*M0.x+h01*P1.x+h11*M1.x,
+           y:h00*P0.y+h10*M0.y+h01*P1.y+h11*M1.y };
+}
+
+/* The trajectory is generated directly as a dense curve — no hand-placed
+   waypoints anywhere, which is what was creating the bends. Six pieces:
+   ascent, Earth capture orbit, trans-lunar coast, lunar orbit, free return,
+   Earth orbit. Every join matches both position and heading. */
+function buildPath(){
   var R=Math.min(W,H);
-  var eIn=seg(p,.05,.26), eOut=seg(p,.48,.72);
-  var eR=lerp(0,R*.30,eIn)*lerp(1,.12,eOut);
-  var eX=lerp(W*.72,W*.79,eIn);
-  var eY=lerp(H*1.45,H*.50,eIn) - H*.28*eOut;
-  var eA=eIn*lerp(1,.28,eOut)*.92;
+  var E={x:W*.30,y:H*.40,r:R*.150};
+  var M={x:W*.80,y:H*.735,r:R*.062};
+  var raw=[],i,f,th,q,t;
+  function add(x,y,d,b){ raw.push({x:x,y:y,d:d===undefined?1:d,b:b===undefined?-1:b}); }
+  function scl(v,k){ return {x:v.x*k,y:v.y*k}; }
 
-  var mIn=seg(p,.50,.78);
-  var mR=lerp(0,R*.27,mIn);
-  var mX=lerp(-W*.30,W*.23,mIn);
-  var mY=lerp(H*.26,H*.52,mIn);
-  var mA=mIn*.92;
+  /* --- Earth orbit: 1.5 turns, widening and precessing so no lap retraces --- */
+  var TH0=Math.PI, THEND=TH0+Math.PI+TAU;
+  var A0=E.r*2.26,B0=E.r*.60,PH0=-0.44, A1=E.r*2.58,B1=E.r*.72,PH1=-0.20;
+  var entry=ell(E.x,E.y,A0,B0,PH0,TH0),  entryT=ellT(A0,B0,PH0,TH0);
+  var exit =ell(E.x,E.y,A1,B1,PH1,THEND), exitT=ellT(A1,B1,PH1,THEND);
 
-  return {eX:eX,eY:eY,eR:eR,eA:eA,aE:Math.max(eR*1.55,76),
-          mX:mX,mY:mY,mR:mR,mA:mA,aM:Math.max(mR*1.60,70)};
+  /* --- Moon orbit: also 1.5 turns, precessing so the extra half sits outside --- */
+  var MA0=M.r*2.55,MB0=M.r*.82,MPH0=-0.36, MA1=M.r*3.15,MB1=M.r*1.10,MPH1=-0.04;
+  var MTH0=0, MTHEND=Math.PI+TAU;
+  var mEntry=ell(M.x,M.y,MA0,MB0,MPH0,MTH0),   mEntryT=ellT(MA0,MB0,MPH0,MTH0);
+  var mExit =ell(M.x,M.y,MA1,MB1,MPH1,MTHEND), mExitT=ellT(MA1,MB1,MPH1,MTHEND);
+
+  /* --- final Earth orbit --- */
+  var THF=2.40, AF=E.r*2.58, BF=E.r*.72, PHF=-0.20;
+  var fEntry=ell(E.x,E.y,AF,BF,PHF,THF), fEntryT=ellT(AF,BF,PHF,THF);
+
+  /* 1. ascent — straight up off the pad, curving into the capture orbit */
+  var L={x:W*.535,y:H*.94};
+  var dA=Math.hypot(entry.x-L.x, entry.y-L.y);
+  for(i=0;i<=120;i++){
+    t=i/120;
+    q=herm(L,{x:0,y:-dA*.72},entry,scl(entryT,dA*.80),t);
+    add(q.x,q.y,1,-1);
+  }
+
+  /* 2. Earth orbit */
+  var st=Math.round((THEND-TH0)/TAU*100);
+  for(i=1;i<=st;i++){
+    f=i/st; th=TH0+f*(THEND-TH0);
+    q=ell(E.x,E.y,lerp(A0,A1,f),lerp(B0,B1,f),lerp(PH0,PH1,f),th);
+    add(q.x,q.y,q.d,0);
+  }
+
+  /* 3. trans-lunar coast — one cubic, tangent to both orbits */
+  var dC=Math.hypot(mEntry.x-exit.x, mEntry.y-exit.y);
+  for(i=1;i<=170;i++){
+    t=i/170;
+    q=herm(exit,scl(exitT,dC*.78),mEntry,scl(mEntryT,dC*.78),t);
+    add(q.x,q.y,1,-1);
+  }
+
+  /* 4. lunar orbit */
+  var ms=Math.round((MTHEND-MTH0)/TAU*100);
+  for(i=1;i<=ms;i++){
+    f=i/ms; th=MTH0+f*(MTHEND-MTH0);
+    q=ell(M.x,M.y,lerp(MA0,MA1,f),lerp(MB0,MB1,f),lerp(MPH0,MPH1,f),th);
+    add(q.x,q.y,q.d,1);
+  }
+
+  /* 5. free return — again one cubic */
+  var dR=Math.hypot(fEntry.x-mExit.x, fEntry.y-mExit.y);
+  for(i=1;i<=170;i++){
+    t=i/170;
+    q=herm(mExit,scl(mExitT,dR*.78),fEntry,scl(fEntryT,dR*.78),t);
+    add(q.x,q.y,1,-1);
+  }
+
+  /* 6. settle back into Earth orbit */
+  var st2=80;
+  for(i=1;i<=st2;i++){
+    th=THF+(i/st2)*TAU*.80;
+    q=ell(E.x,E.y,AF,BF,PHF,th);
+    add(q.x,q.y,q.d,0);
+  }
+
+  return {raw:raw,E:E,M:M};
 }
 
-function posAt(p){
-  var B=bodies(p);
-
-  /* orbit angles ease to a stop, so a frozen orbit can't drag the transfer arc */
-  var fe=clamp01((p-.11)/.37), the=-Math.PI*.5 + TAU*1.85*ease(fe);
-  var fm=clamp01((p-.62)/.28), thm=-.42 + TAU*1.65*ease(fm);
-
-  /* ascent */
-  var ta=clamp01(p/.26);
-  var ax=lerp(W*.52,W*.63,ease(ta)), ay=lerp(H*.86,H*.06,ta);
-
-  /* parking orbit around Earth */
-  var ce=Math.cos(the), se=Math.sin(the);
-  var ex=B.eX+B.aE*ce, ey=B.eY+B.aE*SIN_I*se, ed=B.aE*COS_I*se;
-
-  /* capture orbit around the Moon */
-  var cm=Math.cos(thm), sm=Math.sin(thm);
-  var mx=B.mX+B.aM*cm, my=B.mY+B.aM*SIN_I*sm, md=B.aM*COS_I*sm;
-
-  /* touchdown */
-  var lx=B.mX-B.mR*.30, ly=B.mY-B.mR*.94;
-
-  var w1=seg(p,.09,.26);   /* ascent  → Earth orbit */
-  var w2=seg(p,.44,.72);   /* Earth   → trans-lunar → Moon orbit */
-  var w3=seg(p,.90,1);     /* Moon orbit → landing */
-
-  var x=lerp(ax,ex,w1), y=lerp(ay,ey,w1), d=ed*w1;
-  x=lerp(x,mx,w2); y=lerp(y,my,w2); d=lerp(d,md,w2);
-  x=lerp(x,lx,w3); y=lerp(y,ly,w3); d=lerp(d,0,w3);
-
-  return {x:x,y:y,d:d,B:B,w1:w1,w2:w2,w3:w3};
+/* resample to equal-length steps so the rocket keeps a constant speed */
+var POLY=null;
+function buildPoly(P){
+  var raw=P.raw, cum=[0], total=0, i;
+  for(i=1;i<raw.length;i++){
+    total+=Math.hypot(raw[i].x-raw[i-1].x, raw[i].y-raw[i-1].y);
+    cum.push(total);
+  }
+  var N=900, out=[], j=0;
+  for(i=0;i<N;i++){
+    var target=total*i/(N-1);
+    while(j<cum.length-2 && cum[j+1]<target) j++;
+    var span=cum[j+1]-cum[j]||1, u=clamp01((target-cum[j])/span);
+    out.push({
+      x:lerp(raw[j].x,raw[j+1].x,u),
+      y:lerp(raw[j].y,raw[j+1].y,u),
+      d:lerp(raw[j].d,raw[j+1].d,u),
+      b:u<.5?raw[j].b:raw[j+1].b
+    });
+  }
+  return out;
+}
+function sampleAt(t){
+  t=clamp01(t);
+  var f=t*(POLY.length-1), i=Math.floor(f), u=f-i;
+  if(i>POLY.length-2){ i=POLY.length-2; u=1; }
+  var a=POLY[i], b=POLY[i+1];
+  return { x:lerp(a.x,b.x,u), y:lerp(a.y,b.y,u), d:lerp(a.d,b.d,u), b:u<.5?a.b:b.b };
 }
 
-/* fade the rocket out only while it is genuinely behind a body */
-function eclipse(x,y,bx,by,br,depth,weight){
-  if(br<2||weight<=.01) return 1;
-  var d=Math.hypot(x-bx,y-by)/br;
-  var inside=1-clamp01((d-.88)/.26);
-  var behind=clamp01(-depth/(br*.55));
-  return 1 - (inside*behind*.97 + (1-inside)*behind*.30)*weight;
-}
-function visibility(P){
-  var B=P.B;
-  return Math.max(0, eclipse(P.x,P.y,B.eX,B.eY,B.eR,P.d,1-P.w2)
-                   * eclipse(P.x,P.y,B.mX,B.mY,B.mR,P.d,P.w2));
+/* hidden only when genuinely behind a body and inside its silhouette */
+function occluded(s,eA,mA){
+  if(s.d>=0) return false;
+  if(s.b===0 && eA>.15) return Math.hypot(s.x-PATH.E.x,s.y-PATH.E.y) < PATH.E.r*.995;
+  if(s.b===1 && mA>.15) return Math.hypot(s.x-PATH.M.x,s.y-PATH.M.y) < PATH.M.r*.995;
+  return false;
 }
 
 function frame(){
@@ -840,71 +998,65 @@ function frame(){
   if(!reduce){
     spin += .0016;
     ctx.clearRect(0,0,W,H);
-    var R=Math.min(W,H), cx=W*.76;
 
-    var starA=lerp(.4,1,seg(p,0,.15));
+    if(!PATH || PATH_W!==W || PATH_H!==H){ PATH=buildPath(); POLY=buildPoly(PATH); PATH_W=W; PATH_H=H; }
+
+    /* stars */
+    var starA=lerp(.45,1,seg(p,0,.12));
     for(var i=0;i<stars.length;i++){
-      var s=stars[i];
-      var sy=((s.y - p*s.z*.5)%1+1)%1;
-      s.t+=.008;
-      var a=(.12+s.z*.42)*(.62+Math.sin(s.t)*.26)*starA;
-      ctx.beginPath(); ctx.arc(s.x*W, sy*H, s.r*s.z+.15, 0, TAU);
-      ctx.fillStyle = s.z>.72 ? 'rgba(135,178,255,'+a+')' : 'rgba(206,219,245,'+(a*.72)+')';
+      var st=stars[i];
+      var sy=((st.y - p*st.z*.34)%1+1)%1;
+      st.t+=.008;
+      var a=(.12+st.z*.42)*(.62+Math.sin(st.t)*.26)*starA;
+      ctx.beginPath(); ctx.arc(st.x*W, sy*H, st.r*st.z+.15, 0, TAU);
+      ctx.fillStyle = st.z>.72 ? 'rgba(135,178,255,'+a+')' : 'rgba(206,219,245,'+(a*.72)+')';
       ctx.fill();
     }
 
-    var launch=seg(p,0,.15);
-    if(launch<1){
+    /* ground haze during the first moments */
+    var lift=seg(p,0,.085);
+    if(lift<1){
       var gh=H*.17;
-      ctx.save(); ctx.globalAlpha=(1-launch)*.85;
+      ctx.save(); ctx.globalAlpha=(1-lift)*.8;
       var gg=ctx.createLinearGradient(0,H-gh,0,H);
       gg.addColorStop(0,'rgba(18,24,38,0)'); gg.addColorStop(1,'rgba(26,34,54,.9)');
       ctx.fillStyle=gg; ctx.fillRect(0,H-gh,W,gh); ctx.restore();
     }
 
-    var P  = posAt(p);
-    var Pa = posAt(Math.max(0,p-.0014));
-    var Pb = posAt(Math.min(1,p+.0014));
-    var B  = P.B;
+    var eA=seg(p,.005,.075)*.94, mA=seg(p,.05,.20)*.94;
 
-    /* orbit paths */
-    if(B.eR>2) orbitArc(B.eX,B.eY,B.aE,false,.09*B.eA*(1-P.w2));
-    if(B.mR>2) orbitArc(B.mX,B.mY,B.aM,false,.09*B.mA*P.w2);
+    drawEarth(PATH.E.x,PATH.E.y,PATH.E.r,eA,spin);
+    drawMoon(PATH.M.x,PATH.M.y,PATH.M.r,mA,spin*.45);
 
-    drawEarth(B.eX,B.eY,B.eR,B.eA,spin);
-    drawMoon(B.mX,B.mY,B.mR,B.mA,spin*.45);
-
-    if(B.eR>2) orbitArc(B.eX,B.eY,B.aE,true,.17*B.eA*(1-P.w2));
-    if(B.mR>2) orbitArc(B.mX,B.mY,B.aM,true,.17*B.mA*P.w2);
-
-    /* trail: sampled from the same path, so it can never kink */
-    ctx.save();
-    for(var t=1;t<26;t++){
-      var q=p-t*.0016; if(q<0) break;
-      var T=posAt(q), T2=posAt(Math.max(0,q-.0016));
-      ctx.beginPath(); ctx.moveTo(T2.x,T2.y); ctx.lineTo(T.x,T.y);
-      ctx.strokeStyle='rgba(130,180,255,'+(.20*(1-t/26))+')';
-      ctx.lineWidth=1.5; ctx.stroke();
+    /* the line pays out behind the rocket and breaks where it goes behind */
+    var head=p*(POLY.length-1), hi=Math.floor(head);
+    ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.lineCap='round';
+    var open=false, chunk=Math.max(6,Math.round(POLY.length/26));
+    for(var q=0;q<=hi;q++){
+      var sp=POLY[q];
+      if(occluded(sp,eA,mA)){ if(open){ ctx.stroke(); open=false; } continue; }
+      if(!open){ ctx.beginPath(); ctx.moveTo(sp.x,sp.y); open=true; }
+      else ctx.lineTo(sp.x,sp.y);
+      if(q===hi || q%chunk===0){
+        var near=1-Math.min(1,(hi-q)/(POLY.length*.20));
+        ctx.strokeStyle='rgba(160,198,255,'+(.20+near*.55)+')';
+        ctx.stroke(); ctx.beginPath(); ctx.moveTo(sp.x,sp.y);
+      }
     }
-    ctx.restore();
+    if(open){ ctx.strokeStyle='rgba(160,198,255,.45)'; ctx.stroke(); }
 
-    /* heading always comes from the direction of travel */
-    var vx=Pb.x-Pa.x, vy=Pb.y-Pa.y;
-    var ang = (vx*vx+vy*vy)>1e-7 ? Math.atan2(vy,vx)+Math.PI/2 : 0;
+    /* rocket */
+    var cur=sampleAt(p);
+    var back=sampleAt(Math.max(0,p-.0012)), fwd=sampleAt(Math.min(1,p+.0012));
+    var vx=fwd.x-back.x, vy=fwd.y-back.y;
+    var ang=(vx*vx+vy*vy)>1e-7 ? Math.atan2(vy,vx)+Math.PI/2 : 0;
 
-    var flame=.22;
-    flame=Math.max(flame,(1-seg(p,0,.15))*1.0);
-    flame=Math.max(flame,Math.sin(Math.PI*clamp01((p-.44)/.17))*.95);
-    if(p>.90) flame=Math.min(flame,(1-seg(p,.90,1))*.55);
+    var flame=.20;
+    flame=Math.max(flame,(1-seg(p,0,.10))*1.0);
+    flame=Math.max(flame,Math.sin(Math.PI*clamp01((p-.40)/.16))*.9);
+    flame=Math.max(flame,Math.sin(Math.PI*clamp01((p-.70)/.14))*.7);
 
-    var scale=2.15*(1+P.d/1100);
-    drawRocket(P.x,P.y,ang,scale,flame,visibility(P));
-
-    if(p>.965){
-      ctx.save(); ctx.globalAlpha=seg(p,.965,1)*.45;
-      ctx.beginPath(); ctx.arc(B.mX-B.mR*.30,B.mY-B.mR*.94,13,0,TAU);
-      ctx.fillStyle='rgba(77,141,255,.45)'; ctx.fill(); ctx.restore();
-    }
+    if(!occluded(cur,eA,mA)) drawRocket(cur.x,cur.y,ang,2.1,flame,1);
   }
 
   requestAnimationFrame(frame);
@@ -914,6 +1066,157 @@ sizeSky();
 addEventListener('resize',function(){ sizeSky(); trail.length=0; });
 checkReveals();
 requestAnimationFrame(frame);
+})();
+</script>
+
+<script type="text/plain" id="ex0">
+// Pressure comes off the sensor noisy. A single bad sample must never
+// look like the rocket has stopped climbing, so altitude and velocity
+// both go through a low-pass filter before anything reads them.
+
+const float ALT_ALPHA = 0.25;   // altitude filter
+const float VEL_ALPHA = 0.3;    // velocity filter
+
+float relAlt_ft = (alt_m - baselineAlt_m) * M_TO_FT;
+altFilt_ft = (1.0f - ALT_ALPHA) * altFilt_ft + ALT_ALPHA * relAlt_ft;
+
+// Velocity is the slope of the filtered altitude, filtered again.
+float velRaw_ft_s = (altFilt_ft - prevAltFilt_ft) / dt;
+prevAltFilt_ft = altFilt_ft;
+velFilt_ft_s = (1.0f - VEL_ALPHA) * velFilt_ft_s + VEL_ALPHA * velRaw_ft_s;
+
+// Peak altitude is written to EEPROM as it happens, so the number
+// survives even if the battery comes loose on landing.
+if (relAlt_ft > maxAlt) maxAlt = relAlt_ft;
+
+if (millis() - lastEEPROMWrite >= writeInterval) {
+  lastEEPROMWrite = millis();
+  float storedAlt;
+  EEPROM.get(0, storedAlt);
+  if (maxAlt > storedAlt) EEPROM.put(0, maxAlt);
+}
+</script>
+<script type="text/plain" id="ex1">
+// How high will it still coast? Drag is proportional to velocity
+// squared, so the deceleration is not just gravity.
+
+const float m_rocket     = 0.58;    // kg
+const float Cd_rocket    = 0.7;
+const float A_rocket     = 0.002;   // m^2
+const float Cd_parachute = 0.75;
+const float A_parachute  = 0.05;    // m^2
+const float t_delay      = 0.5;     // s, servo needs time to move
+const float h_target_ft  = 750.0;   // competition target
+
+const float k_rocket = 0.5 * rho * Cd_rocket * A_rocket;
+const float k_total  = 0.5 * rho * (Cd_rocket * A_rocket
+                                  + Cd_parachute * A_parachute);
+
+// Deceleration right now, gravity plus drag:
+float a_no_parachute = -g - (k_rocket / m_rocket) * vel_m_s * vel_m_s;
+
+// Where the servo delay leaves us:
+float v_after_delay  = vel_m_s + a_no_parachute * t_delay;
+float h_during_delay = vel_m_s * t_delay
+                     + 0.5 * a_no_parachute * t_delay * t_delay;
+
+// Closed-form coast distance from that speed, under drag:
+float h_extra_after = (m_rocket / (2 * k_total))
+  * log(1 + (k_total * v_after_delay * v_after_delay) / (m_rocket * g));
+
+float h_predicted_ft = (alt_m_pred + h_during_delay + h_extra_after) * M_TO_FT;
+</script>
+<script type="text/plain" id="ex2">
+// Three ways to deploy. Any one of them is enough.
+
+bool deployNow = false;
+
+// 1. The prediction. Five consecutive readings must agree that we are
+//    going to overshoot the target, so a single spike can't fire it.
+bool allAbove = true;
+for (int i = 0; i < PRED_BUF_SIZE; i++) {
+  if (predBuffer[i] < (h_target_ft - tolerance_ft)) {
+    allAbove = false;
+    break;
+  }
+}
+if (allAbove) deployNow = true;
+
+// 2. Backstop: we are measurably falling and have been for a second.
+if (!servoActive && velFilt_ft_s <= FALL_VEL_THRESHOLD) {
+  if (!falling) {
+    falling = true;
+    fallStartTime = millis();
+  } else if (millis() - fallStartTime >= FALL_TIME_MS) {
+    deployNow = true;
+  }
+} else {
+  falling = false;
+}
+
+// 3. Last resort: raw altitude is already at the target.
+if (altFilt_ft >= (h_target_ft - 10.0f)) deployNow = true;
+
+if (deployNow) deployParachute();
+</script>
+<script>
+(function(){
+  var out=document.getElementById('codeOut');
+  if(!out) return;
+  var note=document.getElementById('codeNote');
+  var notes=[
+    'Both filters are exponential — cheap enough to run at 50 Hz on an 8-bit-era loop.',
+    'This block is the whole reason the rocket can hit a number instead of just surviving.',
+    'The prediction can be wrong. Two dumber checks sit behind it so the chute still comes out.'
+  ];
+  var KW=/\b(?:const|float|int|bool|void|return|if|else|for|while|break|continue|true|false|unsigned|long|char|byte|uint32_t|uint8_t|sizeof|struct|static)\b/;
+
+  function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* one pass only — sequential replaces would re-tokenise their own markup */
+  var RE=/(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|(^\s*#[^\n]*)|(\b\d+\.?\d*[fF]?\b)|(\b[A-Za-z_]\w*\b)/g;
+  function highlight(src){
+    var lines=esc(src).split('\n'), html='';
+    for(var i=0;i<lines.length;i++){
+      var L=lines[i].replace(RE,function(m,c,st,pp,nu,wd){
+        if(c!==undefined&&c!=='')  return '<span class="tk-c">'+c+'</span>';
+        if(st!==undefined&&st!=='')return '<span class="tk-s">'+st+'</span>';
+        if(pp!==undefined&&pp!=='')return '<span class="tk-p">'+pp+'</span>';
+        if(nu!==undefined&&nu!=='')return '<span class="tk-n">'+nu+'</span>';
+        if(wd!==undefined&&wd!=='')return KW.test(wd)?'<span class="tk-k">'+wd+'</span>':wd;
+        return m;
+      });
+      html+='<span class="line">'+(L===''?' ':L)+'</span>';
+    }
+    return html;
+  }
+
+  var current=0;
+  function show(n){
+    var raw=document.getElementById('ex'+n);
+    if(!raw) return;
+    current=n;
+    out.innerHTML=highlight(raw.textContent.replace(/^\n/,'').replace(/\s+$/,''));
+    if(note) note.textContent=notes[n];
+    var tabs=document.querySelectorAll('.tab');
+    for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle('is-on', i===n);
+    var wrap=out.closest('.codewrap'); if(wrap) wrap.scrollTop=0;
+  }
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){ show(+t.getAttribute('data-tab')); });
+  });
+  var cp=document.getElementById('copyBtn');
+  if(cp) cp.addEventListener('click',function(){
+    var raw=document.getElementById('ex'+current);
+    var txt=raw?raw.textContent.replace(/^\n/,''):'';
+    var done=function(){ cp.textContent='Copied'; setTimeout(function(){cp.textContent='Copy';},1400); };
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,done); }
+    else {
+      var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+      ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); done();
+    }
+  });
+  show(0);
 })();
 </script>
 </body>
