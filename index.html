@@ -524,21 +524,21 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
       <span class="fname"><i>&#9679;</i> full_glove.f3d</span>
       <div class="tabs v3d-tabs">
         <button class="tab is-on" data-view="all"      type="button">All parts</button>
-        <button class="tab"       data-view="main"     type="button">Main glove</button>
         <button class="tab"       data-view="covers"   type="button">Finger covers</button>
-        <button class="tab"       data-view="entrance" type="button">Glove entrance</button>
+        <button class="tab"       data-view="main"     type="button">Main glove</button>
         <button class="tab"       data-view="coupler"  type="button">Coupler</button>
+        <button class="tab"       data-view="entrance" type="button">Glove entrance</button>
       </div>
     </div>
 
-    <div class="v3d" data-src="assets/model/glove.glb">
+    <div class="v3d" data-src="assets/model/glove.glb?v=3">
       <img class="v3d-poster" src="assets/img/glove-exploded.png" alt="Exploded CAD view of the glove: main glove, finger covers, glove entrance, and coupler">
       <p class="v3d-load">Loading model</p>
       <div class="v3d-legend">
-        <button type="button" data-group="Main glove"><i style="background:#8790a6"></i>Main glove</button>
         <button type="button" data-group="Finger covers"><i style="background:#4d8dff"></i>Finger covers &times;5</button>
-        <button type="button" data-group="Glove entrance"><i style="background:#9b7bff"></i>Glove entrance</button>
+        <button type="button" data-group="Main glove"><i style="background:#8790a6"></i>Main glove</button>
         <button type="button" data-group="Coupler"><i style="background:#cfd6e4"></i>Coupler</button>
+        <button type="button" data-group="Glove entrance"><i style="background:#9b7bff"></i>Glove entrance</button>
       </div>
       <div class="v3d-ui">
         <label for="gloveExplode">Explode</label>
@@ -1407,18 +1407,19 @@ const VIEWS = [
   { id:'all',      label:'All parts',
     members:null,
     note:'Eight bodies, modelled in Fusion 360. Drag the slider to pull them apart.' },
+  { id:'covers',   label:'Finger covers',
+    members:['Thumb cover','Index cover','Middle cover','Ring cover','Pinky cover'],
+    test:(n) => /cover/i.test(n),
+    note:'One per digit, each sized to its own finger. Hover any of them for the name.' },
   { id:'main',     label:'Main glove',
     members:['Main glove'],
     note:'The pressure envelope and everything wrapped around it — five layers between the hand and the lunar surface.' },
-  { id:'covers',   label:'Finger covers',
-    members:['Thumb cover','Index cover','Middle cover','Ring cover','Pinky cover'],
-    note:'One per digit, each sized to its own finger. Hover any of them for the name.' },
-  { id:'entrance', label:'Glove entrance',
-    members:['Glove entrance'],
-    note:'The opening the hand passes through when donning the glove.' },
   { id:'coupler',  label:'Coupler',
     members:['Coupler'],
-    note:'The joint that mates the glove to the suit sleeve.' }
+    note:'The joint that mates the glove to the suit sleeve.' },
+  { id:'entrance', label:'Glove entrance',
+    members:['Glove entrance'],
+    note:'The opening the hand passes through when donning the glove.' }
 ];
 
 /* three.js sanitises node names on load (spaces -> underscores), so every
@@ -1590,7 +1591,15 @@ function initViewer(root){
     view = v;
     const solo = !!v.members;
     const want = solo ? v.members.map(norm) : null;
-    for (const p of pieces) p.mesh.visible = !solo || want.indexOf(norm(p.label)) !== -1;
+    for (const p of pieces){
+      p.mesh.visible = !solo
+        || want.indexOf(norm(p.label)) !== -1
+        || (v.test ? v.test(p.label) : false);
+      // clear any ghosting left over from a hover before the tab changed
+      p.mesh.material.opacity = 1;
+      p.mesh.material.transparent = false;
+      p.mesh.material.emissive.setHex(0x000000);
+    }
 
     // explode only means something when more than one body is on screen
     const many = !solo || v.members.length > 1;
@@ -1650,11 +1659,13 @@ function initViewer(root){
 
   function highlight(groupName){
     for (const p of pieces){
-      if (!p.mesh.visible) continue;
-      const on = groupName && p.group === groupName;
+      // reset every piece, visible or not — a hidden mesh that keeps
+      // opacity 0.28 comes back nearly invisible on the next tab
+      const on = p.mesh.visible && groupName && p.group === groupName;
+      const ghost = p.mesh.visible && groupName && !on;
       p.mesh.material.emissive.setHex(on ? 0x22406e : 0x000000);
-      p.mesh.material.opacity = groupName && !on ? 0.28 : 1;
-      p.mesh.material.transparent = !!groupName;
+      p.mesh.material.opacity = ghost ? 0.28 : 1;
+      p.mesh.material.transparent = ghost;
     }
     legend.querySelectorAll('button').forEach((b) => {
       b.classList.toggle('on', b.dataset.group === groupName);
