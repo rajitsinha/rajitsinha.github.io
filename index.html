@@ -28,6 +28,13 @@
 <meta name="twitter:title" content="Rajit Sinha · Aerospace Engineering">
 <meta name="twitter:description" content="Rocket avionics that predict apogee, a lunar EVA glove designed for NASA Texas Aerospace Scholars, and things that only get one try.">
 <meta name="twitter:image" content="https://rajitsinha.github.io/assets/og-preview.jpg">
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+}}
+</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -257,6 +264,86 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
   .hero .status b{animation:none}
   #boot{display:none}
 }
+
+/* ---------- 3D glove viewer ---------- */
+.v3d{position:relative;width:100%;aspect-ratio:16/11;background:#08090d;
+  border-radius:var(--r-lg);overflow:hidden;touch-action:pan-y}
+.v3d.live{touch-action:none}
+.v3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.v3d-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:.7rem;
+  filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(1.05);
+  transition:opacity .6s ease;pointer-events:none}
+.v3d.ready .v3d-poster{opacity:0}
+
+.v3d-load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dimmer);transition:opacity .4s ease}
+.v3d.ready .v3d-load{opacity:0;pointer-events:none}
+
+/* legend */
+.v3d-legend{position:absolute;top:.9rem;left:.9rem;z-index:4;display:grid;gap:1px;
+  background:rgba(8,9,13,.55);backdrop-filter:blur(9px);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:.45rem;
+  opacity:0;transition:opacity .5s ease .2s}
+.v3d.ready .v3d-legend{opacity:1}
+.v3d-legend button{display:flex;align-items:center;gap:.5rem;width:100%;
+  background:none;border:0;color:var(--dim);cursor:pointer;text-align:left;
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;
+  padding:.3rem .45rem;border-radius:8px;transition:background .2s ease,color .2s ease}
+.v3d-legend button:hover,.v3d-legend button.on{background:rgba(255,255,255,.05);color:var(--text)}
+.v3d-legend i{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
+
+/* controls */
+.v3d-ui{position:absolute;left:.9rem;right:.9rem;bottom:.9rem;z-index:4;
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;
+  background:rgba(8,9,13,.55);backdrop-filter:blur(9px);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:.55rem .75rem;
+  opacity:0;transition:opacity .5s ease .2s}
+.v3d.ready .v3d-ui{opacity:1}
+.v3d-ui label{font-family:var(--mono);font-size:.58rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--dimmer);white-space:nowrap}
+.v3d-ui input[type=range]{-webkit-appearance:none;appearance:none;flex:1 1 120px;min-width:90px;
+  height:2px;background:var(--line-lit);border-radius:2px;outline:none;cursor:pointer}
+.v3d-ui input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;
+  border-radius:50%;background:var(--blue);box-shadow:0 0 10px rgba(77,141,255,.7);cursor:pointer}
+.v3d-ui input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;
+  background:var(--blue);box-shadow:0 0 10px rgba(77,141,255,.7);cursor:pointer}
+.v3d-btns{display:flex;gap:.3rem;margin-left:auto}
+.v3d-btns button{width:26px;height:26px;display:grid;place-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:7px;
+  color:var(--dim);font-family:var(--mono);font-size:.7rem;cursor:pointer;
+  transition:background .2s ease,color .2s ease,border-color .2s ease}
+.v3d-btns button:hover{background:var(--blue-soft);border-color:var(--line-lit);color:var(--text)}
+
+/* hover label */
+.v3d-tip{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,-140%);
+  background:rgba(8,9,13,.86);border:1px solid var(--line-lit);border-radius:7px;
+  padding:.22rem .5rem;font-family:var(--mono);font-size:.58rem;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text);white-space:nowrap;opacity:0;transition:opacity .18s ease}
+.v3d-tip.on{opacity:1}
+
+/* touch gate */
+.v3d-gate{position:absolute;inset:0;z-index:6;display:grid;place-items:center;
+  background:rgba(6,7,11,.35);cursor:pointer;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+.v3d-gate span{border:1px solid var(--line-lit);border-radius:999px;padding:.5rem 1rem;
+  background:rgba(8,9,13,.7);backdrop-filter:blur(6px)}
+.v3d.live .v3d-gate{display:none}
+.v3d-exit{position:absolute;top:.9rem;right:.9rem;z-index:6;display:none;
+  background:rgba(8,9,13,.7);border:1px solid var(--line-lit);border-radius:999px;
+  padding:.35rem .7rem;color:var(--dim);cursor:pointer;
+  font-family:var(--mono);font-size:.55rem;letter-spacing:.1em;text-transform:uppercase}
+.v3d.live .v3d-exit{display:block}
+
+@media (max-width:720px){
+  .v3d{aspect-ratio:4/5}
+  .v3d-legend{top:.6rem;left:.6rem;padding:.3rem}
+  .v3d-legend button{font-size:.53rem;padding:.25rem .35rem}
+  .v3d-ui{left:.6rem;right:.6rem;bottom:.6rem;padding:.5rem .6rem;gap:.5rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .v3d-poster,.v3d-legend,.v3d-ui,.v3d-tip{transition:none}
+}
 </style>
 </head>
 <body>
@@ -418,8 +505,29 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
   </div>
 
   <figure class="shot plate mt rv">
-    <img src="assets/img/glove-exploded.png" alt="Exploded CAD view of the glove: main glove, finger covers, glove entrance, and coupler">
-    <figcaption>Every part of the glove, pulled apart</figcaption>
+    <div class="v3d" data-src="assets/model/glove.glb">
+      <img class="v3d-poster" src="assets/img/glove-exploded.png" alt="Exploded CAD view of the glove: main glove, finger covers, glove entrance, and coupler">
+      <p class="v3d-load">Loading model</p>
+      <div class="v3d-legend">
+        <button type="button" data-group="Main glove"><i style="background:#8790a6"></i>Main glove</button>
+        <button type="button" data-group="Finger covers"><i style="background:#4d8dff"></i>Finger covers &times;5</button>
+        <button type="button" data-group="Glove entrance"><i style="background:#9b7bff"></i>Glove entrance</button>
+        <button type="button" data-group="Coupler"><i style="background:#cfd6e4"></i>Coupler</button>
+      </div>
+      <div class="v3d-ui">
+        <label for="gloveExplode">Explode</label>
+        <input id="gloveExplode" class="v3d-explode" type="range" min="0" max="100" value="0" aria-label="Explode the glove assembly">
+        <span class="v3d-btns">
+          <button type="button" data-act="in"  aria-label="Zoom in">+</button>
+          <button type="button" data-act="out" aria-label="Zoom out">&minus;</button>
+          <button type="button" data-act="reset" aria-label="Reset view">&#8635;</button>
+        </span>
+      </div>
+      <div class="v3d-tip"></div>
+      <div class="v3d-gate"><span>Tap to rotate</span></div>
+      <button type="button" class="v3d-exit">Done</button>
+    </div>
+    <figcaption>Every part of the glove, pulled apart &mdash; drag to rotate</figcaption>
   </figure>
 
   <div class="g-media-text mt">
@@ -1239,6 +1347,236 @@ if (deployNow) deployParachute();
   });
   show(0);
 })();
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const DRACO_PATH = 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/libs/draco/';
+
+/* part name -> colour + legend grouping. Rename the labels here if a
+   body turns out to be something other than what I guessed. */
+const PARTS = {
+  'Main glove':     { color: 0x8790a6, group: 'Main glove',     explode: 0    },
+  'Glove entrance': { color: 0x9b7bff, group: 'Glove entrance', explode: 0.85 },
+  'Coupler':        { color: 0xcfd6e4, group: 'Coupler',        explode: 0.85 },
+  'Finger cover 1': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
+  'Finger cover 2': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
+  'Finger cover 3': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
+  'Finger cover 4': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
+  'Finger cover 5': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 }
+};
+
+function initViewer(root){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const src    = root.dataset.src;
+
+  const tip    = root.querySelector('.v3d-tip');
+  const slider = root.querySelector('.v3d-explode');
+  const legend = root.querySelector('.v3d-legend');
+  const loadEl = root.querySelector('.v3d-load');
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:'high-performance' });
+  } catch(e){ loadEl.textContent = 'WebGL unavailable'; return; }
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  root.appendChild(renderer.domElement);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  const key = new THREE.DirectionalLight(0xdce6ff, 2.1); key.position.set(3, 5, 4);
+  const rim = new THREE.DirectionalLight(0x4d8dff, 1.5); rim.position.set(-4, 1, -3);
+  scene.add(key, rim, new THREE.HemisphereLight(0x8fa5cc, 0x0a0c12, 0.7));
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  controls.enablePan = false;
+  controls.minDistance = 2.2;
+  controls.maxDistance = 14;
+  controls.autoRotate = !reduce;
+  controls.autoRotateSpeed = 0.55;
+  controls.enableZoom = coarse;          // pinch on touch; buttons on desktop (never hijacks page scroll)
+  controls.enabled = !coarse;            // touch requires an explicit tap to activate
+  controls.addEventListener('start', () => { controls.autoRotate = false; });
+
+  const model = new THREE.Group();
+  scene.add(model);
+  const pieces = [];
+  let userZoomed = false, radius = 1.2, tExplode = 0;
+
+  function frame(){
+    const r = radius * (1 + 0.62 * tExplode);
+    let d = r / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2);
+    if (camera.aspect < 1) d /= camera.aspect;
+    return d * 1.02;
+  }
+
+  function resize(){
+    const w = root.clientWidth, h = root.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(root);
+
+  const loader = new GLTFLoader();
+  const draco  = new DRACOLoader().setDecoderPath(DRACO_PATH);
+  loader.setDRACOLoader(draco);
+
+  loader.load(src, (gltf) => {
+    const found = [];
+    gltf.scene.traverse((o) => { if (o.isMesh) found.push(o); });
+
+    for (const o of found){
+      const cfg = PARTS[o.name] || { color:0x8790a6, group:'Other', explode:0.85 };
+      o.material = new THREE.MeshStandardMaterial({
+        color: cfg.color, metalness: 0.22, roughness: 0.46,
+        emissive: 0x000000, envMapIntensity: 0.9
+      });
+      o.geometry.computeBoundingSphere();
+      pieces.push({
+        mesh: o,
+        dir: o.geometry.boundingSphere.center.clone(),
+        f: cfg.explode,
+        group: cfg.group,
+        base: cfg.color
+      });
+      model.add(o);
+    }
+
+    const box = new THREE.Box3().setFromObject(model);
+    radius = box.getBoundingSphere(new THREE.Sphere()).radius;
+
+    camera.position.set(frame() * 0.42, frame() * 0.30, frame() * 0.86);
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    root.classList.add('ready');
+    draco.dispose();
+  },
+  undefined,
+  () => { loadEl.textContent = 'Model failed to load'; });
+
+  /* ---- explode ---- */
+  function setExplode(t){
+    tExplode = t;
+    for (const p of pieces) p.mesh.position.copy(p.dir).multiplyScalar(t * p.f);
+    if (!userZoomed){
+      const d = frame();
+      camera.position.setLength(d);
+      controls.minDistance = Math.min(2.2, d * 0.55);
+    }
+  }
+  slider.addEventListener('input', () => setExplode(slider.value / 100));
+
+  /* ---- zoom buttons + reset ---- */
+  root.querySelector('[data-act=in]').onclick  = () => zoom(0.82);
+  root.querySelector('[data-act=out]').onclick = () => zoom(1.22);
+  root.querySelector('[data-act=reset]').onclick = () => {
+    userZoomed = false;
+    slider.value = 0; setExplode(0);
+    const d = frame();
+    camera.position.set(d * 0.42, d * 0.30, d * 0.86);
+    controls.target.set(0, 0, 0);
+    controls.autoRotate = !reduce;
+  };
+  function zoom(k){
+    userZoomed = true;
+    controls.autoRotate = false;
+    const d = THREE.MathUtils.clamp(camera.position.length() * k, controls.minDistance, controls.maxDistance);
+    camera.position.setLength(d);
+  }
+
+  /* ---- hover / highlight ---- */
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+  let hovered = null;
+
+  function highlight(groupName){
+    for (const p of pieces){
+      const on = groupName && p.group === groupName;
+      p.mesh.material.emissive.setHex(on ? 0x22406e : 0x000000);
+      p.mesh.material.opacity = groupName && !on ? 0.28 : 1;
+      p.mesh.material.transparent = !!groupName;
+    }
+    legend.querySelectorAll('button').forEach((b) => {
+      b.classList.toggle('on', b.dataset.group === groupName);
+    });
+  }
+
+  renderer.domElement.addEventListener('pointermove', (e) => {
+    if (!root.classList.contains('ready')) return;
+    const r = root.getBoundingClientRect();
+    ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(ptr, camera);
+    const hit = ray.intersectObjects(pieces.map((p) => p.mesh), false)[0];
+    const name = hit ? hit.object.name : null;
+    if (name !== hovered){
+      hovered = name;
+      const p = pieces.find((q) => q.mesh.name === name);
+      highlight(p ? p.group : null);
+      tip.textContent = p ? p.group : '';
+      tip.classList.toggle('on', !!p);
+    }
+    if (hovered){ tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px'; }
+  }, { passive:true });
+
+  renderer.domElement.addEventListener('pointerleave', () => {
+    hovered = null; highlight(null); tip.classList.remove('on');
+  });
+
+  legend.querySelectorAll('button').forEach((b) => {
+    b.addEventListener('pointerenter', () => highlight(b.dataset.group));
+    b.addEventListener('pointerleave', () => highlight(null));
+  });
+
+  /* ---- touch gate: one-finger drag only after an explicit tap ---- */
+  const gate = root.querySelector('.v3d-gate');
+  if (gate) gate.addEventListener('click', () => {
+    root.classList.add('live'); controls.enabled = true;
+  });
+  const exit = root.querySelector('.v3d-exit');
+  if (exit) exit.addEventListener('click', () => {
+    root.classList.remove('live'); controls.enabled = false;
+  });
+
+  /* ---- render only while on screen ---- */
+  let running = false;
+  function loop(){
+    if (!running) return;
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  new IntersectionObserver((es) => {
+    const vis = es[0].isIntersecting;
+    if (vis && !running){ running = true; resize(); loop(); }
+    else if (!vis) running = false;
+  }, { rootMargin:'200px' }).observe(root);
+}
+
+/* lazy: only pull three.js work into play when the section is near */
+document.querySelectorAll('.v3d').forEach((el) => {
+  new IntersectionObserver((es, o) => {
+    if (!es[0].isIntersecting) return;
+    o.disconnect();
+    initViewer(el);
+  }, { rootMargin:'600px' }).observe(el);
+});
 </script>
 </body>
 </html>
