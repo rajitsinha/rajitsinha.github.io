@@ -267,7 +267,7 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
 
 /* ---------- 3D glove viewer ---------- */
 .v3d{position:relative;width:100%;aspect-ratio:16/11;background:#08090d;
-  border-radius:var(--r-lg);overflow:hidden;touch-action:pan-y}
+  overflow:hidden;touch-action:pan-y}
 .v3d.live{touch-action:none}
 .v3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .v3d-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:.7rem;
@@ -275,9 +275,16 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
   transition:opacity .6s ease;pointer-events:none}
 .v3d.ready .v3d-poster{opacity:0}
 
-.v3d-load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
-  font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+.v3d-load{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:7;
+  max-width:min(90%,30rem);margin:0;text-align:center;
+  font-family:var(--mono);font-size:.6rem;line-height:1.9;letter-spacing:.1em;
   color:var(--dimmer);transition:opacity .4s ease}
+.v3d-load.err{color:var(--text);text-transform:none;letter-spacing:.02em;
+  background:rgba(8,9,13,.92);border:1px solid var(--line-lit);border-radius:var(--r-md);
+  padding:.9rem 1.1rem}
+.v3d-load.err b{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  color:#ff8f6b;margin-bottom:.35rem}
+.v3d-load code{color:var(--blue);word-break:break-all}
 .v3d.ready .v3d-load{opacity:0;pointer-events:none}
 
 /* legend */
@@ -291,6 +298,8 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
   font-family:var(--mono);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;
   padding:.3rem .45rem;border-radius:8px;transition:background .2s ease,color .2s ease}
 .v3d-legend button:hover,.v3d-legend button.on{background:rgba(255,255,255,.05);color:var(--text)}
+.v3d-legend button.sel{color:var(--blue)}
+.v3d-legend button.sel i{box-shadow:0 0 8px currentColor}
 .v3d-legend i{width:8px;height:8px;border-radius:2px;flex:0 0 auto}
 
 /* controls */
@@ -308,6 +317,8 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
   border-radius:50%;background:var(--blue);box-shadow:0 0 10px rgba(77,141,255,.7);cursor:pointer}
 .v3d-ui input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;
   background:var(--blue);box-shadow:0 0 10px rgba(77,141,255,.7);cursor:pointer}
+.v3d-ui.locked input[type=range]{opacity:.25;pointer-events:none}
+.v3d-ui.locked label{opacity:.35}
 .v3d-btns{display:flex;gap:.3rem;margin-left:auto}
 .v3d-btns button{width:26px;height:26px;display:grid;place-items:center;
   background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:7px;
@@ -329,6 +340,7 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
 .v3d-gate span{border:1px solid var(--line-lit);border-radius:999px;padding:.5rem 1rem;
   background:rgba(8,9,13,.7);backdrop-filter:blur(6px)}
 .v3d.live .v3d-gate{display:none}
+.v3d-load.err ~ .v3d-gate{display:none}
 .v3d-exit{position:absolute;top:.9rem;right:.9rem;z-index:6;display:none;
   background:rgba(8,9,13,.7);border:1px solid var(--line-lit);border-radius:999px;
   padding:.35rem .7rem;color:var(--dim);cursor:pointer;
@@ -344,6 +356,9 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
 @media (prefers-reduced-motion:reduce){
   .v3d-poster,.v3d-legend,.v3d-ui,.v3d-tip{transition:none}
 }
+
+.v3d-foot .stat{font-family:var(--mono);font-size:.66rem;color:var(--dimmer);margin-left:auto}
+@media (max-width:640px){ .v3d-foot .stat{margin-left:0} }
 </style>
 </head>
 <body>
@@ -504,7 +519,18 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
     </figure>
   </div>
 
-  <figure class="shot plate mt rv">
+  <div class="card codecard mt rv">
+    <div class="codehead">
+      <span class="fname"><i>&#9679;</i> full_glove.f3d</span>
+      <div class="tabs v3d-tabs">
+        <button class="tab is-on" data-view="all"      type="button">All parts</button>
+        <button class="tab"       data-view="main"     type="button">Main glove</button>
+        <button class="tab"       data-view="covers"   type="button">Finger covers</button>
+        <button class="tab"       data-view="entrance" type="button">Glove entrance</button>
+        <button class="tab"       data-view="coupler"  type="button">Coupler</button>
+      </div>
+    </div>
+
     <div class="v3d" data-src="assets/model/glove.glb">
       <img class="v3d-poster" src="assets/img/glove-exploded.png" alt="Exploded CAD view of the glove: main glove, finger covers, glove entrance, and coupler">
       <p class="v3d-load">Loading model</p>
@@ -527,8 +553,12 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
       <div class="v3d-gate"><span>Tap to rotate</span></div>
       <button type="button" class="v3d-exit">Done</button>
     </div>
-    <figcaption>Every part of the glove, pulled apart &mdash; drag to rotate</figcaption>
-  </figure>
+
+    <div class="codefoot v3d-foot">
+      <span class="v3d-note"></span>
+      <span class="stat v3d-stat"></span>
+    </div>
+  </div>
 
   <div class="g-media-text mt">
     <figure class="shot plate rv">
@@ -1360,15 +1390,36 @@ const DRACO_PATH = 'https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/libs
 /* part name -> colour + legend grouping. Rename the labels here if a
    body turns out to be something other than what I guessed. */
 const PARTS = {
-  'Main glove':     { color: 0x8790a6, group: 'Main glove',     explode: 0    },
-  'Glove entrance': { color: 0x9b7bff, group: 'Glove entrance', explode: 0.85 },
-  'Coupler':        { color: 0xcfd6e4, group: 'Coupler',        explode: 0.85 },
-  'Finger cover 1': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
-  'Finger cover 2': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
-  'Finger cover 3': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
-  'Finger cover 4': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 },
-  'Finger cover 5': { color: 0x4d8dff, group: 'Finger covers',  explode: 0.85 }
+  'Main glove':     { color:0x8790a6, group:'Main glove',     explode:0    },
+  'Glove entrance': { color:0x9b7bff, group:'Glove entrance', explode:0.85 },
+  'Coupler':        { color:0xcfd6e4, group:'Coupler',        explode:0.85 },
+  'Thumb cover':    { color:0x4d8dff, group:'Finger covers',  explode:0.85 },
+  'Index cover':    { color:0x4d8dff, group:'Finger covers',  explode:0.85 },
+  'Middle cover':   { color:0x4d8dff, group:'Finger covers',  explode:0.85 },
+  'Ring cover':     { color:0x4d8dff, group:'Finger covers',  explode:0.85 },
+  'Pinky cover':    { color:0x4d8dff, group:'Finger covers',  explode:0.85 }
 };
+
+
+/* tabs: which meshes each view shows. Edit the `note` strings — they're
+   descriptive placeholders, and you know the actual design reasoning. */
+const VIEWS = [
+  { id:'all',      label:'All parts',
+    members:null,
+    note:'Eight bodies, modelled in Fusion 360. Drag the slider to pull them apart.' },
+  { id:'main',     label:'Main glove',
+    members:['Main glove'],
+    note:'The pressure envelope and everything wrapped around it — five layers between the hand and the lunar surface.' },
+  { id:'covers',   label:'Finger covers',
+    members:['Thumb cover','Index cover','Middle cover','Ring cover','Pinky cover'],
+    note:'One per digit, each sized to its own finger. Hover any of them for the name.' },
+  { id:'entrance', label:'Glove entrance',
+    members:['Glove entrance'],
+    note:'The opening the hand passes through when donning the glove.' },
+  { id:'coupler',  label:'Coupler',
+    members:['Coupler'],
+    note:'The joint that mates the glove to the suit sleeve.' }
+];
 
 function initViewer(root){
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1437,9 +1488,16 @@ function initViewer(root){
   const draco  = new DRACOLoader().setDecoderPath(DRACO_PATH);
   loader.setDRACOLoader(draco);
 
-  loader.load(src, (gltf) => {
+  function fail(msg){
+    loadEl.innerHTML = '<b>Model didn\'t load</b><br>' + msg;
+    loadEl.classList.add('err');
+    console.error('[glove viewer]', msg);
+  }
+
+  function build(gltf){
     const found = [];
     gltf.scene.traverse((o) => { if (o.isMesh) found.push(o); });
+    if (!found.length) return fail('The file loaded but contains no meshes.');
 
     for (const o of found){
       const cfg = PARTS[o.name] || { color:0x8790a6, group:'Other', explode:0.85 };
@@ -1452,8 +1510,8 @@ function initViewer(root){
         mesh: o,
         dir: o.geometry.boundingSphere.center.clone(),
         f: cfg.explode,
-        group: cfg.group,
-        base: cfg.color
+        label: o.name,
+        group: cfg.group
       });
       model.add(o);
     }
@@ -1461,21 +1519,32 @@ function initViewer(root){
     const box = new THREE.Box3().setFromObject(model);
     radius = box.getBoundingSphere(new THREE.Sphere()).radius;
 
-    camera.position.set(frame() * 0.42, frame() * 0.30, frame() * 0.86);
+    const d = frame();
+    camera.position.set(d * 0.42, d * 0.30, d * 0.86);
     controls.target.set(0, 0, 0);
     controls.update();
 
     root.classList.add('ready');
     draco.dispose();
-  },
-  undefined,
-  () => { loadEl.textContent = 'Model failed to load'; });
+    setView(VIEWS[0]);
+  }
+
+  /* fetch first so a 404 / wrong path reports itself instead of failing silently */
+  fetch(src).then((r) => {
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' &mdash; nothing at <code>' + src + '</code>');
+    return r.arrayBuffer();
+  }).then((buf) => {
+    const magic = String.fromCharCode(...new Uint8Array(buf, 0, 4));
+    if (magic !== 'glTF') throw new Error('The server returned something that isn\'t a .glb (got <code>' + magic.replace(/[^\x20-\x7e]/g,'?') + '</code>). Usually a 404 page.');
+    loader.parse(buf, '', build, (e) => fail('Couldn\'t decode the model. ' + (e && e.message ? e.message : 'The Draco decoder may be blocked.')));
+  }).catch((e) => fail(e.message || String(e)));
 
   /* ---- explode ---- */
   function setExplode(t){
     tExplode = t;
     for (const p of pieces) p.mesh.position.copy(p.dir).multiplyScalar(t * p.f);
-    if (!userZoomed){
+    if (tExplode > 0) fly = null;
+    if (!userZoomed && (!view || view.id === 'all')){
       const d = frame();
       camera.position.setLength(d);
       controls.minDistance = Math.min(2.2, d * 0.55);
@@ -1483,16 +1552,83 @@ function initViewer(root){
   }
   slider.addEventListener('input', () => setExplode(slider.value / 100));
 
+  /* ---- tabs: isolate a part and fly the camera to it ---- */
+  const noteEl = root.parentElement.querySelector('.v3d-note');
+  const statEl = root.parentElement.querySelector('.v3d-stat');
+  const ui     = root.querySelector('.v3d-ui');
+  let view = VIEWS[0], fly = null;
+
+  function focusOn(){
+    if (!pieces.length) return;
+    const on = pieces.filter((p) => p.mesh.visible);
+    if (!on.length) return;
+    const box = new THREE.Box3();
+    for (const p of on) box.expandByObject(p.mesh);
+    const sph = box.getBoundingSphere(new THREE.Sphere());
+
+    let d = sph.radius / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2);
+    if (camera.aspect < 1) d /= camera.aspect;
+    d = THREE.MathUtils.clamp(d * 1.35, 0.05, 40);
+
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    fly = {
+      t0: performance.now(), dur: reduce ? 0 : 620,
+      p0: camera.position.clone(), t0v: controls.target.clone(),
+      p1: sph.center.clone().addScaledVector(dir, d), t1v: sph.center.clone()
+    };
+    controls.minDistance = d * 0.35;
+    controls.maxDistance = d * 4;
+  }
+
+  function setView(v){
+    view = v;
+    const solo = !!v.members;
+    for (const p of pieces) p.mesh.visible = !solo || v.members.indexOf(p.label) !== -1;
+
+    // explode only means something when more than one body is on screen
+    const many = !solo || v.members.length > 1;
+    ui.classList.toggle('locked', !many);
+    if (!many){ slider.value = 0; setExplode(0); }
+
+    if (noteEl) noteEl.textContent = v.note;
+    if (statEl){
+      const on = pieces.filter((p) => p.mesh.visible);
+      const tris = on.reduce((a, p) => a + (p.mesh.geometry.index
+        ? p.mesh.geometry.index.count : p.mesh.geometry.attributes.position.count) / 3, 0);
+      statEl.textContent = on.length + (on.length === 1 ? ' body · ' : ' bodies · ')
+                         + tris.toLocaleString() + ' triangles';
+    }
+
+    root.parentElement.querySelectorAll('.v3d-tabs .tab')
+      .forEach((b) => b.classList.toggle('is-on', b.dataset.view === v.id));
+    legend.querySelectorAll('button')
+      .forEach((b) => b.classList.toggle('sel', b.dataset.group === v.label));
+
+    userZoomed = false;
+    controls.autoRotate = !reduce;
+    focusOn();
+  }
+
+  root.parentElement.querySelectorAll('.v3d-tabs .tab').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = VIEWS.find((x) => x.id === b.dataset.view);
+      if (v && root.classList.contains('ready')) setView(v);
+    });
+  });
+  legend.querySelectorAll('button').forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = VIEWS.find((x) => x.label === b.dataset.group) || VIEWS[0];
+      if (root.classList.contains('ready')) setView(v);
+    });
+  });
+
   /* ---- zoom buttons + reset ---- */
   root.querySelector('[data-act=in]').onclick  = () => zoom(0.82);
   root.querySelector('[data-act=out]').onclick = () => zoom(1.22);
   root.querySelector('[data-act=reset]').onclick = () => {
     userZoomed = false;
     slider.value = 0; setExplode(0);
-    const d = frame();
-    camera.position.set(d * 0.42, d * 0.30, d * 0.86);
-    controls.target.set(0, 0, 0);
-    controls.autoRotate = !reduce;
+    setView(VIEWS[0]);
   };
   function zoom(k){
     userZoomed = true;
@@ -1507,6 +1643,7 @@ function initViewer(root){
 
   function highlight(groupName){
     for (const p of pieces){
+      if (!p.mesh.visible) continue;
       const on = groupName && p.group === groupName;
       p.mesh.material.emissive.setHex(on ? 0x22406e : 0x000000);
       p.mesh.material.opacity = groupName && !on ? 0.28 : 1;
@@ -1523,13 +1660,13 @@ function initViewer(root){
     ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
     ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
     ray.setFromCamera(ptr, camera);
-    const hit = ray.intersectObjects(pieces.map((p) => p.mesh), false)[0];
+    const hit = ray.intersectObjects(pieces.filter((p) => p.mesh.visible).map((p) => p.mesh), false)[0];
     const name = hit ? hit.object.name : null;
     if (name !== hovered){
       hovered = name;
       const p = pieces.find((q) => q.mesh.name === name);
       highlight(p ? p.group : null);
-      tip.textContent = p ? p.group : '';
+      tip.textContent = p ? p.label : '';
       tip.classList.toggle('on', !!p);
     }
     if (hovered){ tip.style.left = (e.clientX - r.left) + 'px'; tip.style.top = (e.clientY - r.top) + 'px'; }
@@ -1558,6 +1695,13 @@ function initViewer(root){
   let running = false;
   function loop(){
     if (!running) return;
+    if (fly){
+      const k = fly.dur ? Math.min(1, (performance.now() - fly.t0) / fly.dur) : 1;
+      const e = 1 - Math.pow(1 - k, 3);
+      camera.position.lerpVectors(fly.p0, fly.p1, e);
+      controls.target.lerpVectors(fly.t0v, fly.t1v, e);
+      if (k >= 1) fly = null;
+    }
     controls.update();
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
