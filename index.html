@@ -1422,11 +1422,26 @@ const VIEWS = [
     note:'The opening the hand passes through when donning the glove.' }
 ];
 
+/* Explode travel, solved from the geometry: each body slides along its own
+   axis instead of radially out from the model centre. The two wrist bodies
+   share one axis (they're coaxial), so they stay in line with the glove. */
+const EXPLODE = {
+  'Coupler': { axis:[ -0.0266,  -0.9655,  -0.2589 ], dist:0.5305 },
+  'Glove entrance': { axis:[ -0.0266,  -0.9655,  -0.2589 ], dist:0.7841 },
+  'Pinky cover': { axis:[  0.0072,   0.9993,  -0.0362 ], dist:0.7966 },
+  'Ring cover': { axis:[ -0.0286,   0.9947,  -0.0987 ], dist:0.8403 },
+  'Middle cover': { axis:[ -0.0215,   0.9982,   0.0559 ], dist:0.9537 },
+  'Index cover': { axis:[ -0.0539,   0.9980,   0.0344 ], dist:0.8634 },
+  'Thumb cover': { axis:[ -0.5879,   0.7885,  -0.1808 ], dist:0.5320 }
+};
+
 /* three.js sanitises node names on load (spaces -> underscores), so every
    lookup goes through norm() rather than matching the raw mesh name. */
 const norm = (s) => String(s).toLowerCase().replace(/[\s_]+/g, ' ').trim();
 const PART_BY_NAME = {};
 for (const k of Object.keys(PARTS)) PART_BY_NAME[norm(k)] = Object.assign({ label: k }, PARTS[k]);
+const EXPLODE_BY_NAME = {};
+for (const k of Object.keys(EXPLODE)) EXPLODE_BY_NAME[norm(k)] = EXPLODE[k];
 
 function initViewer(root){
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1515,7 +1530,11 @@ function initViewer(root){
       o.geometry.computeBoundingSphere();
       pieces.push({
         mesh: o,
-        dir: o.geometry.boundingSphere.center.clone(),
+        dir: (() => {
+          const e = EXPLODE_BY_NAME[norm(cfg.label)];
+          return e ? new THREE.Vector3(e.axis[0], e.axis[1], e.axis[2]).multiplyScalar(e.dist)
+                   : o.geometry.boundingSphere.center.clone();
+        })(),
         f: cfg.explode,
         label: cfg.label,
         group: cfg.group
