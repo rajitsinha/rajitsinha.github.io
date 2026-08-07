@@ -359,6 +359,93 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
 
 .v3d-foot .stat{font-family:var(--mono);font-size:.66rem;color:var(--dimmer);margin-left:auto}
 @media (max-width:640px){ .v3d-foot .stat{margin-left:0} }
+
+/* ---------- hero portrait ---------- */
+.hero-grid{width:100%;display:grid;grid-template-columns:1.08fr .8fr;
+  gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.hero-portrait{position:relative;margin:0;border-radius:var(--r-lg);overflow:hidden;
+  border:1px solid var(--line);background:var(--panel);isolation:isolate}
+.hero-portrait img{display:block;width:100%;height:auto;
+  filter:saturate(.82) contrast(1.04) brightness(.88)}
+.hero-portrait::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to top,   rgba(6,7,11,.85) 0%, rgba(6,7,11,0) 42%),
+    linear-gradient(to right, rgba(6,7,11,.32) 0%, rgba(6,7,11,0) 38%),
+    radial-gradient(120% 78% at 50% 34%, rgba(77,141,255,.10), transparent 68%)}
+.hero-portrait figcaption{position:absolute;left:1rem;bottom:.95rem;z-index:2;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--dim)}
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:2.5rem}
+  .hero-portrait{max-width:340px;margin-inline:auto;width:100%}
+}
+
+/* ---------- apogee predictor simulator ---------- */
+.sim-body{padding:.9rem 1.1rem 1rem}
+.sim-plot{width:100%;aspect-ratio:700/236;display:block;overflow:visible}
+.sim-plot .grid-l{stroke:var(--line);stroke-width:1}
+.sim-plot .axis-t{fill:var(--dimmer);font-family:var(--mono);font-size:9px}
+.sim-plot .target{stroke:var(--blue);stroke-width:1;stroke-dasharray:4 4;opacity:.75}
+.sim-plot .curve-off{fill:none;stroke:#6b7488;stroke-width:1.6;stroke-dasharray:5 4}
+.sim-plot .curve-on{fill:none;stroke:var(--blue);stroke-width:2.2;
+  filter:drop-shadow(0 0 6px rgba(77,141,255,.45))}
+.sim-plot .dep{fill:var(--blue);stroke:var(--void);stroke-width:1.5}
+
+.sim-key{display:flex;flex-wrap:wrap;gap:1rem;margin:.5rem 0 0;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:var(--dimmer)}
+.sim-key span{display:inline-flex;align-items:center;gap:.45rem}
+.sim-key i{width:16px;height:0;border-top:2px solid currentColor;display:inline-block}
+.sim-key .k-on{color:var(--blue)}
+.sim-key .k-off{color:#6b7488}
+
+.sim-out{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-top:.8rem}
+.sim-out div{border:1px solid var(--line);border-radius:var(--r-md);padding:.55rem .7rem;
+  background:rgba(255,255,255,.02)}
+.sim-out dt{font-family:var(--mono);font-size:.57rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dimmer);margin-bottom:.3rem}
+.sim-out dd{margin:0;font-size:1.05rem;letter-spacing:-.02em}
+.sim-out dd small{display:block;font-size:.63rem;color:var(--dim);letter-spacing:0;margin-top:.15rem}
+.sim-out .good{color:var(--blue)}
+.sim-out .bad{color:#ff5f56}
+
+.sim-ctrls{display:grid;grid-template-columns:1fr 1fr;gap:.7rem 1.5rem;margin-top:.9rem}
+.sim-ctrls label{display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--dimmer);margin-bottom:.35rem;
+  display:flex;justify-content:space-between;gap:.5rem}
+.sim-ctrls label b{color:var(--text);font-weight:400}
+.sim-ctrls input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;
+  background:var(--line-lit);border-radius:2px;outline:none;cursor:pointer}
+.sim-ctrls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;
+  border-radius:50%;background:var(--blue);box-shadow:0 0 10px rgba(77,141,255,.7);cursor:pointer}
+.sim-ctrls input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;
+  background:var(--blue);box-shadow:0 0 10px rgba(77,141,255,.7);cursor:pointer}
+
+.sim-foot{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem;margin-top:.9rem;
+  padding-top:.8rem;border-top:1px solid var(--line)}
+.sim-toggle{display:inline-flex;align-items:center;gap:.55rem;cursor:pointer;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.sim-toggle input{appearance:none;-webkit-appearance:none;width:30px;height:16px;border-radius:999px;
+  background:var(--line-lit);position:relative;cursor:pointer;transition:background .2s ease;margin:0}
+.sim-toggle input::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;
+  border-radius:50%;background:var(--dim);transition:.2s ease}
+.sim-toggle input:checked{background:var(--blue-soft)}
+.sim-toggle input:checked::after{left:16px;background:var(--blue)}
+.sim-note{font-size:.8rem;color:var(--dim);margin:0;flex:1 1 16rem;min-width:0}
+.sim-reset{margin-left:auto;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim);background:none;border:1px solid var(--line);
+  border-radius:999px;padding:.4rem .8rem;cursor:pointer;transition:.2s ease}
+.sim-reset:hover{color:var(--text);border-color:var(--line-lit)}
+
+@media (max-width:720px){
+  .sim-ctrls{grid-template-columns:1fr;gap:.85rem}
+  .sim-out{grid-template-columns:1fr}
+  .sim-plot{aspect-ratio:1/1}
+}
+
+.sim-plot .burn-l{stroke:var(--line-lit);stroke-width:1;stroke-dasharray:2 5}
+.sim-motor{margin:.4rem 0 0;font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--dimmer)}
+.sim-motor b{color:var(--text);font-weight:400}
 </style>
 </head>
 <body>
@@ -391,7 +478,8 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
 <main id="top">
 
 <section class="wrap hero">
-  <div>
+  <div class="hero-grid">
+  <div class="hero-copy">
     <div class="status rv"><b></b> Plano, Texas · Class of 2027</div>
     <h1 class="rv d1">I like building things that only get <em>one try</em>.</h1>
     <p class="intro rv d2">I'm a high school senior going into aerospace engineering. Most of what I've made sits right where the code meets the hardware — a flight computer that gets one chance to fire, a glove that has to hold pressure in and still let you bend a finger.</p>
@@ -405,6 +493,17 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
       <div><dt>Rocket test flights</dt><dd>470–509 g<small>across three different motors</small></dd></div>
       <div><dt>Business fairs run</dt><dd>10<small>200+ kids started a business</small></dd></div>
     </dl>
+  </div>
+
+  <figure class="hero-portrait rv d2">
+    <img src="assets/img/hero-portrait-1280.jpg"
+         srcset="assets/img/hero-portrait-640.jpg 640w, assets/img/hero-portrait-1280.jpg 1280w"
+         sizes="(max-width:900px) 340px, 40vw"
+         width="1280" height="1707"
+         fetchpriority="high" decoding="async"
+         alt="Rajit Sinha standing beside a NASA extravehicular mobility unit spacesuit">
+    <figcaption>Texas Aerospace Scholars at NASA's Johnson Space Center</figcaption>
+  </figure>
   </div>
 </section>
 
@@ -478,6 +577,57 @@ pre.code .line::before{counter-increment:ln;content:counter(ln);position:absolut
     <div class="codefoot">
       <span id="codeNote"></span>
       <a href="assets/altitude_sensor.ino" download>Download the full file</a>
+    </div>
+  </div>
+
+
+  <div class="card codecard mt rv" id="sim">
+    <div class="codehead">
+      <span class="fname"><i>&#9679;</i> apogee prediction, running live</span>
+    </div>
+    <div class="sim-body">
+      <svg class="sim-plot" viewBox="0 0 700 236" preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="Altitude against time for the competition rocket, with and without early parachute deployment"></svg>
+      <p class="sim-key">
+        <span class="k-on"><i></i>With the flight computer</span>
+        <span class="k-off"><i></i>Chute at apogee (most teams)</span>
+        <span style="color:var(--blue)">&#9679; release fires</span>
+      </p>
+      <p class="sim-motor"></p>
+
+      <dl class="sim-out">
+        <div><dt>Apogee reached</dt><dd data-out="apogee"></dd></div>
+        <div><dt>Miss</dt><dd data-out="miss"></dd></div>
+        <div><dt>Without early deploy</dt><dd data-out="off"></dd></div>
+        <div class="cost"><dt>Cost of no flight computer</dt><dd data-out="cost"></dd></div>
+      </dl>
+
+      <div class="sim-ctrls">
+        <div>
+          <label for="p-m">Rocket mass at burnout <b data-v="m"></b></label>
+          <input id="p-m" data-p="m" type="range" min="400" max="700" step="10">
+        </div>
+        <div>
+          <label for="p-ap">Parachute area <b data-v="ap"></b></label>
+          <input id="p-ap" data-p="ap" type="range" min="0.02" max="0.12" step="0.005">
+        </div>
+        <div>
+          <label for="p-delay">Servo travel time <b data-v="delay"></b></label>
+          <input id="p-delay" data-p="delay" type="range" min="0" max="1.5" step="0.05">
+        </div>
+        <div>
+          <label for="p-target">Target altitude <b data-v="target"></b></label>
+          <input id="p-target" data-p="target" type="range" min="600" max="900" step="10">
+        </div>
+      </div>
+
+      <div class="sim-foot">
+        <label class="sim-toggle" for="p-comp">
+          <input id="p-comp" data-p="compensate" type="checkbox"> Correct for servo travel time
+        </label>
+        <p class="sim-note">Turn that off and the predictor fires at the right altitude but ignores how long the servo takes to move &mdash; the rocket keeps climbing through the delay and lands high.</p>
+        <button class="sim-reset" type="button">Reset</button>
+      </div>
     </div>
   </div>
 
@@ -1758,6 +1908,189 @@ document.querySelectorAll('.v3d').forEach((el) => {
     initViewer(el);
   }, { rootMargin:'600px' }).observe(el);
 });
+</script>
+<script>
+/* Apogee predictor — the coast model is the one running on the flight computer
+   (see altitude_sensor.ino, "Apogee prediction"). The boost phase is integrated
+   from the F50T's certified numbers, so the motor is fixed and burnout velocity
+   is a RESULT of the rocket's mass rather than something you dial in. */
+(function(){
+  var root = document.getElementById('sim');
+  if (!root) return;
+
+  var G = 9.81, RHO = 1.225, FT = 3.280839895;
+
+  /* Effective drag area, calibrated so this model reproduces the OpenRocket
+     run for the real airframe on an F50T-9 at 580 g: 871 ft apogee, 295 ft/s
+     max velocity, 368 ft/s^2 peak acceleration. */
+  var CDA_R = 0.00367;          // m^2, Cd x reference area
+  var CD_P  = 0.75;             // parachute
+
+  /* AeroTech F50T (NAR cert): 76.8 N.s over 1.4 s, 38 g propellant.
+     Thrust modelled as a linear decay holding that total impulse, with the
+     initial value set by the 368 ft/s^2 peak acceleration in the sim. */
+  var MOTOR = { name:'AeroTech F50T', imp:76.8, avg:53.7, f0:75, burn:1.4, prop:0.038 };
+  MOTOR.f1 = 2 * MOTOR.avg - MOTOR.f0;
+
+  var P = { m:580, ap:0.05, delay:0.5, target:750, compensate:true };
+  var DEFAULTS = JSON.parse(JSON.stringify(P));
+
+  function run(p, chute, compensate){
+    var kR = 0.5 * RHO * CDA_R;
+    var kT = 0.5 * RHO * (CDA_R + (chute ? CD_P * p.ap : 0));
+    var hT = p.target / FT;
+    var mB = p.m / 1000;                 // burnout mass, kg
+    var m0 = mB + MOTOR.prop;            // liftoff mass, kg
+    var dt = 0.001, step = 0, t = 0, h = 0, v = 0, dep = null, trace = [];
+
+    /* boost: thrust against a mass that drops as propellant burns off */
+    while (t < MOTOR.burn){
+      if (step++ % 20 === 0) trace.push([t, h * FT]);
+      var frac = t / MOTOR.burn;
+      var m = m0 - MOTOR.prop * frac;
+      var F = MOTOR.f0 + (MOTOR.f1 - MOTOR.f0) * frac;
+      var aB = F / m - G - (kR / m) * v * v;
+      v += aB * dt; h += v * dt; t += dt;
+    }
+    var burnout = { v: v * FT, h: h * FT, t: t };
+
+    /* coast: the chute can only come out after burnout */
+    while (v > 0 && t < 30){
+      if (step++ % 20 === 0) trace.push([t, h * FT]);
+      if (chute && dep === null){
+        var hExtra, vAfter, hDelay;
+        if (compensate){
+          /* Where the servo delay leaves us. Drag varies a lot across the delay,
+             so this integrates dv/dt = -g - (k/m)v^2 in closed form rather than
+             assuming the deceleration holds constant. */
+          var Vt  = Math.sqrt(mB * G / kR);
+          var ang = Math.atan(v / Vt) - (G / Vt) * p.delay;
+          if (ang < 0) ang = 0;                       // apogee arrives mid-delay
+          vAfter = Vt * Math.tan(ang);
+          hDelay = (mB / (2 * kR)) * Math.log((1 + v * v / (Vt * Vt)) / (1 + vAfter * vAfter / (Vt * Vt)));
+          hExtra = (mB / (2 * kT)) * Math.log(1 + (kT * vAfter * vAfter) / (mB * G));
+        } else {
+          hDelay = 0;
+          hExtra = (mB / (2 * kT)) * Math.log(1 + (kT * v * v) / (mB * G));
+        }
+        if (h + hDelay + hExtra >= hT) dep = { t: t, h: h };
+      }
+      var k = (dep && t >= dep.t + p.delay) ? kT : kR;
+      var a = -G - (k / mB) * v * v;
+      v += a * dt; h += v * dt; t += dt;
+    }
+    trace.push([t, h * FT]);
+    return { apogee:h * FT, t:t, burnout:burnout,
+             dep: dep ? { t:dep.t, ft:dep.h * FT } : null, trace:trace };
+  }
+
+  var W = 700, H = 236, ML = 44, MR = 12, MT = 12, MB = 22;
+
+  /* Axes are FIXED, not fitted to the data. Auto-scaling made every mass look
+     the same because the numbers moved instead of the curves. Worst case across
+     every slider combination is 963 ft and 6.85 s, so these bounds always fit. */
+  var Y_MAX = 1000, T_MAX = 7.5;
+
+  function path(trace, sx, sy){
+    var d = '';
+    for (var i = 0; i < trace.length; i++){
+      d += (i ? 'L' : 'M') + sx(trace[i][0]).toFixed(1) + ' ' + sy(trace[i][1]).toFixed(1);
+    }
+    return d;
+  }
+
+  function draw(){
+    var on  = run(P, true,  P.compensate);
+    var off = run(P, false, false);
+
+    var sx = function(t){ return ML + (Math.min(t, T_MAX) / T_MAX) * (W - ML - MR); };
+    var sy = function(f){
+      var y = H - MB - (Math.min(f, Y_MAX) / Y_MAX) * (H - MT - MB);
+      return Math.max(MT, y);
+    };
+
+    var g = '';
+    for (var i = 0; i <= 4; i++){
+      var ft = Y_MAX * i / 4, y = sy(ft);
+      g += '<line class="grid-l" x1="' + ML + '" y1="' + y.toFixed(1) + '" x2="' + (W - MR) + '" y2="' + y.toFixed(1) + '"/>'
+         + '<text class="axis-t" x="' + (ML - 7) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end">' + ft + '</text>';
+    }
+    for (var s = 0; s <= Math.floor(T_MAX); s += 2){
+      g += '<text class="axis-t" x="' + sx(s).toFixed(1) + '" y="' + (H - MB + 14) + '" text-anchor="middle">' + s + 's</text>';
+    }
+
+    /* end of burn */
+    var bx = sx(on.burnout.t);
+    g += '<line class="burn-l" x1="' + bx.toFixed(1) + '" y1="' + MT + '" x2="' + bx.toFixed(1) + '" y2="' + (H - MB) + '"/>'
+       + '<text class="axis-t" x="' + (bx + 5).toFixed(1) + '" y="' + (MT + 9) + '">BURNOUT</text>';
+
+    var ty = sy(P.target);
+    g += '<line class="target" x1="' + ML + '" y1="' + ty.toFixed(1) + '" x2="' + (W - MR) + '" y2="' + ty.toFixed(1) + '"/>'
+       + '<text class="axis-t" x="' + (W - MR) + '" y="' + (ty - 5).toFixed(1) + '" text-anchor="end" style="fill:var(--blue)">TARGET ' + P.target + ' FT</text>';
+
+    g += '<path class="curve-off" d="' + path(off.trace, sx, sy) + '"/>';
+    g += '<path class="curve-on"  d="' + path(on.trace,  sx, sy) + '"/>';
+    if (on.dep){
+      g += '<circle class="dep" cx="' + sx(on.dep.t).toFixed(1) + '" cy="' + sy(on.dep.ft).toFixed(1) + '" r="4.5"/>';
+    }
+    root.querySelector('.sim-plot').innerHTML = g;
+
+    var miss = Math.round(on.apogee - P.target);
+    var over = Math.round(off.apogee - P.target);
+    /* identical numbers mean the chute never fired — the flight computer
+       bought nothing on this flight, so the miss is red too */
+    var missCls = (miss === over) ? 'bad' : 'good';
+
+    root.querySelector('[data-out=apogee]').innerHTML =
+      Math.round(on.apogee) + ' ft<small>' + (on.dep ? 'chute released at ' + Math.round(on.dep.ft) + ' ft' : 'never reached target &mdash; no deploy') + '</small>';
+    root.querySelector('[data-out=miss]').innerHTML =
+      '<span class="' + missCls + '">' + (miss > 0 ? '+' : '') + miss + ' ft</span><small>off the ' + P.target + ' ft target</small>';
+    root.querySelector('[data-out=off]').innerHTML =
+      Math.round(off.apogee) + ' ft<small>chute waits for apogee</small>';
+
+    root.querySelector('[data-out=cost]').innerHTML =
+      '<span class="' + (over === 0 ? 'good' : 'bad') + '">'
+      + (over > 0 ? '+' : '') + over + ' ft</span>'
+      + '<small>' + (over >= 0 ? 'past target without the release system'
+                               : 'it cannot reach the target at this mass') + '</small>';
+
+    root.querySelector('.sim-motor').innerHTML =
+      MOTOR.name + ' &middot; ' + MOTOR.imp + ' N&middot;s over ' + MOTOR.burn + ' s &mdash; burns out at <b>'
+      + Math.round(on.burnout.v) + ' ft/s</b> and <b>' + Math.round(on.burnout.h) + ' ft</b> at this mass';
+  }
+
+  var FMT = {
+    m:      function(x){ return x + ' g' + (x > 650 ? '  ·  over ARC limit' : ''); },
+    ap:     function(x){ return x.toFixed(3) + ' m²'; },
+    delay:  function(x){ return x.toFixed(2) + ' s'; },
+    target: function(x){ return x + ' ft'; }
+  };
+
+  function sync(){
+    Object.keys(FMT).forEach(function(k){
+      var el = root.querySelector('[data-p=' + k + ']');
+      if (!el) return;
+      el.value = P[k];
+      root.querySelector('[data-v=' + k + ']').textContent = FMT[k](P[k]);
+    });
+    root.querySelector('[data-p=compensate]').checked = P.compensate;
+    draw();
+  }
+
+  root.addEventListener('input', function(e){
+    var k = e.target.dataset.p;
+    if (!k) return;
+    P[k] = (k === 'compensate') ? e.target.checked : parseFloat(e.target.value);
+    if (k !== 'compensate') root.querySelector('[data-v=' + k + ']').textContent = FMT[k](P[k]);
+    draw();
+  });
+  root.querySelector('.sim-reset').addEventListener('click', function(){
+    P = JSON.parse(JSON.stringify(DEFAULTS));
+    sync();
+  });
+
+  sync();
+})();
 </script>
 </body>
 </html>
