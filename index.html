@@ -105,6 +105,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
    re-renders at whatever box it lands in. */
 .deck .v3d{aspect-ratio:auto;height:min(72lvh,760px)}
 @media(max-width:900px){.deck .v3d{height:min(58lvh,520px)}}
+/* The apogee plot is 700x236, so at full panel width it alone is 378 px tall
+   and pushes the simulator past one viewport. Capping the width keeps its
+   aspect ratio and brings the whole card back under, with no letterboxing. */
+.deck .sim-plot{max-width:min(100%,800px);margin-inline:auto}
 /* Panels are their own reveal, so anything inside one starts visible rather
    than waiting for a scroll trigger that can never fire in a pinned chapter. */
 .deck .fade{opacity:1;transform:none}
@@ -1475,6 +1479,15 @@ function buildDeck(sel,groups,vhPerStep){
     for(let i=0;i<n;i++){
       let v=fe(re(1-Math.abs(at*(n-1)-i)*1.4));
       panels[i].style.setProperty("--pv",v.toFixed(3));
+      /* A panel that is scrolled away is clipped by the pin, so anything
+         playing in it is decoding frames nobody can see. Toggle on the edge,
+         never per frame. */
+      let on=v>.02;
+      if(panels[i]._on!==on){
+        panels[i]._on=on;
+        for(let vid of panels[i].querySelectorAll("video"))
+          on?vid.play().catch(()=>{}):vid.pause()
+      }
       for(let ws of words[i])for(let j=0;j<ws.length;j++){
         let st=ws.length>1?j/(ws.length-1)*.4:0,w=fe(re((v-st)/.6));
         ws[j].style.setProperty("--wo",w.toFixed(3)),
@@ -1484,6 +1497,7 @@ function buildDeck(sel,groups,vhPerStep){
     }
   }})
 }
+buildDeck("#sec-rocketry",[[0,1,2],[3],[4],[5],[6]],130);
 buildDeck("#sec-glove",[[0,1,2],[3],[4]],130);
 buildDeck("#sec-awards",[[0,1,2],[3]],130);
 Ee(".rv").filter(e=>!e.closest(".deck")).forEach(e=>{let t=We(e);ee(e,{start:"top 88%",end:"top 42%",onUpdate(n){let r=t.length,m=.5;for(let f=0;f<r;f++){let h=r>1?f/(r-1)*m:0,x=fe(re((n-h)/(1-m)));t[f].style.setProperty("--wo",x.toFixed(3)),t[f].style.setProperty("--wy",((1-x)*26).toFixed(1)+"px"),t[f].style.setProperty("--wr",((1-x)*1.6).toFixed(2)+"deg")}}})});Ee(".fade").filter(e=>!e.closest(".deck")).forEach((e,t)=>{ee(e,{start:"top 92%",end:"top 62%",onUpdate(n){let r=fe(n);e.style.setProperty("--fo",r.toFixed(3)),e.style.setProperty("--fy",((1-r)*34).toFixed(1)+"px")}})});var Tt=F("#hudNum"),Mt=F("#hudName"),wt=F("#hudBar"),st=Ee(".railwrap a"),Xe=Ee("[data-chapter]");function St(e){let t=Xe[e];t&&(Tt.textContent=String(e+1).padStart(2,"0"),Mt.textContent=t.dataset.chapter,st.forEach((n,r)=>n.classList.toggle("on",r===e)),Ee(".nav ul a").forEach(n=>n.classList.toggle("on",n.dataset.ch===String(e))))}Xe.forEach((e,t)=>{ee(e,{start:"top 55%",end:"bottom 45%",onToggle(n){n&&St(t)}})});/* Only one scene trigger runs per frame, so a fast scroll can jump straight from
@@ -1510,7 +1524,7 @@ function ascentPath(f){
    and onto the pad while the rocket fades up, so the chapter opens instead of
    cutting. e in [.86,1] hands the camera over to the orbital framing that
    #sec-rocketry starts from. Flight time f runs over what is left. */
-ee(F("#stage-ascent"),{scene:!0,pin:!0,onUpdate(e){ve();let ti=re(e/AP0),tf=fe(ti),to=fe(I(.86,1,e)),f=re((e-AP0)/(1-AP0)),{alt:t,vel:n}=kt(f),p=ascentPath(f),p2=ascentPath(Math.min(1,f+.005)),cb=I(de,de+.1,f);o.rocketK=I(.22,.6,ti)*(1-I(.82,.93,e)),o.rocketX=p.x,o.rocketY=p.y,o.rocketZ=p.z,o.rocketTilt=s(-Math.atan2(p2.x-p.x,p2.y-p.y),Math.sin(f*11)*.13,cb),o.thrust=f<=0?I(.85,1,ti)*.55:f<ge?s(.55,1,re(f/(ge*.4))):Math.max(0,1-(f-ge)*16),o.trailOn=f<=0?I(.85,1,ti):f<de?1:Math.max(0,1-(f-de)*5),o.chuteK=(f>de?I(de,de+.09,f):0)*(1-I(.82,.93,e)),o.noseK=f>de?I(de,de+.05,f):0,o.groundK=I(.45,.95,ti)*(1-I(.28,.5,f));let fx=o.rocketX+s(6.5,12.5,f),fy=o.rocketY+s(1.2,3.4,f),fz=s(15,27,f);o.camX=s(s(3.2,fx,tf),9,to),o.camY=s(s(6.5,fy,tf),6,to),o.camZ=s(s(34,fz,tf),30,to),o.tgtX=s(s(0,o.rocketX,tf),0,to),o.tgtY=s(s(-6,o.rocketY+1,tf),-4,to),o.tgtZ=s(s(0,o.rocketZ,tf),0,to),o.earthK=s(1-I(.55,1,ti),1,to),o.earthY=s(s(-21,-33,tf),-24,to),o.earthScale=s(s(.86,2.4,tf),.72,to),o.starOpacity=s(s(1,s(.78,1,I(.25,.6,f)),tf),.9,to),o.bloom=s(s(.5,.5+o.thrust*.55,tf),.45,to),o.exposure=s(1+o.thrust*.14,1,to),Ct.style.setProperty("--teleO",(I(.5,1,ti)*(1-I(.86,.96,e))).toFixed(3)),Rt.textContent=Math.round(t).toLocaleString(),Ht.textContent=Math.round(n),Pt.textContent=(f*8.4).toFixed(1);let m="Boost",g2=!0;f>=ge&&(m="Coast",g2=!1),f>=de-.005&&f<de+.06?(m="Release",g2=!0):f>=de+.06&&(m="Descent",g2=!1),je.textContent=m,je.classList.toggle("hot",g2);let h=I(.04,.18,f),x=1-I(.8,.94,f);Je.style.setProperty("--capO",(h*x).toFixed(3)),Je.style.setProperty("--capY",((1-h)*20).toFixed(1)+"px")}});ee(F("#sec-rocketry"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){ve(),o.earthK=1,o.camX=s(9,-6,e),o.camY=s(6,2,e),o.camZ=s(30,26,e),o.tgtX=0,o.tgtY=s(-4,-8,e),o.tgtZ=0,o.earthY=s(-24,-34,e),o.earthScale=s(.72,.6,e),o.starOpacity=s(.9,.75,Math.sin(e*Math.PI)),o.bloom=.45,o.exposure=1}});var Qe=F("#transitCap"),et=F("#transitTitle");/* The Apollo chapter. A Saturn V climbs out and pitches over, stages away,
+ee(F("#stage-ascent"),{scene:!0,pin:!0,onUpdate(e){ve();let ti=re(e/AP0),tf=fe(ti),to=fe(I(.86,1,e)),f=re((e-AP0)/(1-AP0)),{alt:t,vel:n}=kt(f),p=ascentPath(f),p2=ascentPath(Math.min(1,f+.005)),cb=I(de,de+.1,f);o.rocketK=I(.22,.6,ti)*(1-I(.82,.93,e)),o.rocketX=p.x,o.rocketY=p.y,o.rocketZ=p.z,o.rocketTilt=s(-Math.atan2(p2.x-p.x,p2.y-p.y),Math.sin(f*11)*.13,cb),o.thrust=f<=0?I(.85,1,ti)*.55:f<ge?s(.55,1,re(f/(ge*.4))):Math.max(0,1-(f-ge)*16),o.trailOn=f<=0?I(.85,1,ti):f<de?1:Math.max(0,1-(f-de)*5),o.chuteK=(f>de?I(de,de+.09,f):0)*(1-I(.82,.93,e)),o.noseK=f>de?I(de,de+.05,f):0,o.groundK=I(.45,.95,ti)*(1-I(.28,.5,f));let fx=o.rocketX+s(6.5,12.5,f),fy=o.rocketY+s(1.2,3.4,f),fz=s(15,27,f);o.camX=s(s(3.2,fx,tf),9,to),o.camY=s(s(6.5,fy,tf),6,to),o.camZ=s(s(34,fz,tf),30,to),o.tgtX=s(s(0,o.rocketX,tf),0,to),o.tgtY=s(s(-6,o.rocketY+1,tf),-4,to),o.tgtZ=s(s(0,o.rocketZ,tf),0,to),o.earthK=s(1-I(.55,1,ti),1,to),o.earthY=s(s(-21,-33,tf),-24,to),o.earthScale=s(s(.86,2.4,tf),.72,to),o.starOpacity=s(s(1,s(.78,1,I(.25,.6,f)),tf),.9,to),o.bloom=s(s(.5,.5+o.thrust*.55,tf),.45,to),o.exposure=s(1+o.thrust*.14,1,to),Ct.style.setProperty("--teleO",(I(.5,1,ti)*(1-I(.86,.96,e))).toFixed(3)),Rt.textContent=Math.round(t).toLocaleString(),Ht.textContent=Math.round(n),Pt.textContent=(f*8.4).toFixed(1);let m="Boost",g2=!0;f>=ge&&(m="Coast",g2=!1),f>=de-.005&&f<de+.06?(m="Release",g2=!0):f>=de+.06&&(m="Descent",g2=!1),je.textContent=m,je.classList.toggle("hot",g2);let h=I(.04,.18,f),x=1-I(.8,.94,f);Je.style.setProperty("--capO",(h*x).toFixed(3)),Je.style.setProperty("--capY",((1-h)*20).toFixed(1)+"px")}});ee(F("#sec-rocketry"),{scene:!0,pin:!0,onUpdate(e){ve(),o.earthK=1,o.camX=s(9,-6,e),o.camY=s(6,2,e),o.camZ=s(30,26,e),o.tgtX=0,o.tgtY=s(-4,-8,e),o.tgtZ=0,o.earthY=s(-24,-34,e),o.earthScale=s(.72,.6,e),o.starOpacity=s(.9,.75,Math.sin(e*Math.PI)),o.bloom=.45,o.exposure=1}});var Qe=F("#transitCap"),et=F("#transitTitle");/* The Apollo chapter. A Saturn V climbs out and pitches over, stages away,
    and leaves the lunar module to make the crossing while the Earth shrinks
    behind and the Moon comes up. Both are real NASA hardware, which is why the
    Saturn V is here and not over his own rocket's telemetry two chapters up —
