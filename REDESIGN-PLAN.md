@@ -19,6 +19,18 @@ Live at `github.com/rajitsinha/rajitsinha.github.io` (GitHub Pages), tracked on 
 **Checkpoint before the rebuild: `2a70380`.** If the rebuild goes wrong:
 `git reset --hard 2a70380`.
 
+The rebuild lives on **`rebuild/scroll-scenes`**, not yet merged to `main` and not yet
+deployed. Each of the four steps is its own commit and each was verified green before the
+next began, so any of them is a safe place to stop:
+
+```
+762c3da  step 4  wire-body language kept; Saturn V decode + z-fight fixed
+151a40e  step 3  Apollo chapter, NASA's glove beside his
+3d865fa  step 2  Draco decoder, texture strip, lazy load, dispose
+ea60293  step 1  pin primitive in the scroll engine
+e1c3e19          the verification harness, committed as tools/verify.js
+```
+
 `index.html` on the remote is already identical to local — the owner had been
 uploading it manually during the session, so all prior work is deployed.
 
@@ -52,6 +64,14 @@ chose "keep content, rebuild presentation" over a blank slate.
 - Hero proportions copied from `index_(25).html`: `1.08fr .8fr`, `align-items:center`,
   headline inside the left column, `margin:0 0 .9rem` under the h1.
 - Photos must not be cropped through their subject (`.shot.full` = `object-fit:contain`).
+- **His ascent chapter is his.** `#stage-ascent` is the American Rocketry Challenge
+  rocket — 470 g, 3D-printed airframe, F50T — and the telemetry beside it is his own
+  flight computer's apogee prediction. The plan originally put the Saturn V here; it went
+  to `#stage-transit` with the lunar module instead, because flying NASA hardware on his
+  numbers misrepresents his project on a site used for college applications. The whole
+  chapter is verified byte-identical to `2a70380`; keep it that way.
+- **The scene engine stays hand-rolled.** Offered Lenis + GSAP ScrollTrigger, the owner
+  chose to extend the native engine. Don't reopen it without asking.
 
 ## Reference sites — what was actually found
 
@@ -112,18 +132,137 @@ attribution required, no commercial restriction). Add a courtesy credit anyway.
   were installed — read their `SKILL.md` from
   `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/` directly.
 
-## Build plan
+## Build plan — status
 
-1. **Scroll engine** — replace the hand-rolled scroller with Lenis + GSAP ScrollTrigger;
-   every scene pinned and scrubbed. This is the structural thing the references do that
-   this site doesn't. **Highest risk step — it drives every animation.** Do it first, on
-   a branch, and verify with the harness below before going further.
-2. **Model pipeline** — Draco-compress the five NASA models, lazy-load per chapter,
-   dispose on exit.
-3. **Chapters, all full-viewport** — hero → Saturn V ascent → apogee/telemetry → transit
-   to the Moon with the Lunar Module → glove chapter with his model and NASA's side by
-   side → outreach → contact.
-4. **Keep** the wire-body language for Earth and Moon.
+On branch `rebuild/scroll-scenes`, four commits off `2a70380`, each verified before the
+next started. `main` is untouched.
+
+1. **Scroll engine — done** (`ea60293`). *Not* Lenis + ScrollTrigger. The site already
+   contained hand-rolled equivalents of both: `Ge` is Lenis (damped smooth scroll, wheel
+   ×0.5, `1 − e^(−15·dt)`), and `ee()` is ScrollTrigger (`start`/`end` string syntax,
+   scrub via `onUpdate(p)`), *plus* something ScrollTrigger has no equivalent for — the
+   `scene:true` arbitration that guarantees exactly one scene handler runs per frame and
+   falls back to the nearest preceding scene at p=1. That arbitration is what makes state
+   a pure function of scroll, so swapping in ScrollTrigger would have meant rebuilding it
+   by hand on top, at a cost of ~110 KB and both "scroll speed stays" constraints. The
+   owner was asked and chose to extend the native engine. What was actually missing was a
+   general **pin**, which `ee()` now takes as `pin:true`.
+2. **Model pipeline — done** (`3d865fa`, corrected in `762c3da`). The plan had this
+   backwards: four of the five NASA models were *already* Draco-compressed and the site
+   had no decoder, so they could not load at all. See "Model pipeline" below.
+3. **Chapters — done** (`151a40e`, then `400f3e0` → `0ccfb22`). The Apollo chapter and the
+   glove comparison first; then every remaining chapter converted to full-viewport, one
+   section per commit. See "Decks" below.
+4. **Wire-body language — done** (`762c3da`). Earth and Moon untouched and verified
+   byte-identical; `wireModel()` extends the same treatment to loaded geometry.
+
+## Decks — how the full-viewport chapters work
+
+`buildDeck(selector, groups, vhPerStep)` turns a chapter into a column of viewport-tall
+panels paged inside its own pin. `groups` names which of the chapter's existing top-level
+blocks each panel holds, so all the copy, photos and widgets stay the originals — only
+the grouping is new.
+
+```js
+buildDeck("#sec-rocketry",[[0,1,2],[3],[4],[5],[6]],130);   // 5 panels, 620lvh
+buildDeck("#sec-glove",   [[0,1,2],[3],[4]],      130);     // 3 panels, 360lvh
+buildDeck("#sec-awards",  [[0,1,2],[3]],          130);     // 2 panels, 230lvh
+```
+
+Section height is `100 + (panels-1) * vhPerStep` lvh, set by `buildDeck`. `#sec-outreach`
+is deliberately **not** a deck: it is one screen of copy plus the card stack, which is
+already sticky, and pinning the section would nest that inside another pin's
+`overflow:hidden` and stop it working. It uses `.vfull` instead — `min-height:100lvh`, so
+a short viewport grows the block rather than clipping it.
+
+Things worth knowing before changing any of it:
+
+- **Panels dwell.** `DWELL` (0.42) is the fraction of each step's scroll spent parked
+  before any travel begins. That is what keeps the code viewer and the simulator still
+  while you read or drag them. Lower it and widgets start sliding under the pointer.
+- **Reveal cannot come from element geometry inside a deck** — every panel sits at the
+  same place on screen. It comes from how near the deck is to that panel, and the global
+  `.rv`/`.fade` passes skip anything inside one. Without that skip they sit at opacity 0
+  forever, because their triggers can never fire in a pinned chapter.
+- **Panels measure themselves and scale down what does not fit.** `.pin` clips, so an
+  overrunning block would simply be lost. Transforms do not affect layout, so the panel
+  stays exactly one viewport. At 1440×900 all ten panels fit unscaled; at 1280×680 they
+  scale to ~0.75–0.8 and still land exactly on the available height.
+- Two blocks needed sizing to fit a viewport at all: the `.v3d` glove viewer
+  (`min(72lvh,760px)` inside decks) and the apogee plot (width-capped to 800px, which
+  keeps its 700×236 ratio and takes the card from 886 to 771).
+- Decks pause video in panels that are scrolled away, toggled on the edge.
+- `docRect()` resolves elements inside a pin to their document-flow position. Decks do
+  not rely on it — they drive everything off chapter progress — but it is what makes any
+  geometry-based trigger inside a pin measure sanely.
+
+Optional leftovers:
+
+- `nasa-emu-suit.glb` (3.4 MB) and `nasa-helmet.glb` (232 KB) are still unused. The suit
+  is the one from his hero photo; the helmet is the other half of what his TAS team
+  designed. Neither is loaded, so neither costs a visitor anything today.
+- The NASA glove's left edge just touches the viewport edge at the end of the glove
+  chapter (NDC x reaches −1.00). Nudge `o.nglX` if it bothers you.
+
+## Model pipeline — how it actually works now
+
+- `assets/vendor/DRACOLoader.js` (r185, MIT) is vendored, not CDN-linked. Its only edit is
+  the import specifier, `'three'` → `'./three.bundle.js'`, which exports all eleven names
+  it needs. Decoder wasm is in `assets/vendor/draco/` (340 KB).
+- Loader and decoder are built **on first use**, and chapters take models a few viewports
+  ahead and release them once well behind. First paint fetches no model and no decoder.
+  `window.__models.count()` reports how many are held.
+- The models were stripped of textures and UVs, because both places the site loads a
+  `.glb` throw the file's materials away and substitute a flat `MeshStandardMaterial` —
+  nothing ever samples a texture. `nasa-astronaut-glove` was 646 KB, of which 621 KB was
+  WebP for an 842-triangle mesh; it is now 25 KB.
+- Only `nasa-saturn-v` was re-encoded (905 → 375 KB). **Do not re-encode the others** —
+  DracoPy's encoder is worse than whatever produced them; re-encoding the lunar module
+  inflated it from 700 KB to 1017 KB.
+- Originals are recoverable: `git show 2a70380:assets/model/<file>`.
+- The re-encode script is not in the repo. If you need it again, the one thing that
+  matters is that **DracoPy assigns Draco attribute unique ids in the order tex_coord,
+  normal, position — position always last — so every id shifts with the number of
+  attributes present.** Measure it with a probe; do not assume. Getting it wrong writes
+  an id that isn't in the payload, and the mesh decodes to an empty position buffer.
+
+## Traps that cost real time — read before debugging
+
+- **A model that renders nothing but passes every check.** Triangle counts come from the
+  index and `geometry.boundingBox` comes from the accessor's own min/max, so both stay
+  correct when the position buffer is empty. Any model check must read actual vertex
+  data (`geometry.attributes.position.array.length`).
+- **`root.traverse()` while re-parenting.** Moving a node out of the tree during traverse
+  mutates the array being walked and it starts handing back `undefined`. Collect first,
+  mutate after. And re-parenting drops every ancestor transform — bake the old
+  `matrixWorld` into the node's local transform.
+- **Normalising a group after attaching it.** `Box3.setFromObject` measures *world* space,
+  so if the host already carries the chapter's scale it gets folded into the normalisation
+  and silently cancels it: the model renders at a fixed size no matter what the scene
+  asks. Normalise while the group is still detached.
+- **Occluding shell vs. its own edges.** They share a depth value and z-fight, leaving the
+  model a faint smudge. `wireBody()` insets its core sphere to `R*.99`; a loaded mesh has
+  no radius to inset, so the fill needs `polygonOffset`.
+- **`lvh` does not follow a programmatic resize in the preview pane.** Resize, then
+  *reload*, then check that a `height:100lvh` probe equals `innerHeight` before trusting
+  any measurement. Get this wrong and panels report the wrong available height, the fit
+  guard scales things that did not need scaling, and section heights look invented.
+- **A marginal seam hit at short viewports is expected.** At 720 px the check reports
+  `rocketTilt` at y=1176, d2 0.00884 against a 0.00736 threshold. The same hit appears on
+  every commit back through the rebuild, identical to five decimals: it is the ascent
+  trajectory's tangent pitching over across fewer pixels, marginally crossing a threshold
+  set at 1% of the key's range. Before chasing a seam hit, A/B it against the previous
+  commit at the same viewport — that takes one minute and settles it.
+- **Don't `await` between harness probes.** The page's own rAF loop calls `scrollTo()`
+  with the scroller's damped position every frame; give it a turn mid-walk and it moves
+  the page under the next measurement. It shows up as a single bad sample, usually at
+  y=0, that looks exactly like a purity bug and is not one. Do any waiting before the
+  walk starts.
+- The preview pane reports `visibilityState: "hidden"`, so rAF never runs and screenshots
+  are unreliable. Drive frames with `__world.update(1/60)` after each `__harness.go(y)`,
+  and read the framebuffer with `gl.readPixels` if you need to see what is on screen.
+- **Cache-bust model URLs too**, not just `index.html`. A re-encoded `.glb` at the same
+  path will keep serving the old bytes and you will "verify" the file you just replaced.
 
 ## Already fixed — don't regress
 
@@ -143,13 +282,19 @@ attribution required, no commercial restriction). Add a courtesy credit anyway.
 
 ## Verification harness — reuse this, it caught every bug
 
-`window.__world`, `window.__scroller`, `window.__applyScroll` are exposed on purpose.
+**It is now committed at `tools/verify.js`.** Nothing in `index.html` references it; load
+it by hand against a running preview:
 
 ```js
-const go = y => { const s = window.__scroller;
-  s.target = y; s.current = y; s._set = Math.round(y);
-  scrollTo(0, y); window.__applyScroll(y); };
+fetch('/tools/verify.js').then(r => r.text()).then(eval)
 ```
+
+Then `__harness.seam({})`, `__harness.purity({n:320})`, and `__harness.fingerprint()` —
+the last one snapshots the whole state vector at fixed fractions of the page so a change
+meant to alter nothing can be *proved* to alter nothing (`fingerprintDiff`). Resize the
+window first, then `__world.resize()` and `__scroller._measure()`.
+
+`window.__world`, `__scroller`, `__applyScroll` and now `__models` are exposed on purpose.
 
 - **Seam check** — walk every scroll pixel, flag second differences
   `|v(y+1) − 2v(y) + v(y−1)|` over a threshold. Isolates true steps from fast ramps;
@@ -159,7 +304,17 @@ const go = y => { const s = window.__scroller;
   props to stick.
 
 Gate both on visibility: a value only matters when its `rocketK` / `gloveK` / `earthK` /
-`moonK` is > 0.02. Last run: 0 steps, 0 drift across ~21,500 pixels at 1440×900.
+`moonK` / `saturnK` / `lmK` / `nglK` is > 0.02. `ve()` resets the K's but deliberately
+leaves the parked coordinates behind them, so an off-screen prop's position is undefined
+by design and must not be tested. **The gate applies to the purity check too** — without
+it, purity reports ~900 false drifts on a healthy page.
+
+Last run at 1440×900, after all four steps: **0 steps across 22,487 pixels, 0 drift over
+320 probes**, twice, with different shuffle seeds. Also verified: hero + ascent + flight
+computer sampled every 25 px from 0 to 8000 against `2a70380` served side by side, 0
+differences over 25 keys; and `gloveK`/`gloveExplode` checked against their original
+formulas at 200 positions with progress recovered from `gloveSpin` so pixel rounding
+cannot mask a change, 0 mismatches.
 
 ## Environment notes
 
