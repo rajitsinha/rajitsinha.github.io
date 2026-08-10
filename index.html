@@ -895,7 +895,7 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
       </div>
     </div>
   </div>
-  <div class="wrap"><footer><span>Rajit Sinha · Plano, Texas</span><span>Designed and built from scratch</span></footer></div>
+  <div class="wrap"><footer><span>Rajit Sinha · Plano, Texas</span><span>Saturn V, lunar module and EVA glove models: NASA, public domain</span><span>Designed and built from scratch</span></footer></div>
 </section>
 
 </main>
@@ -1244,7 +1244,14 @@ function wireBody(R,o){
 function wireModel(root,o){
   let g=new a.Group,mats=[],segs=[],dots=[],
       m4=new a.Matrix4(),v3=new a.Vector3(),
-      core=new a.MeshBasicMaterial({color:o.core,transparent:!0,opacity:1});
+      /* The shell has to occlude the far side without also hiding the edges
+         drawn along its own surface — they share a depth value and z-fight,
+         which leaves the model looking like a faint smudge in the starfield.
+         wireBody() sidesteps this by insetting its core sphere to R*0.99; a
+         loaded mesh has no such radius, so the fill is pushed back a fraction
+         instead and the lines win. */
+      core=new a.MeshBasicMaterial({color:o.core,transparent:!0,opacity:1,
+        polygonOffset:!0,polygonOffsetFactor:2,polygonOffsetUnits:2});
   root.updateMatrixWorld(!0);
   /* Collect before touching anything: re-parenting inside traverse() mutates
      the child array it is walking and it starts handing back undefined. */
