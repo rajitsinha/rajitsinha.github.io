@@ -1,0 +1,15 @@
+# Local Claude Code state (machine-specific)
+.claude/settings.local.json
+
+# Three.js reference skills — a separate git clone, not part of the site
+threejs-skills/
+
+# Accidental byte-identical duplicate of index.html; safe to delete
+eftgtsetgsetges.html
+
+# OS cruft
+Thumbs.db
+.DS_Store
+
+# Previous version of the site, kept locally as reference (never deployed)
+index_(25).html
