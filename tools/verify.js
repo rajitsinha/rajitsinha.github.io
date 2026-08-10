@@ -16,6 +16,15 @@
    visibilityState "hidden", so requestAnimationFrame never runs. Resize the
    window first, then call __world.resize() and __scroller._measure(), then
    drive frames through this harness rather than waiting for rAF.
+
+   Do not await anything between go() calls. seam() and purity() are
+   deliberately synchronous: the page's own rAF loop calls scrollTo() with the
+   scroller's damped position every frame, so if it gets a turn between two
+   probes it moves the page out from under the next measurement. An await in
+   the middle of a walk produces a single bad sample -- usually at y=0, showing
+   the last chapter's state -- that looks exactly like a purity bug and is not
+   one. If a check needs to wait (for a model to load, say), do the waiting
+   before the walk starts.
    =========================================================================== */
 (function () {
   const W = window.__world, S = window.__scroller, APPLY = window.__applyScroll;
@@ -39,8 +48,13 @@
     thrust: "rocketK", chuteK: "rocketK", noseK: "rocketK", trailOn: "rocketK",
     gloveSpin: "gloveK", gloveExplode: "gloveK", gloveScale: "gloveK",
     earthX: "earthK", earthY: "earthK", earthScale: "earthK",
-    moonX: "moonK", moonY: "moonK", moonZ: "moonK", moonScale: "moonK"
+    moonX: "moonK", moonY: "moonK", moonZ: "moonK", moonScale: "moonK",
+    saturnX: "saturnK", saturnY: "saturnK", saturnZ: "saturnK",
+    saturnScale: "saturnK", saturnTilt: "saturnK", saturnSpin: "saturnK",
+    lmX: "lmK", lmY: "lmK", lmZ: "lmK", lmScale: "lmK", lmSpin: "lmK",
+    nglX: "nglK", nglY: "nglK", nglZ: "nglK", nglScale: "nglK", nglSpin: "nglK"
   };
+  const GATES = ["rocketK", "gloveK", "earthK", "moonK", "saturnK", "lmK", "nglK"];
   const VIS = 0.02;
 
   const keys = () => Object.keys(W.state).filter(k => typeof W.state[k] === "number").sort();
@@ -60,7 +74,7 @@
     const N = Math.floor((to - from) / step) + 1;
     const track = {}, min = {}, max = {}, gate = {};
     for (const k of K) { track[k] = new Float64Array(N); min[k] = Infinity; max[k] = -Infinity; }
-    for (const g of ["rocketK", "gloveK", "earthK", "moonK"]) gate[g] = new Float64Array(N);
+    for (const g of GATES) gate[g] = new Float64Array(N);
 
     for (let i = 0; i < N; i++) {
       go(from + i * step);
