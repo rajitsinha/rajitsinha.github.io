@@ -96,6 +96,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .deck-panel{height:100lvh;display:flex;align-items:center;
   padding:3.6rem 0 2.2rem;opacity:var(--pv,1)}
 .deck-panel>.wrap{width:100%}
+/* One screen of content that only needs framing, not paging. min-height rather
+   than height so a short viewport grows the block instead of clipping it. */
+.vfull{min-height:100lvh;display:flex;align-items:center}
+.vfull>.wrap{width:100%}
 /* Panels are their own reveal, so anything inside one starts visible rather
    than waiting for a scroll trigger that can never fire in a pinned chapter. */
 .deck .fade{opacity:1;transform:none}
@@ -814,12 +818,17 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
 
 <!-- ===================== 06 · OUTREACH ===================== -->
 <section class="chapter" id="sec-outreach" data-chapter="Outreach">
+  <!-- Full-viewport, but not a deck and not pinned: it is one screen of copy,
+       and the card stack below is already sticky — nesting that inside another
+       pin's overflow:hidden would stop it working. -->
+  <div class="vfull">
   <div class="wrap sec" style="padding-bottom:2rem">
     <div class="kicker fade">06 — Young Tech Pioneers</div>
     <h2 class="rv">Getting a ten-year-old to <em>sell to a stranger</em>.</h2>
     <p class="lead fade" style="margin-top:1.4rem;max-width:52ch">I joined in tenth grade and took over
       fundraising the summer after. It's a nonprofit that teaches business and tech to elementary and
       middle schoolers — my job as VP of Fundraising is finding the money and the sponsors that keep it running.</p>
+  </div>
   </div>
   <div class="hstage" id="hstage" style="height:220lvh">
     <div class="hpin">
