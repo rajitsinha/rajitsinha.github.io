@@ -150,43 +150,53 @@ next started. `main` is untouched.
 2. **Model pipeline — done** (`3d865fa`, corrected in `762c3da`). The plan had this
    backwards: four of the five NASA models were *already* Draco-compressed and the site
    had no decoder, so they could not load at all. See "Model pipeline" below.
-3. **Chapters — partly done** (`151a40e`). The Apollo chapter and the glove comparison
-   are built. **The full-viewport conversion is NOT done — this is the main thing left.**
-   See "What is left" below.
+3. **Chapters — done** (`151a40e`, then `400f3e0` → `0ccfb22`). The Apollo chapter and the
+   glove comparison first; then every remaining chapter converted to full-viewport, one
+   section per commit. See "Decks" below.
 4. **Wire-body language — done** (`762c3da`). Earth and Moon untouched and verified
    byte-identical; `wireModel()` extends the same treatment to loaded geometry.
 
-## What is left
+## Decks — how the full-viewport chapters work
 
-**Convert the remaining chapters to full-viewport pinned scenes.** These four are still
-ordinary flowing sections:
+`buildDeck(selector, groups, vhPerStep)` turns a chapter into a column of viewport-tall
+panels paged inside its own pin. `groups` names which of the chapter's existing top-level
+blocks each panel holds, so all the copy, photos and widgets stay the originals — only
+the grouping is new.
 
-| Section | Height | Content that has to survive |
-|---|---|---|
-| `#sec-rocketry` | ~3400 px | copy, launch + deployment video, avionics photo, code viewer, apogee simulator |
-| `#sec-glove` | ~2486 px | copy, JSC poster photo, layer cutaway, the `.v3d` glove viewer |
-| `#sec-outreach` | ~2450 px | copy, plus `#hstage` which is already pinned |
-| `#sec-awards` | ~1427 px | award list, school/skills panels |
+```js
+buildDeck("#sec-rocketry",[[0,1,2],[3],[4],[5],[6]],130);   // 5 panels, 620lvh
+buildDeck("#sec-glove",   [[0,1,2],[3],[4]],      130);     // 3 panels, 360lvh
+buildDeck("#sec-awards",  [[0,1,2],[3]],          130);     // 2 panels, 230lvh
+```
 
-The engine is ready for it — this is a content-layout job, not an engine job:
+Section height is `100 + (panels-1) * vhPerStep` lvh, set by `buildDeck`. `#sec-outreach`
+is deliberately **not** a deck: it is one screen of copy plus the card stack, which is
+already sticky, and pinning the section would nest that inside another pin's
+`overflow:hidden` and stop it working. It uses `.vfull` instead — `min-height:100lvh`, so
+a short viewport grows the block rather than clipping it.
 
-- `ee(el,{pin:true})` gives a section pinned+scrubbed defaults (`top top` →
-  `bottom bottom`). Put the height in the markup as `style="height:NNNlvh"` so the first
-  paint is right; the engine only guarantees the sticky `.pin` wrapper exists.
-- `docRect()` already resolves elements *inside* a pin to their document-flow position
-  rather than their stuck position, so `.rv`/`.fade` triggers on pinned content measure
-  correctly. This was built for exactly this step and is currently a no-op.
-- **`.pin` is `overflow:hidden` and `height:100lvh`.** Content taller than the viewport
-  will be clipped. So each of these needs its content broken into viewport-sized panels
-  paged by chapter progress (the `#hstage` horizontal scroller at `#sec-outreach` is the
-  worked example already in the file — copy its shape).
-- Don't drive panels off element geometry inside a pin; drive them off the chapter's own
-  `p`, the way the existing captions do (`I(.06,.2,e)*(1-I(.8,.96,e))`).
+Things worth knowing before changing any of it:
 
-Do it one section at a time and run the harness between each. Budget it properly — a
-half-converted section clips its own content, which is worse than leaving it flowing.
+- **Panels dwell.** `DWELL` (0.42) is the fraction of each step's scroll spent parked
+  before any travel begins. That is what keeps the code viewer and the simulator still
+  while you read or drag them. Lower it and widgets start sliding under the pointer.
+- **Reveal cannot come from element geometry inside a deck** — every panel sits at the
+  same place on screen. It comes from how near the deck is to that panel, and the global
+  `.rv`/`.fade` passes skip anything inside one. Without that skip they sit at opacity 0
+  forever, because their triggers can never fire in a pinned chapter.
+- **Panels measure themselves and scale down what does not fit.** `.pin` clips, so an
+  overrunning block would simply be lost. Transforms do not affect layout, so the panel
+  stays exactly one viewport. At 1440×900 all ten panels fit unscaled; at 1280×680 they
+  scale to ~0.75–0.8 and still land exactly on the available height.
+- Two blocks needed sizing to fit a viewport at all: the `.v3d` glove viewer
+  (`min(72lvh,760px)` inside decks) and the apogee plot (width-capped to 800px, which
+  keeps its 700×236 ratio and takes the card from 886 to 771).
+- Decks pause video in panels that are scrolled away, toggled on the edge.
+- `docRect()` resolves elements inside a pin to their document-flow position. Decks do
+  not rely on it — they drive everything off chapter progress — but it is what makes any
+  geometry-based trigger inside a pin measure sanely.
 
-Two smaller things, both optional:
+Optional leftovers:
 
 - `nasa-emu-suit.glb` (3.4 MB) and `nasa-helmet.glb` (232 KB) are still unused. The suit
   is the one from his hero photo; the helmet is the other half of what his TAS team
@@ -233,6 +243,16 @@ Two smaller things, both optional:
 - **Occluding shell vs. its own edges.** They share a depth value and z-fight, leaving the
   model a faint smudge. `wireBody()` insets its core sphere to `R*.99`; a loaded mesh has
   no radius to inset, so the fill needs `polygonOffset`.
+- **`lvh` does not follow a programmatic resize in the preview pane.** Resize, then
+  *reload*, then check that a `height:100lvh` probe equals `innerHeight` before trusting
+  any measurement. Get this wrong and panels report the wrong available height, the fit
+  guard scales things that did not need scaling, and section heights look invented.
+- **A marginal seam hit at short viewports is expected.** At 720 px the check reports
+  `rocketTilt` at y=1176, d2 0.00884 against a 0.00736 threshold. The same hit appears on
+  every commit back through the rebuild, identical to five decimals: it is the ascent
+  trajectory's tangent pitching over across fewer pixels, marginally crossing a threshold
+  set at 1% of the key's range. Before chasing a seam hit, A/B it against the previous
+  commit at the same viewport — that takes one minute and settles it.
 - **Don't `await` between harness probes.** The page's own rAF loop calls `scrollTo()`
   with the scroller's damped position every frame; give it a turn mid-walk and it moves
   the page under the next measurement. It shows up as a single bad sample, usually at
