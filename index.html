@@ -449,8 +449,10 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
    column as the pinned section is scrubbed. */
 .hstage{position:relative}
 .hpin{position:sticky;top:0;height:100lvh;display:flex;align-items:center;overflow:hidden}
-.hlayout{width:100%;padding:0 var(--pad);display:grid;align-items:center;
-  grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(1.4rem,3.4vw,3rem)}
+/* The photo was taking half the screen. It now sits at a fixed, modest width
+   beside the deck, and the pair is centred rather than stretched edge to edge. */
+.hlayout{width:100%;padding:0 var(--pad);display:grid;align-items:center;justify-content:center;
+  grid-template-columns:minmax(0,26rem) minmax(0,36rem);gap:clamp(2rem,5vw,5.5rem)}
 .hlead{margin:0;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
   background:var(--panel);backdrop-filter:blur(12px)}
 .hlead img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
@@ -458,21 +460,30 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
 .hlead .n{font-size:1.35rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);display:block}
 .hlead p{font-size:.9rem;margin-top:.45rem}
 
-.hviewport{position:relative;height:min(66lvh,32rem);overflow:hidden;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 13%,#000 87%,transparent 100%);
-  mask-image:linear-gradient(to bottom,transparent 0,#000 13%,#000 87%,transparent 100%)}
-.htrack{display:flex;flex-direction:column;gap:clamp(.7rem,1.5vw,1.05rem);
-  padding:calc(min(66lvh,32rem) * .18) 0;
-  transform:translate3d(0,var(--hy,0px),0);will-change:transform}
-.hcard{border:1px solid var(--line);border-radius:var(--r-lg);
-  background:var(--panel);backdrop-filter:blur(12px);padding:1.15rem 1.3rem}
+/* ------------------------------------------------------------ outreach deck
+   The five cards are one stack seen in perspective, and scroll deals through
+   it: the top card tips back and is flung up past the
+   viewer while the next comes forward from behind. The scroll handler writes
+   the transforms as variables. Cards align by their top edge and share a
+   height, so the pile behind shows an even edge. They are opaque rather than
+   blurred -- stacked cards have to hide one another, and backdrop blur under
+   3D transforms is expensive to composite. Perspective sits on the track, the
+   cards' direct parent, so z-index still decides which card is on top. */
+.hviewport{position:relative;height:min(58lvh,31rem);display:flex;align-items:center}
+.htrack{position:relative;width:100%;height:12.5rem;perspective:1600px;perspective-origin:50% 0%}
+.hcard{position:absolute;left:0;right:0;top:0;min-height:12.5rem;
+  border:1px solid var(--line-lit);border-radius:var(--r-lg);background:rgba(9,12,19,.95);
+  padding:1.2rem 1.4rem;transform-origin:50% 60%;
+  transform:translate3d(0,var(--cy,0px),var(--cz,0px)) rotateX(var(--crx,0deg)) scale(var(--cs,1));
+  opacity:var(--co,1);will-change:transform,opacity;box-shadow:0 18px 40px -22px rgba(0,0,0,.9)}
 .hcard .n{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;color:var(--blue)}
-.hcard h3{font-size:1.3rem;margin-top:.35rem}
+.hcard h3{font-size:clamp(1.7rem,3vw,2.35rem);margin-top:.45rem;letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums}
 .hcard p{margin-top:.45rem;font-size:.88rem}
 @media(max-width:900px){
   .hlayout{grid-template-columns:1fr;gap:1.2rem}
-  .hviewport{height:min(46lvh,22rem)}
-  .htrack{padding:calc(min(46lvh,22rem) * .16) 0}
+  .hviewport{height:min(48lvh,24rem)}.hlead{max-width:22rem;justify-self:center}
+  .htrack{height:11rem}.hcard{min-height:11rem}
 }
 
 /* ------------------------------------------------------------ awards */
@@ -848,7 +859,7 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
       middle schoolers — my job as VP of Fundraising is finding the money and the sponsors that keep it running.</p>
   </div>
   </div>
-  <div class="hstage" id="hstage" style="height:220lvh">
+  <div class="hstage" id="hstage" style="height:300lvh">
     <div class="hpin">
       <div class="hlayout">
         <figure class="hlead">
@@ -1602,7 +1613,57 @@ var sglT=ee(F("#sec-glove"),{scene:!0,pin:!0,start:"top bottom",onUpdate(e){
   o.camX=s(0,s(0,6,q),b),o.camY=s(1.5,3,b),o.camZ=s(20,28,b),
   o.tgtX=0,o.tgtY=s(.5,-3,b),o.tgtZ=s(-2,-20,b),
   o.starOpacity=s(1,.8,b),o.bloom=s(.55,s(.55,.45,q),b)
-}});ee(F("#sec-awards"),{scene:!0,pin:!0,onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.moonX=s(-30,-52,q),o.moonScale=s(2.2,1.8,q),o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=1,o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.moonScale=s(1.8,1,t),o.moonX=s(-52,-34,t),o.moonZ=s(-52,-90,t),o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});var ot=F("#hstage"),Ie=F("#htrack");var HCARDS=Ee(".hcard").length||1;ot&&Ie&&ee(ot,{start:"top top",end:"bottom bottom",onUpdate(e){let t=Math.max(0,Ie.scrollHeight-Ie.parentElement.clientHeight);Ie.style.setProperty("--hy",(-e*t).toFixed(1)+"px"),F("#hProg").style.setProperty("--p",e.toFixed(3)),F("#hCount").textContent=String(Math.min(HCARDS,Math.floor(e*(HCARDS-.001))+1)).padStart(2,"0")}});var nt=F(".nav"),at=0,_e=!1;st.forEach((e,t)=>e.addEventListener("click",n=>{n.preventDefault();let r=Xe[t];r&&ne.jump(r.getBoundingClientRect().top+ne.current)}));Ee('a[href^="#"]').forEach(e=>e.addEventListener("click",t=>{let n=document.querySelector(e.getAttribute("href"));n&&(t.preventDefault(),ne.jump(n.getBoundingClientRect().top+ne.current))}));var rt=performance.now();function ct(e){let t=Math.min(.05,(e-rt)/1e3);rt=e;let n=ne.update(t);$e(n),wt.style.setProperty("--p",(ne.max?re(n/ne.max):0).toFixed(4));let r=n-at;n>160&&r>1&&!_e?(nt.classList.add("away"),_e=!0):(r<-1||n<160)&&_e&&(nt.classList.remove("away"),_e=!1),at=n,it.forEach((m,f)=>{let h=m.scrollWidth/2||1;m._x=((m._x||0)-(.35+Math.abs(ne.velocity)*.05)*(f%2?-1:1))%h,m.style.setProperty("--mx",(f%2?m._x-h:m._x).toFixed(1)+"px")}),Re.update(t),requestAnimationFrame(ct)}requestAnimationFrame(ct);setTimeout(ye,400);addEventListener("load",()=>{ye(),ne._measure()});/* ---------------------------------------------------------------------------
+}});ee(F("#sec-awards"),{scene:!0,pin:!0,onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.moonX=s(-30,-52,q),o.moonScale=s(2.2,1.8,q),o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=1,o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.moonScale=s(1.8,1,t),o.moonX=s(-52,-34,t),o.moonZ=s(-52,-90,t),o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});/* ---------------------------------------------------------------------------
+   Outreach: a deck the scroll deals through.
+
+   The five cards are one stack seen in perspective. As you scroll, the card on
+   top tips back and is flung up past the viewer while the next one comes
+   forward from behind it, and the figures on each card count up as it
+   arrives. Each card parks for a stretch of scroll -- the same dwell the
+   chapter decks use -- so it can be read before the next one is dealt.
+
+   Written from the chapter's progress alone, so the deck is in the same state
+   however you arrived at a given point.
+   --------------------------------------------------------------------------- */
+var ot=F("#hstage"),Ie=F("#htrack"),HC=Ee(".hcard"),HCARDS=HC.length||1,
+    /* each title kept as a template, so a card can be drawn at any point of
+       its count without reading back what the DOM last showed */
+    HT=HC.map(c=>{let h=c.querySelector("h3"),p=h.textContent.split(/(\d[\d,]*)/);
+      return{h,p,v:p.map((x,i)=>i%2?+x.replace(/,/g,""):0),last:h.textContent}});
+function hTitle(t,k){
+  let out="";
+  for(let i=0;i<t.p.length;i++)out+=i%2?Math.round(t.v[i]*k).toLocaleString("en-US"):t.p[i];
+  out!==t.last&&(t.h.textContent=out,t.last=out)
+}
+ot&&Ie&&ee(ot,{start:"top top",end:"bottom bottom",onUpdate(e){
+  let n=HCARDS,a=deckAt(e,n)*(n-1);
+  for(let i=0;i<n;i++){
+    let d=i-a,c=HC[i].style,cy,cz,rx,sc,op,zi;
+    if(d>=0){
+      /* still in the stack: each card further back sits lower, deeper and a
+         touch smaller so the pile reads as a pile; three show */
+      let k=Math.min(d,3);
+      cy=k*16,cz=-k*60,rx=0,sc=1-k*.04,op=d>3?0:1-k*.18,zi=100-i
+    }else{
+      /* dealt: tips back about its bottom edge and is flung up toward the
+         viewer, gone before it is a whole step away. Tipping it back swings
+         its top corner toward the camera, where perspective magnifies it
+         most, so it pivots just below its middle, travels at most 150px under
+         a 1600px perspective, and takes no extra scale -- measured, that keeps
+         even its nearest corner out of the photo's column. */
+      let t=Math.min(1,-d);
+      cy=-t*t*230,cz=t*150,rx=-t*48,sc=1,op=1-I(.15,.82,t),zi=200+i
+    }
+    Se&&(cz=0,rx=0);
+    c.setProperty("--cy",cy.toFixed(1)+"px"),c.setProperty("--cz",cz.toFixed(1)+"px"),
+    c.setProperty("--crx",rx.toFixed(2)+"deg"),c.setProperty("--cs",sc.toFixed(4)),
+    c.setProperty("--co",op.toFixed(3)),c.zIndex=zi;
+    /* a card counts up as it comes to the top of the stack, and holds once dealt */
+    hTitle(HT[i],d<=0?1:fe(re(1-d)))
+  }
+  F("#hProg").style.setProperty("--p",e.toFixed(3)),
+  F("#hCount").textContent=String(Math.min(n,Math.round(a)+1)).padStart(2,"0")
+}});var nt=F(".nav"),at=0,_e=!1;st.forEach((e,t)=>e.addEventListener("click",n=>{n.preventDefault();let r=Xe[t];r&&ne.jump(r.getBoundingClientRect().top+ne.current)}));Ee('a[href^="#"]').forEach(e=>e.addEventListener("click",t=>{let n=document.querySelector(e.getAttribute("href"));n&&(t.preventDefault(),ne.jump(n.getBoundingClientRect().top+ne.current))}));var rt=performance.now();function ct(e){let t=Math.min(.05,(e-rt)/1e3);rt=e;let n=ne.update(t);$e(n),wt.style.setProperty("--p",(ne.max?re(n/ne.max):0).toFixed(4));let r=n-at;n>160&&r>1&&!_e?(nt.classList.add("away"),_e=!0):(r<-1||n<160)&&_e&&(nt.classList.remove("away"),_e=!1),at=n,it.forEach((m,f)=>{let h=m.scrollWidth/2||1;m._x=((m._x||0)-(.35+Math.abs(ne.velocity)*.05)*(f%2?-1:1))%h,m.style.setProperty("--mx",(f%2?m._x-h:m._x).toFixed(1)+"px")}),Re.update(t),requestAnimationFrame(ct)}requestAnimationFrame(ct);setTimeout(ye,400);addEventListener("load",()=>{ye(),ne._measure()});/* ---------------------------------------------------------------------------
    Model pipeline.
 
    Nothing here is needed at first paint, and four of the five NASA models ship
