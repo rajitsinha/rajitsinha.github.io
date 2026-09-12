@@ -1599,12 +1599,19 @@ ee(F("#stage-transit"),{scene:!0,pin:!0,onUpdate(e){
    as a zoom. The fade now goes through gloveFade, which leaves the size alone,
    and the pull-back to the wide framing happens as the outreach intro arrives
    instead. gloveK only drops once the glove is already invisible, so the
-   handover to the next chapter has no step. */
+   handover to the next chapter has no step.
+
+   The Moon fades out over the first 13% of the same arrival, rather than
+   moving, and is gone before the chapter's kicker -- 132px into its panel,
+   so 14.6% of the way in -- reaches the bottom of the screen. It sits large in the lower left of this framing, exactly where the
+   heading rises in, and no position it could slide to clears the heading
+   from the start of the rise -- measured across the whole arrival, not
+   assumed. The section's panels then sit on a plain starfield. */
 var sglT=ee(F("#sec-glove"),{scene:!0,pin:!0,start:"top bottom",onUpdate(e){
   ve();
   let r=e*(sglT._e-sglT._s)/innerHeight,   /* viewports of arrival so far */
       a=re(r);
-  o.moonK=1,o.earthK=1,
+  o.moonK=1-I(0,.13,a),o.earthK=1,
   o.gloveK=1-I(1,1.25,r),o.gloveExplode=1,
   o.gloveSpin=Math.PI*1.35-.5+a*.35,
   o.gloveLift=a*15.4,o.gloveFade=1-I(.45,.92,a),
@@ -1612,12 +1619,16 @@ var sglT=ee(F("#sec-glove"),{scene:!0,pin:!0,start:"top bottom",onUpdate(e){
   o.moonX=-9,o.moonY=-19,o.moonZ=-38,o.moonScale=1.45,
   o.starOpacity=1,o.bloom=.55
 }});ee(F("#sec-outreach"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){
-  ve(),o.moonK=1,o.earthK=1;
+  ve(),o.earthK=1;
   let q=I(0,.6,e),
-      /* the glove chapter holds its close framing to the very end, so the
-         camera eases back out here, while this chapter's intro arrives */
+      /* The glove section ends on its close framing with the Moon faded out.
+         The camera eases back to this chapter's wide framing while the intro
+         arrives -- with no body on screen, the move does not read as a zoom --
+         and the Moon fades back in only once the camera has settled, on a path
+         measured 105px clear of the intro copy. */
       b=I(0,.22,e);
-  o.moonScale=s(1.45,s(1.9,2.2,q),b),o.moonX=s(-9,s(-9,-30,q),b),o.moonY=s(-19,s(-34,-40,q),b),o.moonZ=s(-38,-52,b),
+  o.moonK=I(.22,.34,e),
+  o.moonScale=s(1.9,2.2,q),o.moonX=s(-9,-30,q),o.moonY=s(-34,-40,q),
   o.camX=s(0,s(0,6,q),b),o.camY=s(1.5,3,b),o.camZ=s(20,28,b),
   o.tgtX=0,o.tgtY=s(.5,-3,b),o.tgtZ=s(-2,-20,b),
   o.starOpacity=s(1,.8,b),o.bloom=s(.55,s(.55,.45,q),b)
