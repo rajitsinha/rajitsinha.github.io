@@ -18,14 +18,14 @@
    window first, then call __world.resize() and __scroller._measure(), then
    drive frames through this harness rather than waiting for rAF.
 
-   Do not await anything between go() calls. seam() and purity() are
-   deliberately synchronous: the page's own rAF loop calls scrollTo() with the
-   scroller's damped position every frame, so if it gets a turn between two
-   probes it moves the page out from under the next measurement. An await in
-   the middle of a walk produces a single bad sample -- usually at y=0, showing
-   the last chapter's state -- that looks exactly like a purity bug and is not
-   one. If a check needs to wait (for a model to load, say), do the waiting
-   before the walk starts.
+   seam() and purity() are synchronous and should stay that way, because the
+   page's own rAF loop scrolls the page every frame and an await inside a walk
+   gives it a turn. But an earlier note here blamed that for a single bad
+   sample at y=0 showing the last chapter's state, and it was wrong: that was a
+   real bug. Triggers were measured against the scroll that was requested
+   rather than where the page actually was, so any scroll clamped at the end of
+   the document shifted every trigger by the overshoot. Fixed in docRect();
+   clampCheck() below is the regression test.
    =========================================================================== */
 (function () {
   const W = window.__world, S = window.__scroller, APPLY = window.__applyScroll;
@@ -299,6 +299,28 @@
              list: Object.values(hits).sort((a, b) => b.probes - a.probes) };
   }
 
-  window.__harness = { go, snap, seam, purity, fingerprint, fingerprintDiff, occlusion, keys, GATE, VIS };
+  /* ---------------------------------------------------------- clampCheck
+     Regression test for triggers measured against a clamped scroll. Mark the
+     triggers dirty, apply a scroll past the end of the document (the page
+     clamps it and they are re-measured there), then return to the top: the
+     state at y=0 must be exactly what it was before. */
+  function clampCheck() {
+    go(0); const before = snap();
+    dispatchEvent(new Event("resize"));
+    const past = document.documentElement.scrollHeight;
+    S.target = S.current = past; S._set = past; scrollTo(0, past);
+    const overshoot = past - Math.round(scrollY);
+    APPLY(past);
+    go(0); const after = snap(), mismatched = [];
+    for (const k in before) {
+      const g = GATE[k];
+      if (g && (before[g] <= VIS || after[g] <= VIS)) continue;
+      if (Math.abs(before[k] - after[k]) > 1e-9) mismatched.push(k);
+    }
+    dispatchEvent(new Event("resize")); go(0);
+    return { overshootPx: overshoot, mismatchedKeys: mismatched };
+  }
+
+  window.__harness = { go, snap, seam, purity, fingerprint, fingerprintDiff, occlusion, clampCheck, keys, GATE, VIS };
   return "harness installed; keys=" + keys().length + " max=" + S.max;
 })();

@@ -253,11 +253,14 @@ Optional leftovers:
   trajectory's tangent pitching over across fewer pixels, marginally crossing a threshold
   set at 1% of the key's range. Before chasing a seam hit, A/B it against the previous
   commit at the same viewport — that takes one minute and settles it.
-- **Don't `await` between harness probes.** The page's own rAF loop calls `scrollTo()`
-  with the scroller's damped position every frame; give it a turn mid-walk and it moves
-  the page under the next measurement. It shows up as a single bad sample, usually at
-  y=0, that looks exactly like a purity bug and is not one. Do any waiting before the
-  walk starts.
+- **A single bad sample at y=0 showing the last chapter's state is a real bug, not a
+  harness artifact.** An earlier version of this note blamed awaiting between probes; that
+  was wrong. Triggers were measured against the scroll that was *requested* rather than
+  where the page actually was, so any scroll clamped at the end of the document shifted
+  every trigger by the overshoot, and whole chapters answered for the wrong range: after
+  one clamped jump the top of the page drew the contact chapter. Fixed in `docRect()`,
+  which now measures against `scrollY`; `__harness.clampCheck()` is the regression test.
+  Keep the walks synchronous anyway -- an await gives the page's own rAF loop a turn.
 - The preview pane reports `visibilityState: "hidden"`, so rAF never runs and screenshots
   are unreliable. Drive frames with `__world.update(1/60)` after each `__harness.go(y)`,
   and read the framebuffer with `gl.readPixels` if you need to see what is on screen.
