@@ -1734,14 +1734,26 @@ var sglT=ee(F("#sec-glove"),{scene:!0,pin:!0,start:"top bottom",onUpdate(e){
          The camera eases back to this chapter's wide framing while the intro
          arrives -- with no body on screen, the move does not read as a zoom --
          and the Moon fades back in only once the camera has settled, on a path
-         measured 105px clear of the intro copy. */
+         measured 105px clear of the intro copy. It leaves again by 88%, before
+         the awards tape's first line shows at 90.2%: no position it could hold
+         there stays clear of the tape's rows as they slide up into place. */
       b=I(0,.22,e);
-  o.moonK=I(.22,.34,e),
+  o.moonK=I(.22,.34,e)*(1-I(.8,.88,e)),
   o.moonScale=s(1.9,2.2,q),o.moonX=s(-9,-30,q),o.moonY=s(-34,-40,q),
   o.camX=s(0,s(0,6,q),b),o.camY=s(1.5,3,b),o.camZ=s(20,28,b),
   o.tgtX=0,o.tgtY=s(.5,-3,b),o.tgtZ=s(-2,-20,b),
   o.starOpacity=s(1,.8,b),o.bloom=s(.55,s(.55,.45,q),b)
-}});ee(F("#sec-awards"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.moonX=s(-30,-52,q),o.moonScale=s(2.2,1.8,q),o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=1,o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.moonScale=s(1.8,1,t),o.moonX=s(-52,-34,t),o.moonZ=s(-52,-90,t),o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});/* ---------------------------------------------------------------------------
+}});/* No Moon over the awards. As the tape pins, its rows slide up through the
+   whole right side of the screen, and a search over every Moon position that
+   would also suit the contact chapter found none that stays clear of them.
+   The Earth rises alone. */
+ee(F("#sec-awards"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){ve(),o.moonK=0,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});/* Contact. The Moon used to sit behind the links. It now fades in upper right
+   at a position measured against every line of contact copy -- kicker,
+   heading, links and footer -- across the whole chapter, with 188px at its
+   closest, and it holds still while the camera pulls back, so it settles into
+   frame instead of sweeping across the words. The Earth's arc ends further
+   right, 66px clear of the footer it used to cover. */
+ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=I(.1,.22,e),o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.earthX=s(20,36,t),o.moonScale=1.2,o.moonX=63,o.moonY=1,o.moonZ=-90,o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});/* ---------------------------------------------------------------------------
    Outreach: a deck the scroll deals through.
 
    The five cards are one stack seen in perspective. As you scroll, the card on

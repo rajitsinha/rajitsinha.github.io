@@ -213,11 +213,21 @@
       if (el.closest(BACKED)) continue;
       const op = effOpacity(el);
       if (op < floor) continue;
+      /* clip to every ancestor that hides overflow, so text scrolled out of a
+         window -- a tape row above the pointer, a panel outside its pin -- is
+         not counted as exposed just because it still has a rect */
+      let c0 = 0, c1 = 0, c2 = innerWidth, c3 = innerHeight;
+      for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+        const cs = getComputedStyle(a);
+        if (cs.overflowX === "visible" && cs.overflowY === "visible") continue;
+        const ar = a.getBoundingClientRect();
+        c0 = Math.max(c0, ar.left); c1 = Math.max(c1, ar.top); c2 = Math.min(c2, ar.right); c3 = Math.min(c3, ar.bottom);
+      }
       rng.selectNodeContents(el);
       for (const r of rng.getClientRects()) {
-        if (r.width < 2 || r.height < 2) continue;
-        if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) continue;
-        out.push({ label: tag(el), x0: r.left, x1: r.right, y0: r.top, y1: r.bottom });
+        const x0 = Math.max(r.left, c0), y0 = Math.max(r.top, c1), x1 = Math.min(r.right, c2), y1 = Math.min(r.bottom, c3);
+        if (x1 - x0 < 2 || y1 - y0 < 2) continue;
+        out.push({ label: tag(el), x0, x1, y0, y1 });
       }
     }
     return out;
