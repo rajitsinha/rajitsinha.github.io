@@ -243,6 +243,16 @@ p{color:var(--dim);max-width:56ch}
 .shot{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
   background:var(--bg2);position:relative}
 .shot img,.shot video{width:100%;height:100%;object-fit:cover;display:block}
+/* Keep video off the hardware-overlay path. On Windows, Chrome can hand a
+   <video> to DirectComposition as its own overlay plane, and with NVIDIA
+   drivers that path stalls while the page scrolls or animates near it: the
+   whole window stops updating until it is moved or resized (Chromium issue
+   451225677). The compositor never promotes a quad whose opacity is below 1,
+   so this keeps the video composited with the rest of the page. .999 is below
+   1 to the compositor and indistinguishable on screen. It matters here more
+   than on most pages, because the decks translate and fade the panels these
+   videos sit in on every scroll frame. */
+.shot video{opacity:.999}
 .shot figcaption{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;
   text-transform:uppercase;color:var(--faint);padding:.7rem .95rem;border-top:1px solid var(--line)}
 .shot.tall img,.shot.tall video{aspect-ratio:4/5;max-height:min(70lvh,32rem)}
