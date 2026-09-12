@@ -8,6 +8,7 @@
      __harness.seam({})        // walk every scroll pixel, look for steps
      __harness.purity({n:320}) // is state a pure function of scroll?
      __harness.fingerprint()   // exact state vector, for before/after diffs
+     __harness.occlusion({})   // bright bodies behind unbacked text
 
    Depends on window.__world / __scroller / __applyScroll, which index.html
    exposes on purpose.
@@ -47,14 +48,14 @@
     rocketX: "rocketK", rocketY: "rocketK", rocketZ: "rocketK", rocketTilt: "rocketK",
     thrust: "rocketK", chuteK: "rocketK", noseK: "rocketK", trailOn: "rocketK",
     gloveSpin: "gloveK", gloveExplode: "gloveK", gloveScale: "gloveK",
+    gloveLift: "gloveK", gloveFade: "gloveK",
     earthX: "earthK", earthY: "earthK", earthScale: "earthK",
     moonX: "moonK", moonY: "moonK", moonZ: "moonK", moonScale: "moonK",
     saturnX: "saturnK", saturnY: "saturnK", saturnZ: "saturnK",
     saturnScale: "saturnK", saturnTilt: "saturnK", saturnSpin: "saturnK",
-    lmX: "lmK", lmY: "lmK", lmZ: "lmK", lmScale: "lmK", lmSpin: "lmK",
-    nglX: "nglK", nglY: "nglK", nglZ: "nglK", nglScale: "nglK", nglSpin: "nglK"
+    lmX: "lmK", lmY: "lmK", lmZ: "lmK", lmScale: "lmK", lmSpin: "lmK"
   };
-  const GATES = ["rocketK", "gloveK", "earthK", "moonK", "saturnK", "lmK", "nglK"];
+  const GATES = ["rocketK", "gloveK", "earthK", "moonK", "saturnK", "lmK"];
   const VIS = 0.02;
 
   const keys = () => Object.keys(W.state).filter(k => typeof W.state[k] === "number").sort();
@@ -176,6 +177,128 @@
     return { differences: out.length, worst: out.slice(0, 20) };
   }
 
-  window.__harness = { go, snap, seam, purity, fingerprint, fingerprintDiff, keys, GATE, VIS };
+
+  /* ----------------------------------------------------------- occlusion
+     A bright body sitting behind text that has nothing of its own behind it.
+
+     For every probe, push the state into the scene graph, project each visible
+     body onto the screen, grow it by a bloom margin, and intersect it with the
+     line boxes of text that is actually showing: effective opacity above a
+     floor, on screen, and not on a surface that carries its own wash. Spheres
+     project as circles and models as boxes, so a hit is real overlap rather
+     than the empty corner of a bounding square. Line boxes rather than element
+     rects, so a short last line does not claim the whole width.
+
+     Needs __world.earthGroup / moonGroup for the planets; models come from the
+     slots. Synchronous, like the other walks. */
+  const BACKED = ".panel,.codecard,.hcard,.hlead";
+  function effOpacity(el) {
+    let o = 1;
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (cs.display === "none" || cs.visibility === "hidden") return 0;
+      o *= parseFloat(cs.opacity);
+      if (o < 0.01) return 0;
+    }
+    return o;
+  }
+  function tag(el) {
+    const host = el.closest("[id]");
+    const cls = typeof el.className === "string" && el.className.trim() ? "." + el.className.trim().split(/\s+/)[0] : "";
+    return (host ? "#" + host.id + " " : "") + el.tagName.toLowerCase() + cls;
+  }
+  function textBoxes(sel, floor) {
+    const out = [], rng = document.createRange();
+    for (const el of document.querySelectorAll(sel)) {
+      if (el.closest(BACKED)) continue;
+      const op = effOpacity(el);
+      if (op < floor) continue;
+      rng.selectNodeContents(el);
+      for (const r of rng.getClientRects()) {
+        if (r.width < 2 || r.height < 2) continue;
+        if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) continue;
+        out.push({ label: tag(el), x0: r.left, x1: r.right, y0: r.top, y1: r.bottom });
+      }
+    }
+    return out;
+  }
+  function toPx(v) {
+    const p = v.clone().project(W.camera);
+    return { x: (p.x + 1) / 2 * innerWidth, y: (1 - p.y) / 2 * innerHeight, z: p.z };
+  }
+  function circleOf(group, radius) {
+    group.updateMatrixWorld(true);
+    const T = W.THREE, c = new T.Vector3().setFromMatrixPosition(group.matrixWorld);
+    const up = new T.Vector3(0, 1, 0).applyQuaternion(W.camera.quaternion);
+    const a = toPx(c), b = toPx(c.clone().addScaledVector(up, group.matrixWorld.getMaxScaleOnAxis() * radius));
+    if (a.z > 1) return null;
+    return { kind: "circle", cx: a.x, cy: a.y, r: Math.hypot(b.x - a.x, b.y - a.y) };
+  }
+  function rectOf(group) {
+    group.updateMatrixWorld(true);
+    const T = W.THREE, b = new T.Box3().setFromObject(group);
+    if (b.isEmpty()) return null;
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, behind = 0;
+    for (let i = 0; i < 8; i++) {
+      const p = toPx(new T.Vector3(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z));
+      if (p.z > 1) behind++;
+      x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+    }
+    return behind === 8 ? null : { kind: "rect", x0, y0, x1, y1 };
+  }
+  function bodies() {
+    const slot = s => { const g = W.slotGroup && W.slotGroup(s); return g && g.visible && g.children.length ? rectOf(g) : null; };
+    return [
+      { name: "earth",  k: "earthK",  shape: () => W.earthGroup && W.earthGroup.visible ? circleOf(W.earthGroup, 9.55) : null },
+      { name: "moon",   k: "moonK",   shape: () => W.moonGroup && W.moonGroup.visible ? circleOf(W.moonGroup, 14.1) : null },
+      { name: "saturn", k: "saturnK", shape: () => slot("saturn") },
+      { name: "lm",     k: "lmK",     shape: () => slot("lm") },
+      { name: "glove",  k: "gloveK",  shape: () => W.gloveGroup && W.gloveGroup.visible && W.gloveGroup.children.length ? rectOf(W.gloveGroup) : null }
+    ];
+  }
+  function overlap(sh, t, m) {
+    if (sh.kind === "rect") {
+      const ox = Math.min(sh.x1 + m, t.x1) - Math.max(sh.x0 - m, t.x0);
+      const oy = Math.min(sh.y1 + m, t.y1) - Math.max(sh.y0 - m, t.y0);
+      return ox > 0 && oy > 0 ? Math.min(ox, oy) : 0;
+    }
+    const nx = Math.max(t.x0, Math.min(sh.cx, t.x1)), ny = Math.max(t.y0, Math.min(sh.cy, t.y1));
+    const d = Math.hypot(sh.cx - nx, sh.cy - ny);
+    return d < sh.r + m ? sh.r + m - d : 0;
+  }
+  /* Returns every body-behind-text pairing with the scroll range it spans and
+     how deep the worst overlap gets, in CSS pixels. */
+  function occlusion(opts) {
+    opts = opts || {};
+    const sel = opts.text || ".card-title .big,.card-title p,.caption .kicker,.caption h2,.caption p,#contact .kicker,#contact h2,#contact .btn,footer span";
+    const floor = opts.floor != null ? opts.floor : 0.08, m = opts.margin != null ? opts.margin : 36;
+    const list = bodies().filter(b => !opts.bodies || opts.bodies.indexOf(b.name) !== -1);
+    const from = opts.from || 0, to = opts.to != null ? opts.to : S.max, step = opts.step || 30;
+    const hits = {};
+    let probes = 0;
+    for (let y = from; y <= to; y += step) {
+      go(y); W.update(1 / 60); probes++;
+      const text = textBoxes(sel, floor);
+      if (!text.length) continue;
+      W.camera.updateMatrixWorld(true);
+      for (const b of list) {
+        if ((W.state[b.k] || 0) <= VIS) continue;
+        const sh = b.shape();
+        if (!sh) continue;
+        for (const t of text) {
+          const d = overlap(sh, t, m);
+          if (!d) continue;
+          const key = b.name + " behind " + t.label;
+          const h = hits[key] || (hits[key] = { pair: key, from: y, to: y, probes: 0, worstPx: 0, worstY: y });
+          h.to = y; h.probes++;
+          if (d > h.worstPx) { h.worstPx = Math.round(d); h.worstY = y; }
+        }
+      }
+    }
+    return { probes, step, marginPx: m, overlaps: Object.keys(hits).length,
+             list: Object.values(hits).sort((a, b) => b.probes - a.probes) };
+  }
+
+  window.__harness = { go, snap, seam, purity, fingerprint, fingerprintDiff, occlusion, keys, GATE, VIS };
   return "harness installed; keys=" + keys().length + " max=" + S.max;
 })();
