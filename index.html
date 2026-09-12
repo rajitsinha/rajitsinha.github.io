@@ -486,16 +486,61 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
   .htrack{height:11rem}.hcard{min-height:11rem}
 }
 
-/* ------------------------------------------------------------ awards */
-.award{display:grid;grid-template-columns:5.5rem 1fr auto;gap:1.2rem;align-items:baseline;
-  padding:1.15rem 0;border-bottom:1px solid var(--line);transition:.3s}
-.award:hover{background:linear-gradient(90deg,var(--blue-soft),transparent);
-  padding-left:.7rem;border-color:var(--line-lit)}
-.award .yr{font-family:var(--mono);font-size:.68rem;color:var(--blue);letter-spacing:.08em}
-.award h4{font-size:1.02rem;font-weight:500;letter-spacing:-.01em}
-.award p{font-size:.85rem;margin-top:.2rem}
-.award .pl{font-family:var(--mono);font-size:.62rem;color:var(--faint);text-align:right;
+/* ------------------------------------------------------------ awards tape
+   The list slides under a fixed pointer at the left edge of the window; the
+   row on the pointer is lit and every other row dims with its distance from
+   it. The readout beside it is a drum: "202" is fixed and the last digit is a
+   strip of the years present, translated by the year being read. */
+.tstage{position:relative}
+.tpin{position:sticky;top:0;height:100lvh;display:flex;align-items:center;overflow:hidden}
+.tlay{width:100%;display:grid;grid-template-columns:minmax(0,14rem) minmax(0,1fr);
+  column-gap:clamp(2rem,5vw,5rem);row-gap:clamp(1.4rem,3.4vh,2.4rem);align-items:center;padding-top:3.2rem}
+.ttitle{grid-column:1/-1}
+.ttitle .kicker{margin-bottom:.9rem}
+.tread{font-family:var(--mono)}
+.tyear{display:flex;font-size:clamp(3.2rem,6.4vw,5.6rem);line-height:1;letter-spacing:-.06em;
+  color:var(--ink);font-variant-numeric:tabular-nums}
+.troll{display:inline-block;height:1em;overflow:hidden}
+.tstrip{display:block;transform:translateY(calc(var(--ty,0) * -1em))}
+.tstrip i{display:block;height:1em;font-style:normal}
+.trail{position:relative;height:1px;margin:1.5rem .3rem 0;background:var(--line-lit)}
+.trail span{position:absolute;top:.75rem;font-size:.56rem;letter-spacing:.12em;color:var(--faint);
+  transform:translateX(-50%)}
+.trail span::before{content:"";position:absolute;left:50%;top:-.95rem;width:1px;height:6px;background:var(--line-lit)}
+.trail span:nth-of-type(1){left:0}.trail span:nth-of-type(2){left:50%}.trail span:nth-of-type(3){left:100%}
+.trail i{position:absolute;top:-4px;left:calc(var(--tp,0) * 100%);width:9px;height:9px;margin-left:-4.5px;
+  border-radius:50%;background:var(--blue);box-shadow:0 0 12px var(--blue)}
+.tcount{display:flex;align-items:baseline;gap:.5rem;margin-top:2.8rem;font-size:.62rem;
+  letter-spacing:.16em;color:var(--faint)}
+.tcount b{color:var(--ink);font-weight:400;font-size:.8rem}
+.twin{position:relative;height:min(52lvh,28rem);overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 20%,#000 80%,transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,#000 20%,#000 80%,transparent 100%)}
+/* the pointer: the row level with it is the one being read */
+.twin::before{content:"";position:absolute;left:0;top:50%;z-index:2;border:6px solid transparent;
+  border-left:7px solid var(--blue);transform:translateY(-50%);filter:drop-shadow(0 0 6px var(--blue))}
+.ttrack{list-style:none;position:absolute;left:0;right:0;top:50%;transform:translate3d(0,var(--tt,0px),0)}
+.trow{display:grid;grid-template-columns:4.2rem 1fr auto;gap:1.2rem;align-items:baseline;
+  padding:1.05rem .9rem 1.05rem 1.6rem;border-bottom:1px solid var(--line);cursor:pointer;outline:none;
+  opacity:calc(.26 + var(--k,0) * .74);transition:background .3s,border-color .3s}
+.trow:hover{background:linear-gradient(90deg,rgba(77,141,255,.07),transparent)}
+.trow:focus-visible{box-shadow:inset 2px 0 0 var(--blue)}
+.trow.on{background:linear-gradient(90deg,var(--blue-soft),transparent);border-color:var(--line-lit)}
+.trow .tyr{font-family:var(--mono);font-size:.68rem;color:var(--blue);letter-spacing:.08em}
+.trow h4{font-size:1.04rem;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+.trow p{font-size:.85rem;margin-top:.2rem}
+.trow .tpl{font-family:var(--mono);font-size:.62rem;color:var(--faint);text-align:right;
   line-height:1.9;white-space:nowrap}
+@media(max-width:900px){
+  .tlay{grid-template-columns:1fr;row-gap:1.1rem;padding-top:4rem}
+  .tread{display:flex;align-items:center;gap:1.4rem}
+  .tyear{font-size:2.6rem}
+  .trail{flex:1;margin-top:0}
+  .tcount{margin-top:0}
+  .twin{height:min(46lvh,22rem)}
+  .trow{grid-template-columns:3.4rem 1fr;gap:.8rem;padding-left:1.3rem}
+  .trow .tpl{grid-column:2;text-align:left;white-space:normal}
+}
 @media(max-width:700px){.award{grid-template-columns:1fr;gap:.3rem}.award .pl{text-align:left}}
 
 /* ------------------------------------------------------------ contact */
@@ -896,28 +941,40 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
 
 <!-- ===================== 07 · AWARDS ===================== -->
 <section class="chapter" id="sec-awards" data-chapter="Awards">
-  <div class="wrap sec">
-    <div class="kicker fade">07 — Awards &amp; recognition</div>
-    <h2 class="rv">Mostly <em>business and computer science</em> competitions.</h2>
-    <div style="margin-top:3rem">
-      <div class="award fade"><span class="yr">2026</span>
-        <div><h4>Business Professionals of America — State</h4>
-          <p>Four events at the Texas state conference, four placements.</p></div>
-        <div class="pl">1st · Digital Marketing<br>2nd · Digital Communication &amp; Design<br>3rd · Information Tech<br>5th · Computer Programming</div></div>
-      <div class="award fade"><span class="yr">2025</span>
-        <div><h4>BPA State qualifier</h4><p>Made it to the state conference again.</p></div><div class="pl"></div></div>
-      <div class="award fade"><span class="yr">2024</span>
-        <div><h4>BPA Regionals</h4><p>My first year competing.</p></div>
-        <div class="pl">3rd · Computer Science Concepts<br>7th · Information Technology Concepts</div></div>
-      <div class="award fade"><span class="yr">2026</span>
-        <div><h4>AP Scholar with Distinction</h4><p>Awarded junior year.</p></div><div class="pl"></div></div>
-      <div class="award fade"><span class="yr">2025</span>
-        <div><h4>AP Scholar with Honor</h4><p>Awarded sophomore year.</p></div><div class="pl"></div></div>
-      <div class="award fade"><span class="yr">2024</span>
-        <div><h4>UIL Solo &amp; Ensemble</h4><p>Qualified for the state contest freshman year.</p></div><div class="pl"></div></div>
+  <!-- The awards read like an instrument tape: the list slides under a fixed
+       reading pointer, the row on the pointer is lit, and the readout on the
+       left rolls its last digit to that row's year. Rows run chronologically
+       so the tape ends on the state placements. Each row can be clicked, or
+       focused and entered, to bring it to the pointer. -->
+  <div class="tstage" id="tstage" style="height:320lvh">
+    <div class="tpin">
+      <div class="wrap tlay">
+        <header class="ttitle">
+          <div class="kicker">07 — Awards &amp; recognition</div>
+          <h2 class="rv tname">Mostly <em>business and computer science</em> competitions.</h2>
+        </header>
+        <div class="tread" aria-hidden="true">
+          <div class="tyear"><span>202</span><span class="troll"><span class="tstrip"><i>4</i><i>5</i><i>6</i></span></span></div>
+          <div class="trail"><i></i><span>2024</span><span>2025</span><span>2026</span></div>
+          <div class="tcount"><b id="tNum">01</b><span>/ 06</span></div>
+        </div>
+        <div class="twin">
+          <ol class="ttrack" id="ttrack">
+            <li class="trow" tabindex="0" data-yr="2024"><span class="tyr">2024</span><div class="tbody"><h4>UIL Solo &amp; Ensemble</h4><p>Qualified for the state contest freshman year.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2024"><span class="tyr">2024</span><div class="tbody"><h4>BPA Regionals</h4><p>My first year competing.</p></div><div class="tpl">3rd · Computer Science Concepts<br>7th · Information Technology Concepts</div></li>
+            <li class="trow" tabindex="0" data-yr="2025"><span class="tyr">2025</span><div class="tbody"><h4>AP Scholar with Honor</h4><p>Awarded sophomore year.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2025"><span class="tyr">2025</span><div class="tbody"><h4>BPA State qualifier</h4><p>Made it to the state conference again.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2026"><span class="tyr">2026</span><div class="tbody"><h4>AP Scholar with Distinction</h4><p>Awarded junior year.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2026"><span class="tyr">2026</span><div class="tbody"><h4>Business Professionals of America — State</h4>
+          <p>Four events at the Texas state conference, four placements.</p></div><div class="tpl">1st · Digital Marketing<br>2nd · Digital Communication &amp; Design<br>3rd · Information Tech<br>5th · Computer Programming</div></li>
+          </ol>
+        </div>
+      </div>
     </div>
-
-    <div class="grid2" style="margin-top:3.4rem">
+  </div>
+  <div class="vfull">
+    <div class="wrap">
+      <div class="grid2" style="margin-top:3.4rem">
       <div class="panel fade"><h3>School</h3>
         <dl class="rows">
           <div><dt>High school</dt><dd>Lebanon Trail High School, Frisco ISD — Frisco, TX</dd></div>
@@ -931,6 +988,7 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
           <div><dt>Tools</dt><dd>Fusion 360, Arduino IDE, 3D printing</dd></div>
           <div><dt>Areas</dt><dd>Embedded systems, real-time control logic, sensor filtering, physics modeling, failure analysis</dd></div>
         </dl></div>
+    </div>
     </div>
   </div>
 </section>
@@ -1522,10 +1580,61 @@ function buildDeck(sel,groups,vhPerStep){
     }
   }})
 }
+/* ---------------------------------------------------------------------------
+   Awards: an instrument tape.
+
+   The list slides under a fixed pointer. The row on it is lit, and the year
+   readout rolls its last digit to that row's year, the way an altimeter tape
+   and its drum read the same number. Each row parks on the pointer for a
+   stretch of scroll -- the deck dwell again -- and rows are clickable: a click
+   scrolls the tape to that row rather than jumping the page past it.
+
+   Drawn from the section's progress alone, like everything else here.
+   --------------------------------------------------------------------------- */
+function buildTape(){
+  let st=F("#tstage");if(!st)return;
+  let rows=[].slice.call(st.querySelectorAll(".trow")),n=rows.length,
+      track=F("#ttrack"),strip=st.querySelector(".tstrip"),rail=st.querySelector(".trail"),num=F("#tNum"),
+      yrs=rows.map(r=>+r.dataset.yr),y0=Math.min.apply(0,yrs),y1=Math.max.apply(0,yrs),
+      words=We(st.querySelector(".tname")),centres=[],on=-1;
+  /* row centres down the track; rows differ in height, so measured, not assumed */
+  function measure(){let t=0;centres=rows.map(r=>{let h=r.offsetHeight,c=t+h/2;return t+=h,c})}
+  measure(),addEventListener("resize",measure,{passive:!0}),addEventListener("load",measure,{passive:!0});
+  /* the heading arrives with the section, before the tape pins */
+  ee(st,{start:"top bottom",end:"top top",onUpdate(p){
+    let m=words.length;
+    for(let j=0;j<m;j++){
+      let w=fe(re((p*1.6-(m>1?j/(m-1)*.5:0))/.6));
+      words[j].style.setProperty("--wo",w.toFixed(3)),
+      words[j].style.setProperty("--wy",((1-w)*22).toFixed(1)+"px"),
+      words[j].style.setProperty("--wr",((1-w)*1.4).toFixed(2)+"deg")
+    }
+  }});
+  let tr=ee(st,{start:"top top",end:"bottom bottom",onUpdate(p){
+    let a=deckAt(p,n)*(n-1),i0=Math.floor(a),i1=Math.min(n-1,i0+1),f=a-i0;
+    centres.length||measure();
+    track.style.setProperty("--tt",(-(centres[i0]+(centres[i1]-centres[i0])*f)).toFixed(1)+"px");
+    for(let i=0;i<n;i++)rows[i].style.setProperty("--k",re(1-Math.abs(a-i)).toFixed(3));
+    let near=Math.round(a);
+    if(near!==on){on>=0&&rows[on].classList.remove("on"),rows[near].classList.add("on"),on=near,
+      num.textContent=String(near+1).padStart(2,"0")}
+    let yr=yrs[i0]+(yrs[i1]-yrs[i0])*f;
+    strip.style.setProperty("--ty",(yr-y0).toFixed(4)),
+    rail.style.setProperty("--tp",(y1>y0?(yr-y0)/(y1-y0):0).toFixed(4))
+  }});
+  /* where row i parks: the middle of its dwell */
+  let park=i=>tr._s+(i>=n-1?1:(i+DWELL/2)/(n-1))*(tr._e-tr._s);
+  rows.forEach((r,i)=>{
+    let go=()=>ne.jump(park(i));
+    r.addEventListener("click",go),
+    /* stopPropagation, or the page scroller also takes Space as page-down */
+    r.addEventListener("keydown",ev=>{(ev.key==="Enter"||ev.key===" ")&&(ev.preventDefault(),ev.stopPropagation(),go())})
+  })
+}
 buildDeck("#sec-rocketry",[[0,1,2],[3],[4],[5],[6]],130);
 buildDeck("#sec-glove",[[0,1,2],[3],[4]],130);
-buildDeck("#sec-awards",[[0,1,2],[3]],130);
-Ee(".rv").filter(e=>!e.closest(".deck")).forEach(e=>{let t=We(e);ee(e,{start:"top 88%",end:"top 42%",onUpdate(n){let r=t.length,m=.5;for(let f=0;f<r;f++){let h=r>1?f/(r-1)*m:0,x=fe(re((n-h)/(1-m)));t[f].style.setProperty("--wo",x.toFixed(3)),t[f].style.setProperty("--wy",((1-x)*26).toFixed(1)+"px"),t[f].style.setProperty("--wr",((1-x)*1.6).toFixed(2)+"deg")}}})});Ee(".fade").filter(e=>!e.closest(".deck")).forEach((e,t)=>{ee(e,{start:"top 92%",end:"top 62%",onUpdate(n){let r=fe(n);e.style.setProperty("--fo",r.toFixed(3)),e.style.setProperty("--fy",((1-r)*34).toFixed(1)+"px")}})});var Tt=F("#hudNum"),Mt=F("#hudName"),wt=F("#hudBar"),st=Ee(".railwrap a"),Xe=Ee("[data-chapter]");function St(e){let t=Xe[e];t&&(Tt.textContent=String(e+1).padStart(2,"0"),Mt.textContent=t.dataset.chapter,st.forEach((n,r)=>n.classList.toggle("on",r===e)),Ee(".nav ul a").forEach(n=>n.classList.toggle("on",n.dataset.ch===String(e))))}Xe.forEach((e,t)=>{ee(e,{start:"top 55%",end:"bottom 45%",onToggle(n){n&&St(t)}})});/* Only one scene trigger runs per frame, so a fast scroll can jump straight from
+buildTape();
+Ee(".rv").filter(e=>!e.closest(".deck,.tstage")).forEach(e=>{let t=We(e);ee(e,{start:"top 88%",end:"top 42%",onUpdate(n){let r=t.length,m=.5;for(let f=0;f<r;f++){let h=r>1?f/(r-1)*m:0,x=fe(re((n-h)/(1-m)));t[f].style.setProperty("--wo",x.toFixed(3)),t[f].style.setProperty("--wy",((1-x)*26).toFixed(1)+"px"),t[f].style.setProperty("--wr",((1-x)*1.6).toFixed(2)+"deg")}}})});Ee(".fade").filter(e=>!e.closest(".deck,.tstage")).forEach((e,t)=>{ee(e,{start:"top 92%",end:"top 62%",onUpdate(n){let r=fe(n);e.style.setProperty("--fo",r.toFixed(3)),e.style.setProperty("--fy",((1-r)*34).toFixed(1)+"px")}})});var Tt=F("#hudNum"),Mt=F("#hudName"),wt=F("#hudBar"),st=Ee(".railwrap a"),Xe=Ee("[data-chapter]");function St(e){let t=Xe[e];t&&(Tt.textContent=String(e+1).padStart(2,"0"),Mt.textContent=t.dataset.chapter,st.forEach((n,r)=>n.classList.toggle("on",r===e)),Ee(".nav ul a").forEach(n=>n.classList.toggle("on",n.dataset.ch===String(e))))}Xe.forEach((e,t)=>{ee(e,{start:"top 55%",end:"bottom 45%",onToggle(n){n&&St(t)}})});/* Only one scene trigger runs per frame, so a fast scroll can jump straight from
    one chapter to another without the ones in between ever getting a turn. Every
    handler therefore starts from this full baseline and then sets what it needs —
    otherwise props from the chapter you left (the glove, the Moon) stay on screen
@@ -1632,7 +1741,7 @@ var sglT=ee(F("#sec-glove"),{scene:!0,pin:!0,start:"top bottom",onUpdate(e){
   o.camX=s(0,s(0,6,q),b),o.camY=s(1.5,3,b),o.camZ=s(20,28,b),
   o.tgtX=0,o.tgtY=s(.5,-3,b),o.tgtZ=s(-2,-20,b),
   o.starOpacity=s(1,.8,b),o.bloom=s(.55,s(.55,.45,q),b)
-}});ee(F("#sec-awards"),{scene:!0,pin:!0,onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.moonX=s(-30,-52,q),o.moonScale=s(2.2,1.8,q),o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=1,o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.moonScale=s(1.8,1,t),o.moonX=s(-52,-34,t),o.moonZ=s(-52,-90,t),o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});/* ---------------------------------------------------------------------------
+}});ee(F("#sec-awards"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.moonX=s(-30,-52,q),o.moonScale=s(2.2,1.8,q),o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=1,o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.moonScale=s(1.8,1,t),o.moonX=s(-52,-34,t),o.moonZ=s(-52,-90,t),o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});/* ---------------------------------------------------------------------------
    Outreach: a deck the scroll deals through.
 
    The five cards are one stack seen in perspective. As you scroll, the card on
