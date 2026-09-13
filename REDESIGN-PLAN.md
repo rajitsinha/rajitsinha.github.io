@@ -105,6 +105,10 @@ chose "keep content, rebuild presentation" over a blank slate.
   moved on screen (`apNdc`/`apAt`). The lunar orbit crosses in front of the Moon, clear of
   its surface.
 - School and skills is a centred board of rounded cards, not two tables.
+- **The wheel scrolls the altitude_sensor.ino listing when the pointer is over it**, and the
+  page takes over once the listing reaches its end (he had to drag its scrollbar before). The
+  smooth-scroll engine lets a wheel through when it is over a box that can still scroll that
+  way (`_inner` in the engine class); don't go back to swallowing every wheel event.
 
 ## Reference sites — what was actually found
 
