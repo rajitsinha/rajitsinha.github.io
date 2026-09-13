@@ -481,8 +481,16 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
   font-variant-numeric:tabular-nums}
 .hcard p{margin-top:.45rem;font-size:.88rem}
 @media(max-width:900px){
+  /* Stacked, the photo card and the deck were taller than a phone screen: the
+     photo rode up under the nav and the card counter sat on top of it. The
+     photo now sits beside its caption as a thumbnail -- still 4:3, so nothing
+     is cropped -- and the pin keeps the band under the nav and counter clear. */
+  .hpin{box-sizing:border-box;padding-top:7.2rem;padding-bottom:1rem}
   .hlayout{grid-template-columns:1fr;gap:1.2rem}
-  .hviewport{height:min(48lvh,24rem)}.hlead{max-width:22rem;justify-self:center}
+  .hviewport{height:min(48lvh,24rem)}
+  .hlead{display:grid;grid-template-columns:minmax(0,42%) minmax(0,1fr);align-items:center}
+  .hlead figcaption{padding:.8rem 1rem}
+  .hlead .n{font-size:1.1rem}.hlead p{font-size:.8rem;margin-top:.3rem}
   .htrack{height:11rem}.hcard{min-height:11rem}
 }
 
