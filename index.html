@@ -495,59 +495,75 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
 }
 
 /* ------------------------------------------------------------ awards tape
-   The list slides under a fixed pointer at the left edge of the window; the
-   row on the pointer is lit and every other row dims with its distance from
-   it. The readout beside it is a drum: "202" is fixed and the last digit is a
-   strip of the years present, translated by the year being read. */
+   One centred column, in the site's rounded language: the heading, a
+   pill-shaped readout (year drum, rail and playhead, count), then a window of
+   rounded cards. Scroll reads down the list. The card being read lights up
+   through --k, which the script writes per card, and the list slides to keep
+   that card near the middle of the window -- never so far that the window
+   shows empty space, so at the ends the highlight travels instead. Each edge
+   of the window fades only where there are more cards beyond it. */
 .tstage{position:relative}
 .tpin{position:sticky;top:0;height:100lvh;display:flex;align-items:center;overflow:hidden}
-.tlay{width:100%;display:grid;grid-template-columns:minmax(0,14rem) minmax(0,1fr);
-  column-gap:clamp(2rem,5vw,5rem);row-gap:clamp(1.4rem,3.4vh,2.4rem);align-items:center;padding-top:3.2rem}
-.ttitle{grid-column:1/-1}
+.tlay{width:100%;display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:3.2rem}
 .ttitle .kicker{margin-bottom:.9rem}
-.tread{font-family:var(--mono)}
-.tyear{display:flex;font-size:clamp(3.2rem,6.4vw,5.6rem);line-height:1;letter-spacing:-.06em;
+.ttitle .kicker::after{content:"";width:26px;height:1px;background:currentColor;opacity:.6}
+.ttitle h2{margin-inline:auto}
+.tread{display:flex;align-items:center;gap:clamp(1.1rem,2.2vw,1.9rem);font-family:var(--mono);
+  margin:clamp(1.3rem,3.4vh,2.2rem) 0 clamp(1.25rem,2.8vh,1.8rem);padding:.7rem 1.6rem .7rem 1.8rem;
+  border:1px solid var(--line);border-radius:999px;background:var(--panel);backdrop-filter:blur(10px)}
+.tyear{display:flex;font-size:clamp(2rem,3.2vw,2.7rem);line-height:1;letter-spacing:-.06em;
   color:var(--ink);font-variant-numeric:tabular-nums}
 .troll{display:inline-block;height:1em;overflow:hidden}
 .tstrip{display:block;transform:translateY(calc(var(--ty,0) * -1em))}
 .tstrip i{display:block;height:1em;font-style:normal}
-.trail{position:relative;height:1px;margin:1.5rem .3rem 0;background:var(--line-lit)}
+/* the rail's year labels hang below it, so the pair is lifted to sit centred */
+.trail{position:relative;height:1px;width:clamp(8rem,16vw,14rem);margin:0 .4rem;
+  background:var(--line-lit);transform:translateY(-.5rem)}
 .trail span{position:absolute;top:.75rem;font-size:.56rem;letter-spacing:.12em;color:var(--faint);
   transform:translateX(-50%)}
 .trail span::before{content:"";position:absolute;left:50%;top:-.95rem;width:1px;height:6px;background:var(--line-lit)}
 .trail span:nth-of-type(1){left:0}.trail span:nth-of-type(2){left:50%}.trail span:nth-of-type(3){left:100%}
 .trail i{position:absolute;top:-4px;left:calc(var(--tp,0) * 100%);width:9px;height:9px;margin-left:-4.5px;
   border-radius:50%;background:var(--blue);box-shadow:0 0 12px var(--blue)}
-.tcount{display:flex;align-items:baseline;gap:.5rem;margin-top:2.8rem;font-size:.62rem;
-  letter-spacing:.16em;color:var(--faint)}
+.tcount{display:flex;align-items:baseline;gap:.45rem;font-size:.62rem;letter-spacing:.16em;color:var(--faint)}
 .tcount b{color:var(--ink);font-weight:400;font-size:.8rem}
-.twin{position:relative;height:min(52lvh,28rem);overflow:hidden;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 20%,#000 80%,transparent 100%);
-  mask-image:linear-gradient(to bottom,transparent 0,#000 20%,#000 80%,transparent 100%)}
-/* the pointer: the row level with it is the one being read */
-.twin::before{content:"";position:absolute;left:0;top:50%;z-index:2;border:6px solid transparent;
-  border-left:7px solid var(--blue);transform:translateY(-50%);filter:drop-shadow(0 0 6px var(--blue))}
-.ttrack{list-style:none;position:absolute;left:0;right:0;top:50%;transform:translate3d(0,var(--tt,0px),0)}
-.trow{display:grid;grid-template-columns:4.2rem 1fr auto;gap:1.2rem;align-items:baseline;
-  padding:1.05rem .9rem 1.05rem 1.6rem;border-bottom:1px solid var(--line);cursor:pointer;outline:none;
-  opacity:calc(.26 + var(--k,0) * .74);transition:background .3s,border-color .3s}
-.trow:hover{background:linear-gradient(90deg,rgba(77,141,255,.07),transparent)}
-.trow:focus-visible{box-shadow:inset 2px 0 0 var(--blue)}
-.trow.on{background:linear-gradient(90deg,var(--blue-soft),transparent);border-color:var(--line-lit)}
+.twin{position:relative;width:min(100%,46rem);height:min(40lvh,24rem);overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--ft,0%),#000 calc(100% - var(--fb,0%)),transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,#000 var(--ft,0%),#000 calc(100% - var(--fb,0%)),transparent 100%)}
+.ttrack{list-style:none;position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;
+  gap:.55rem;padding:.6rem .5rem;transform:translate3d(0,var(--tt,0px),0)}
+.trow{position:relative;display:grid;grid-template-columns:3.4rem minmax(0,1fr);column-gap:.9rem;row-gap:.6rem;
+  align-items:baseline;text-align:left;cursor:pointer;outline:none;
+  padding:1rem 1.4rem 1rem 2.5rem;border-radius:var(--r);
+  border:1px solid color-mix(in srgb,var(--blue) calc(var(--k,0) * 50%),rgba(255,255,255,.08));
+  background:linear-gradient(90deg,rgba(77,141,255,calc(var(--k,0) * .15)),rgba(77,141,255,calc(var(--k,0) * .02)) 70%),rgba(10,13,20,.55);
+  box-shadow:0 20px 44px -28px rgba(77,141,255,calc(var(--k,0) * .8));
+  opacity:calc(.34 + var(--k,0) * .66);transition:border-color .3s}
+/* the node: a ring that fills and glows as its card is read */
+.trow::before{content:"";position:absolute;left:1.1rem;top:1.42rem;width:8px;height:8px;border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--blue) calc(var(--k,0) * 100%),rgba(255,255,255,.22));
+  background:rgba(77,141,255,var(--k,0));box-shadow:0 0 calc(var(--k,0) * 14px) rgba(77,141,255,var(--k,0))}
+.trow:hover{border-color:color-mix(in srgb,var(--blue) calc(20% + var(--k,0) * 40%),rgba(255,255,255,.16))}
+.trow:focus-visible{box-shadow:0 0 0 2px rgba(77,141,255,.55)}
 .trow .tyr{font-family:var(--mono);font-size:.68rem;color:var(--blue);letter-spacing:.08em}
 .trow h4{font-size:1.04rem;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
 .trow p{font-size:.85rem;margin-top:.2rem}
-.trow .tpl{font-family:var(--mono);font-size:.62rem;color:var(--faint);text-align:right;
-  line-height:1.9;white-space:nowrap}
+.tpl{grid-column:2;display:flex;flex-wrap:wrap;gap:.35rem}
+.tpl:empty{display:none}
+.tpl span{font-family:var(--mono);font-size:.6rem;letter-spacing:.05em;color:var(--dim);white-space:nowrap;
+  padding:.3rem .72rem;border:1px solid var(--line-lit);border-radius:999px;background:rgba(255,255,255,.025)}
 @media(max-width:900px){
-  .tlay{grid-template-columns:1fr;row-gap:1.1rem;padding-top:4rem}
-  .tread{display:flex;align-items:center;gap:1.4rem}
-  .tyear{font-size:2.6rem}
-  .trail{flex:1;margin-top:0}
-  .tcount{margin-top:0}
-  .twin{height:min(46lvh,22rem)}
-  .trow{grid-template-columns:3.4rem 1fr;gap:.8rem;padding-left:1.3rem}
-  .trow .tpl{grid-column:2;text-align:left;white-space:normal}
+  .tlay{padding-top:4rem}
+  .tread{width:100%;justify-content:space-between;gap:1rem;padding:.6rem 1.1rem .6rem 1.3rem;margin:1rem 0 .9rem}
+  .tyear{font-size:1.9rem}
+  .trail{flex:1;width:auto;margin:0 .6rem}
+  .twin{width:100%;height:min(46lvh,22rem)}
+  /* on a phone the year sits above the title, so the copy and the placement
+     tags get the card's full width and the tags stay on one line */
+  .trow{grid-template-columns:minmax(0,1fr);row-gap:.3rem;padding:.9rem 1rem .9rem 2.1rem}
+  .trow::before{left:.85rem;top:1.22rem}
+  .tpl{grid-column:1;margin-top:.3rem}
+  .tpl span{font-size:.56rem;letter-spacing:0;white-space:normal;border-radius:.8rem}
 }
 @media(max-width:700px){.award{grid-template-columns:1fr;gap:.3rem}.award .pl{text-align:left}}
 
@@ -949,11 +965,11 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
 
 <!-- ===================== 07 · AWARDS ===================== -->
 <section class="chapter" id="sec-awards" data-chapter="Awards">
-  <!-- The awards read like an instrument tape: the list slides under a fixed
-       reading pointer, the row on the pointer is lit, and the readout on the
-       left rolls its last digit to that row's year. Rows run chronologically
-       so the tape ends on the state placements. Each row can be clicked, or
-       focused and entered, to bring it to the pointer. -->
+  <!-- The awards read like an instrument: one centred column of rounded cards
+       under a pill-shaped readout. Scrolling reads down the list -- the card
+       being read lights up, and the readout's drum rolls its last digit to that
+       card's year. Cards run chronologically so the list ends on the state
+       placements. Each card can be clicked, or focused and entered, to read it. -->
   <div class="tstage" id="tstage" style="height:320lvh">
     <div class="tpin">
       <div class="wrap tlay">
@@ -969,12 +985,12 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
         <div class="twin">
           <ol class="ttrack" id="ttrack">
             <li class="trow" tabindex="0" data-yr="2024"><span class="tyr">2024</span><div class="tbody"><h4>UIL Solo &amp; Ensemble</h4><p>Qualified for the state contest freshman year.</p></div><div class="tpl"></div></li>
-            <li class="trow" tabindex="0" data-yr="2024"><span class="tyr">2024</span><div class="tbody"><h4>BPA Regionals</h4><p>My first year competing.</p></div><div class="tpl">3rd · Computer Science Concepts<br>7th · Information Technology Concepts</div></li>
+            <li class="trow" tabindex="0" data-yr="2024"><span class="tyr">2024</span><div class="tbody"><h4>BPA Regionals</h4><p>My first year competing.</p></div><div class="tpl"><span>3rd · Computer Science Concepts</span><span>7th · Information Technology Concepts</span></div></li>
             <li class="trow" tabindex="0" data-yr="2025"><span class="tyr">2025</span><div class="tbody"><h4>AP Scholar with Honor</h4><p>Awarded sophomore year.</p></div><div class="tpl"></div></li>
             <li class="trow" tabindex="0" data-yr="2025"><span class="tyr">2025</span><div class="tbody"><h4>BPA State qualifier</h4><p>Made it to the state conference again.</p></div><div class="tpl"></div></li>
             <li class="trow" tabindex="0" data-yr="2026"><span class="tyr">2026</span><div class="tbody"><h4>AP Scholar with Distinction</h4><p>Awarded junior year.</p></div><div class="tpl"></div></li>
             <li class="trow" tabindex="0" data-yr="2026"><span class="tyr">2026</span><div class="tbody"><h4>Business Professionals of America — State</h4>
-          <p>Four events at the Texas state conference, four placements.</p></div><div class="tpl">1st · Digital Marketing<br>2nd · Digital Communication &amp; Design<br>3rd · Information Tech<br>5th · Computer Programming</div></li>
+          <p>Four events at the Texas state conference, four placements.</p></div><div class="tpl"><span>1st · Digital Marketing</span><span>2nd · Digital Communication &amp; Design</span><span>3rd · Information Tech</span><span>5th · Computer Programming</span></div></li>
           </ol>
         </div>
       </div>
@@ -1690,24 +1706,27 @@ function buildDeck(sel,groups,vhPerStep){
   }})
 }
 /* ---------------------------------------------------------------------------
-   Awards: an instrument tape.
+   Awards: an instrument tape, read down a column of cards.
 
-   The list slides under a fixed pointer. The row on it is lit, and the year
-   readout rolls its last digit to that row's year, the way an altimeter tape
-   and its drum read the same number. Each row parks on the pointer for a
-   stretch of scroll -- the deck dwell again -- and rows are clickable: a click
-   scrolls the tape to that row rather than jumping the page past it.
+   The card being read lights up, and the year readout rolls its last digit to
+   that card's year, the way an altimeter tape and its drum read the same
+   number. The list slides to keep the card being read near the middle of its
+   window, but never so far that the window shows empty space -- at the ends
+   the highlight travels instead, so the column always looks full and centred.
+   Each card holds for a stretch of scroll (the deck dwell again), and cards
+   are clickable: a click scrolls to that card rather than jumping past it.
 
    Drawn from the section's progress alone, like everything else here.
    --------------------------------------------------------------------------- */
 function buildTape(){
   let st=F("#tstage");if(!st)return;
   let rows=[].slice.call(st.querySelectorAll(".trow")),n=rows.length,
-      track=F("#ttrack"),strip=st.querySelector(".tstrip"),rail=st.querySelector(".trail"),num=F("#tNum"),
+      track=F("#ttrack"),win=st.querySelector(".twin"),strip=st.querySelector(".tstrip"),rail=st.querySelector(".trail"),num=F("#tNum"),
       yrs=rows.map(r=>+r.dataset.yr),y0=Math.min.apply(0,yrs),y1=Math.max.apply(0,yrs),
-      words=We(st.querySelector(".tname")),centres=[],on=-1;
-  /* row centres down the track; rows differ in height, so measured, not assumed */
-  function measure(){let t=0;centres=rows.map(r=>{let h=r.offsetHeight,c=t+h/2;return t+=h,c})}
+      words=We(st.querySelector(".tname")),centres=[],total=0,winH=0,on=-1;
+  /* card centres down the track, and how far the track overruns its window;
+     cards differ in height, so measured, not assumed */
+  function measure(){centres=rows.map(r=>r.offsetTop+r.offsetHeight/2),total=track.offsetHeight,winH=win.clientHeight}
   measure(),addEventListener("resize",measure,{passive:!0}),addEventListener("load",measure,{passive:!0});
   /* the heading arrives with the section, before the tape pins */
   ee(st,{start:"top bottom",end:"top top",onUpdate(p){
@@ -1722,7 +1741,13 @@ function buildTape(){
   let tr=ee(st,{start:"top top",end:"bottom bottom",onUpdate(p){
     let a=deckAt(p,n)*(n-1),i0=Math.floor(a),i1=Math.min(n-1,i0+1),f=a-i0;
     centres.length||measure();
-    track.style.setProperty("--tt",(-(centres[i0]+(centres[i1]-centres[i0])*f)).toFixed(1)+"px");
+    /* where reading is down the track, then the slide that keeps it mid-window
+       without pulling empty space into view */
+    let c=centres[i0]+(centres[i1]-centres[i0])*f,room=total-winH,
+        off=room>0?Math.max(0,Math.min(room,c-winH/2)):room/2;
+    track.style.setProperty("--tt",(-off).toFixed(1)+"px"),
+    win.style.setProperty("--ft",(room>0?re(off/60)*14:0).toFixed(2)+"%"),
+    win.style.setProperty("--fb",(room>0?re((room-off)/60)*14:0).toFixed(2)+"%");
     for(let i=0;i<n;i++)rows[i].style.setProperty("--k",re(1-Math.abs(a-i)).toFixed(3));
     let near=Math.round(a);
     if(near!==on){on>=0&&rows[on].classList.remove("on"),rows[near].classList.add("on"),on=near,

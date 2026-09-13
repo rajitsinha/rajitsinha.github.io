@@ -96,7 +96,8 @@ chose "keep content, rebuild presentation" over a blank slate.
   video off that path. It cannot be reproduced in the preview pane, so it needs confirming
   on his machine.
 - The outreach photo stays small (a `26rem` column) and its stats are a deck the scroll
-  deals. Awards are an interactive tape, not a list. In contact, the Moon sits upper right,
+  deals. Awards are an interactive tape, not a list, in one centred column of rounded cards (he
+  disliked a square, off-centre first version). In contact, the Moon sits upper right,
   clear of the links.
 
 ## Reference sites — what was actually found
@@ -203,8 +204,10 @@ a short viewport grows the block rather than clipping it.
 The card stack inside it (`#hstage`, 300lvh) is now a deal: `deckAt()` gives it the same
 dwell, the top card tips back and flies up past the viewer, and each card's figures count
 up as it arrives (`hTitle`). `#sec-awards` is no longer a deck either: `buildTape()` makes
-it an instrument tape (`#tstage`, 320lvh) whose rows slide under a fixed pointer beside a
-year drum; rows are clickable and keyboard-focusable.
+it an instrument tape (`#tstage`, 320lvh) laid out as one centred column: the heading, a pill readout (year drum,
+rail, count) and a window of rounded cards. The card being read lights up and the list
+slides to keep it mid-window without ever showing empty space, so at the ends the
+highlight travels instead. Cards are clickable and keyboard-focusable.
 
 Things worth knowing before changing any of it:
 
