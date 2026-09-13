@@ -16,23 +16,30 @@ is used in college applications, so licensing and professionalism matter.
 
 Live at `github.com/rajitsinha/rajitsinha.github.io` (GitHub Pages), tracked on `main`.
 
-**Checkpoint before the rebuild: `2a70380`.** If the rebuild goes wrong:
-`git reset --hard 2a70380`.
+**Live: `main` at `a33fd6c`**, tagged `live-before-feedback-fixes`. The rebuild
+(`rebuild/scroll-scenes`, four steps off the pre-rebuild checkpoint `2a70380`) and the
+full-viewport conversion are merged and deployed. A drawing-sheet re-skin was deployed and
+then reverted at the owner's request; that revert is `a33fd6c`.
 
-The rebuild lives on **`rebuild/scroll-scenes`**, not yet merged to `main` and not yet
-deployed. Each of the four steps is its own commit and each was verified green before the
-next began, so any of them is a safe place to stop:
+**Feedback batch: on `fixes/feedback-batch`, not merged, not deployed.** One commit per
+item, each verified before the next:
 
 ```
-762c3da  step 4  wire-body language kept; Saturn V decode + z-fight fixed
-151a40e  step 3  Apollo chapter, NASA's glove beside his
-3d865fa  step 2  Draco decoder, texture strip, lazy load, dispose
-ea60293  step 1  pin primitive in the scroll engine
-e1c3e19          the verification harness, committed as tools/verify.js
+7e369f2  outreach on phones: photo beside its caption, clear of the nav
+273864f  Apollo chapter: a launch, staging and an orbit instead of a glide
+e0cbe5a  Moon and Earth kept off the awards and contact text
+659be1f  awards: an instrument tape the scroll reads through
+586b0d6  glove section: the Moon fades out through the handover
+a983efa  scroll triggers measured against the real scroll position (a real bug)
+a77b2ae  outreach: a smaller photo, and a deck the scroll deals through
+546a028  glove section: the glove lifts away instead of zooming out
+2a98ead  bench-test video: stop the browser freezing
+2f8e044  NASA's glove removed
+de304b8  harness: occlusion check
 ```
 
-`index.html` on the remote is already identical to local — the owner had been
-uploading it manually during the session, so all prior work is deployed.
+To deploy: merge into `main` and push. To go back afterwards: `git revert -m 1 <merge>` and
+push, or reset `main` to the tag `live-before-feedback-fixes` (that one needs a force-push).
 
 Gitignored on purpose: `index_(25).html` (previous site, reference only, **never
 edit**), `threejs-skills/` (separate git clone), `eftgtsetgsetges.html` (byte-identical
@@ -72,6 +79,25 @@ chose "keep content, rebuild presentation" over a blank slate.
   chapter is verified byte-identical to `2a70380`; keep it that way.
 - **The scene engine stays hand-rolled.** Offered Lenis + GSAP ScrollTrigger, the owner
   chose to extend the native engine. Don't reopen it without asking.
+- **No NASA glove beside his.** Removed at his request; the chapter shows his glove alone,
+  and the footer credit names only the Saturn V and lunar module models.
+- **Don't dim the lunar module's light.** When it covered the Apollo title he asked for a
+  fix that keeps it at full brightness. It is kept clear by placement instead: it sits
+  under the title card, positioned on screen (`apAt`).
+- **The Saturn V flies a mission, not a glide.** Ignition, two staging events with each
+  stage's own plume, orbit, a translunar burn, then the lunar module into lunar orbit. He
+  asked for it to feel like a real launch.
+- **The glove does not zoom out** as its detail section arrives. It lifts away and fades
+  through `gloveLift`/`gloveFade`, which leave its size alone; `gloveK` only drops once it
+  is already invisible.
+- **`.shot video{opacity:.999}` stays.** The bench-test video froze his browser until he
+  moved the window. That matches Chromium issue 451225677 (a video promoted to a
+  DirectComposition overlay stalls on some NVIDIA drivers), and opacity below 1 keeps the
+  video off that path. It cannot be reproduced in the preview pane, so it needs confirming
+  on his machine.
+- The outreach photo stays small (a `26rem` column) and its stats are a deck the scroll
+  deals. Awards are an interactive tape, not a list. In contact, the Moon sits upper right,
+  clear of the links.
 
 ## Reference sites — what was actually found
 
@@ -166,7 +192,6 @@ the grouping is new.
 ```js
 buildDeck("#sec-rocketry",[[0,1,2],[3],[4],[5],[6]],130);   // 5 panels, 620lvh
 buildDeck("#sec-glove",   [[0,1,2],[3],[4]],      130);     // 3 panels, 360lvh
-buildDeck("#sec-awards",  [[0,1,2],[3]],          130);     // 2 panels, 230lvh
 ```
 
 Section height is `100 + (panels-1) * vhPerStep` lvh, set by `buildDeck`. `#sec-outreach`
@@ -174,6 +199,12 @@ is deliberately **not** a deck: it is one screen of copy plus the card stack, wh
 already sticky, and pinning the section would nest that inside another pin's
 `overflow:hidden` and stop it working. It uses `.vfull` instead — `min-height:100lvh`, so
 a short viewport grows the block rather than clipping it.
+
+The card stack inside it (`#hstage`, 300lvh) is now a deal: `deckAt()` gives it the same
+dwell, the top card tips back and flies up past the viewer, and each card's figures count
+up as it arrives (`hTitle`). `#sec-awards` is no longer a deck either: `buildTape()` makes
+it an instrument tape (`#tstage`, 320lvh) whose rows slide under a fixed pointer beside a
+year drum; rows are clickable and keyboard-focusable.
 
 Things worth knowing before changing any of it:
 
@@ -186,7 +217,7 @@ Things worth knowing before changing any of it:
   forever, because their triggers can never fire in a pinned chapter.
 - **Panels measure themselves and scale down what does not fit.** `.pin` clips, so an
   overrunning block would simply be lost. Transforms do not affect layout, so the panel
-  stays exactly one viewport. At 1440×900 all ten panels fit unscaled; at 1280×680 they
+  stays exactly one viewport. At 1440×900 all eight panels fit unscaled; at 1280×680 they
   scale to ~0.75–0.8 and still land exactly on the available height.
 - Two blocks needed sizing to fit a viewport at all: the `.v3d` glove viewer
   (`min(72lvh,760px)` inside decks) and the apogee plot (width-capped to 800px, which
@@ -201,8 +232,16 @@ Optional leftovers:
 - `nasa-emu-suit.glb` (3.4 MB) and `nasa-helmet.glb` (232 KB) are still unused. The suit
   is the one from his hero photo; the helmet is the other half of what his TAS team
   designed. Neither is loaded, so neither costs a visitor anything today.
-- The NASA glove's left edge just touches the viewport edge at the end of the glove
-  chapter (NDC x reaches −1.00). Nudge `o.nglX` if it bothers you.
+
+Known and not fixed yet:
+
+- **The Moon sits behind the `#gloveCap` caption** in `#stage-glove` (occlusion: ~160 px
+  deep, across the whole caption window). Not a regression: that chapter's Moon code is
+  identical on live `a33fd6c`. Moving it means moving the Apollo end pose (`mEnd`) and the
+  `#sec-glove` start pose with it, or the handover steps.
+- **Phones: the deck fit guard shrinks panels** to 0.56-0.88 at 375x812 (rocketry
+  `[.56,.88,1,.64,.79]`, glove `[.61,.82,1]`), so body text gets small. It needs panels
+  that pan through tall content, or a flowing layout below ~700 px.
 
 ## Model pipeline — how it actually works now
 
@@ -253,16 +292,26 @@ Optional leftovers:
   trajectory's tangent pitching over across fewer pixels, marginally crossing a threshold
   set at 1% of the key's range. Before chasing a seam hit, A/B it against the previous
   commit at the same viewport — that takes one minute and settles it.
-- **Don't `await` between harness probes.** The page's own rAF loop calls `scrollTo()`
-  with the scroller's damped position every frame; give it a turn mid-walk and it moves
-  the page under the next measurement. It shows up as a single bad sample, usually at
-  y=0, that looks exactly like a purity bug and is not one. Do any waiting before the
-  walk starts.
+- **A single bad sample at y=0 showing the last chapter's state is a real bug, not a
+  harness artifact.** An earlier version of this note blamed awaiting between probes; that
+  was wrong. Triggers were measured against the scroll that was *requested* rather than
+  where the page actually was, so any scroll clamped at the end of the document shifted
+  every trigger by the overshoot, and whole chapters answered for the wrong range: after
+  one clamped jump the top of the page drew the contact chapter. Fixed in `docRect()`,
+  which now measures against `scrollY`; `__harness.clampCheck()` is the regression test.
+  Keep the walks synchronous anyway -- an await gives the page's own rAF loop a turn.
 - The preview pane reports `visibilityState: "hidden"`, so rAF never runs and screenshots
   are unreliable. Drive frames with `__world.update(1/60)` after each `__harness.go(y)`,
   and read the framebuffer with `gl.readPixels` if you need to see what is on screen.
 - **Cache-bust model URLs too**, not just `index.html`. A re-encoded `.glb` at the same
   path will keep serving the old bytes and you will "verify" the file you just replaced.
+- **The preview's `navigate` can hand back a cached `index.html`** right after an edit.
+  Before trusting a run, check that a substring you just added is in `document.scripts` or
+  the `<style>`; if it is not, navigate again with a new `?fresh=` query.
+- **Blend on screen, not in the world, when the camera is moving.** Blending the lunar
+  module's world position during the camera's swing flung it off the corner of the screen
+  and back, and no state seam flagged it, because every key was smooth. Project, blend in
+  NDC, unproject (`apAt`).
 
 ## Already fixed — don't regress
 
@@ -302,15 +351,26 @@ window first, then `__world.resize()` and `__scroller._measure()`.
 - **Purity check** — snapshot state at N positions in order, revisit in random order,
   diff. Any difference means state depends on scroll history — the bug class that caused
   props to stick.
+- **Occlusion check**: `occlusion({from,to,step})` projects each visible body (Earth and
+  Moon as circles; Saturn V, LM and glove as boxes), grows it by a 36 px bloom margin, and
+  intersects it with the line boxes of text that is showing and not on a backed surface
+  (`.panel,.codecard,.hcard,.hlead`), clipped to overflow ancestors. The target is 0.
+  **Run it with the models mounted.** Seam and purity walk the whole page, chapters release
+  their models behind them, and the Saturn V and LM boxes then come back null without any
+  error. Park inside the chapter, poll `__world.slotGroup('saturn').children.length`, then
+  run it.
+- **clampCheck()**: the regression test for the `docRect()` bug described under Traps.
 
 Gate both on visibility: a value only matters when its `rocketK` / `gloveK` / `earthK` /
-`moonK` / `saturnK` / `lmK` / `nglK` is > 0.02. `ve()` resets the K's but deliberately
+`moonK` / `saturnK` / `lmK` is > 0.02 (`saturnNozzle` gates on `saturnThrust`). `ve()` resets the K's but deliberately
 leaves the parked coordinates behind them, so an off-screen prop's position is undefined
 by design and must not be tested. **The gate applies to the purity check too** — without
 it, purity reports ~900 false drifts on a healthy page.
 
-Last run at 1440×900, after all four steps: **0 steps across 22,487 pixels, 0 drift over
-320 probes**, twice, with different shuffle seeds. Also verified: hero + ascent + flight
+Last run at 1440×900, on `273864f`: **0 steps across 30,904 pixels, 0 drift over 320
+probes**, clampCheck clean, occlusion 0 across the Apollo chapter at 5 px steps (the whole
+page at 30 px reports only the known Moon behind `#gloveCap`). At the end of the rebuild,
+also verified: hero + ascent + flight
 computer sampled every 25 px from 0 to 8000 against `2a70380` served side by side, 0
 differences over 25 keys; and `gloveK`/`gloveExplode` checked against their original
 formulas at 200 positions with progress recovered from `gloveSpin` so pixel rounding

@@ -243,6 +243,16 @@ p{color:var(--dim);max-width:56ch}
 .shot{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
   background:var(--bg2);position:relative}
 .shot img,.shot video{width:100%;height:100%;object-fit:cover;display:block}
+/* Keep video off the hardware-overlay path. On Windows, Chrome can hand a
+   <video> to DirectComposition as its own overlay plane, and with NVIDIA
+   drivers that path stalls while the page scrolls or animates near it: the
+   whole window stops updating until it is moved or resized (Chromium issue
+   451225677). The compositor never promotes a quad whose opacity is below 1,
+   so this keeps the video composited with the rest of the page. .999 is below
+   1 to the compositor and indistinguishable on screen. It matters here more
+   than on most pages, because the decks translate and fade the panels these
+   videos sit in on every scroll frame. */
+.shot video{opacity:.999}
 .shot figcaption{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;
   text-transform:uppercase;color:var(--faint);padding:.7rem .95rem;border-top:1px solid var(--line)}
 .shot.tall img,.shot.tall video{aspect-ratio:4/5;max-height:min(70lvh,32rem)}
@@ -439,8 +449,10 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
    column as the pinned section is scrubbed. */
 .hstage{position:relative}
 .hpin{position:sticky;top:0;height:100lvh;display:flex;align-items:center;overflow:hidden}
-.hlayout{width:100%;padding:0 var(--pad);display:grid;align-items:center;
-  grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:clamp(1.4rem,3.4vw,3rem)}
+/* The photo was taking half the screen. It now sits at a fixed, modest width
+   beside the deck, and the pair is centred rather than stretched edge to edge. */
+.hlayout{width:100%;padding:0 var(--pad);display:grid;align-items:center;justify-content:center;
+  grid-template-columns:minmax(0,26rem) minmax(0,36rem);gap:clamp(2rem,5vw,5.5rem)}
 .hlead{margin:0;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;
   background:var(--panel);backdrop-filter:blur(12px)}
 .hlead img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
@@ -448,33 +460,95 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
 .hlead .n{font-size:1.35rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);display:block}
 .hlead p{font-size:.9rem;margin-top:.45rem}
 
-.hviewport{position:relative;height:min(66lvh,32rem);overflow:hidden;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 13%,#000 87%,transparent 100%);
-  mask-image:linear-gradient(to bottom,transparent 0,#000 13%,#000 87%,transparent 100%)}
-.htrack{display:flex;flex-direction:column;gap:clamp(.7rem,1.5vw,1.05rem);
-  padding:calc(min(66lvh,32rem) * .18) 0;
-  transform:translate3d(0,var(--hy,0px),0);will-change:transform}
-.hcard{border:1px solid var(--line);border-radius:var(--r-lg);
-  background:var(--panel);backdrop-filter:blur(12px);padding:1.15rem 1.3rem}
+/* ------------------------------------------------------------ outreach deck
+   The five cards are one stack seen in perspective, and scroll deals through
+   it: the top card tips back and is flung up past the
+   viewer while the next comes forward from behind. The scroll handler writes
+   the transforms as variables. Cards align by their top edge and share a
+   height, so the pile behind shows an even edge. They are opaque rather than
+   blurred -- stacked cards have to hide one another, and backdrop blur under
+   3D transforms is expensive to composite. Perspective sits on the track, the
+   cards' direct parent, so z-index still decides which card is on top. */
+.hviewport{position:relative;height:min(58lvh,31rem);display:flex;align-items:center}
+.htrack{position:relative;width:100%;height:12.5rem;perspective:1600px;perspective-origin:50% 0%}
+.hcard{position:absolute;left:0;right:0;top:0;min-height:12.5rem;
+  border:1px solid var(--line-lit);border-radius:var(--r-lg);background:rgba(9,12,19,.95);
+  padding:1.2rem 1.4rem;transform-origin:50% 60%;
+  transform:translate3d(0,var(--cy,0px),var(--cz,0px)) rotateX(var(--crx,0deg)) scale(var(--cs,1));
+  opacity:var(--co,1);will-change:transform,opacity;box-shadow:0 18px 40px -22px rgba(0,0,0,.9)}
 .hcard .n{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;color:var(--blue)}
-.hcard h3{font-size:1.3rem;margin-top:.35rem}
+.hcard h3{font-size:clamp(1.7rem,3vw,2.35rem);margin-top:.45rem;letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums}
 .hcard p{margin-top:.45rem;font-size:.88rem}
 @media(max-width:900px){
+  /* Stacked, the photo card and the deck were taller than a phone screen: the
+     photo rode up under the nav and the card counter sat on top of it. The
+     photo now sits beside its caption as a thumbnail -- still 4:3, so nothing
+     is cropped -- and the pin keeps the band under the nav and counter clear. */
+  .hpin{box-sizing:border-box;padding-top:7.2rem;padding-bottom:1rem}
   .hlayout{grid-template-columns:1fr;gap:1.2rem}
-  .hviewport{height:min(46lvh,22rem)}
-  .htrack{padding:calc(min(46lvh,22rem) * .16) 0}
+  .hviewport{height:min(48lvh,24rem)}
+  .hlead{display:grid;grid-template-columns:minmax(0,42%) minmax(0,1fr);align-items:center}
+  .hlead figcaption{padding:.8rem 1rem}
+  .hlead .n{font-size:1.1rem}.hlead p{font-size:.8rem;margin-top:.3rem}
+  .htrack{height:11rem}.hcard{min-height:11rem}
 }
 
-/* ------------------------------------------------------------ awards */
-.award{display:grid;grid-template-columns:5.5rem 1fr auto;gap:1.2rem;align-items:baseline;
-  padding:1.15rem 0;border-bottom:1px solid var(--line);transition:.3s}
-.award:hover{background:linear-gradient(90deg,var(--blue-soft),transparent);
-  padding-left:.7rem;border-color:var(--line-lit)}
-.award .yr{font-family:var(--mono);font-size:.68rem;color:var(--blue);letter-spacing:.08em}
-.award h4{font-size:1.02rem;font-weight:500;letter-spacing:-.01em}
-.award p{font-size:.85rem;margin-top:.2rem}
-.award .pl{font-family:var(--mono);font-size:.62rem;color:var(--faint);text-align:right;
+/* ------------------------------------------------------------ awards tape
+   The list slides under a fixed pointer at the left edge of the window; the
+   row on the pointer is lit and every other row dims with its distance from
+   it. The readout beside it is a drum: "202" is fixed and the last digit is a
+   strip of the years present, translated by the year being read. */
+.tstage{position:relative}
+.tpin{position:sticky;top:0;height:100lvh;display:flex;align-items:center;overflow:hidden}
+.tlay{width:100%;display:grid;grid-template-columns:minmax(0,14rem) minmax(0,1fr);
+  column-gap:clamp(2rem,5vw,5rem);row-gap:clamp(1.4rem,3.4vh,2.4rem);align-items:center;padding-top:3.2rem}
+.ttitle{grid-column:1/-1}
+.ttitle .kicker{margin-bottom:.9rem}
+.tread{font-family:var(--mono)}
+.tyear{display:flex;font-size:clamp(3.2rem,6.4vw,5.6rem);line-height:1;letter-spacing:-.06em;
+  color:var(--ink);font-variant-numeric:tabular-nums}
+.troll{display:inline-block;height:1em;overflow:hidden}
+.tstrip{display:block;transform:translateY(calc(var(--ty,0) * -1em))}
+.tstrip i{display:block;height:1em;font-style:normal}
+.trail{position:relative;height:1px;margin:1.5rem .3rem 0;background:var(--line-lit)}
+.trail span{position:absolute;top:.75rem;font-size:.56rem;letter-spacing:.12em;color:var(--faint);
+  transform:translateX(-50%)}
+.trail span::before{content:"";position:absolute;left:50%;top:-.95rem;width:1px;height:6px;background:var(--line-lit)}
+.trail span:nth-of-type(1){left:0}.trail span:nth-of-type(2){left:50%}.trail span:nth-of-type(3){left:100%}
+.trail i{position:absolute;top:-4px;left:calc(var(--tp,0) * 100%);width:9px;height:9px;margin-left:-4.5px;
+  border-radius:50%;background:var(--blue);box-shadow:0 0 12px var(--blue)}
+.tcount{display:flex;align-items:baseline;gap:.5rem;margin-top:2.8rem;font-size:.62rem;
+  letter-spacing:.16em;color:var(--faint)}
+.tcount b{color:var(--ink);font-weight:400;font-size:.8rem}
+.twin{position:relative;height:min(52lvh,28rem);overflow:hidden;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 20%,#000 80%,transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,#000 20%,#000 80%,transparent 100%)}
+/* the pointer: the row level with it is the one being read */
+.twin::before{content:"";position:absolute;left:0;top:50%;z-index:2;border:6px solid transparent;
+  border-left:7px solid var(--blue);transform:translateY(-50%);filter:drop-shadow(0 0 6px var(--blue))}
+.ttrack{list-style:none;position:absolute;left:0;right:0;top:50%;transform:translate3d(0,var(--tt,0px),0)}
+.trow{display:grid;grid-template-columns:4.2rem 1fr auto;gap:1.2rem;align-items:baseline;
+  padding:1.05rem .9rem 1.05rem 1.6rem;border-bottom:1px solid var(--line);cursor:pointer;outline:none;
+  opacity:calc(.26 + var(--k,0) * .74);transition:background .3s,border-color .3s}
+.trow:hover{background:linear-gradient(90deg,rgba(77,141,255,.07),transparent)}
+.trow:focus-visible{box-shadow:inset 2px 0 0 var(--blue)}
+.trow.on{background:linear-gradient(90deg,var(--blue-soft),transparent);border-color:var(--line-lit)}
+.trow .tyr{font-family:var(--mono);font-size:.68rem;color:var(--blue);letter-spacing:.08em}
+.trow h4{font-size:1.04rem;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+.trow p{font-size:.85rem;margin-top:.2rem}
+.trow .tpl{font-family:var(--mono);font-size:.62rem;color:var(--faint);text-align:right;
   line-height:1.9;white-space:nowrap}
+@media(max-width:900px){
+  .tlay{grid-template-columns:1fr;row-gap:1.1rem;padding-top:4rem}
+  .tread{display:flex;align-items:center;gap:1.4rem}
+  .tyear{font-size:2.6rem}
+  .trail{flex:1;margin-top:0}
+  .tcount{margin-top:0}
+  .twin{height:min(46lvh,22rem)}
+  .trow{grid-template-columns:3.4rem 1fr;gap:.8rem;padding-left:1.3rem}
+  .trow .tpl{grid-column:2;text-align:left;white-space:normal}
+}
 @media(max-width:700px){.award{grid-template-columns:1fr;gap:.3rem}.award .pl{text-align:left}}
 
 /* ------------------------------------------------------------ contact */
@@ -711,13 +785,13 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
 </section>
 
 <!-- ===================== 03 · TRANSIT ===================== -->
-<section class="chapter stage" id="stage-transit" data-chapter="Transit" style="height:460lvh">
+<section class="chapter stage" id="stage-transit" data-chapter="Transit" style="height:680lvh">
   <div class="pin">
     <div class="caption" id="saturnCap">
       <div class="kicker">03 — Apollo</div>
       <h2>Everything I want to work on left the ground on one of these.</h2>
-      <p>A Saturn V pitching over into its gravity turn, then the lunar module it was carrying.
-        Both models are NASA's, released into the public domain.</p>
+      <p>A Saturn V from ignition through staging and into orbit, then the lunar module it
+        carried the rest of the way. Both models are NASA's, released into the public domain.</p>
     </div>
     <div class="inner">
       <div class="card-title" id="transitTitle">
@@ -742,7 +816,6 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
       <h2>Eight bodies, and every one of them fights your fingers.</h2>
       <p>I was the design engineer for the glove: the CAD model, and working out what each layer is
         actually doing. Keep scrolling to pull it apart.</p>
-      <p>Beside it is NASA's own EVA glove — the thing ours had to stand next to.</p>
     </div>
   </div>
 </section>
@@ -839,7 +912,7 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
       middle schoolers — my job as VP of Fundraising is finding the money and the sponsors that keep it running.</p>
   </div>
   </div>
-  <div class="hstage" id="hstage" style="height:220lvh">
+  <div class="hstage" id="hstage" style="height:300lvh">
     <div class="hpin">
       <div class="hlayout">
         <figure class="hlead">
@@ -876,28 +949,40 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
 
 <!-- ===================== 07 · AWARDS ===================== -->
 <section class="chapter" id="sec-awards" data-chapter="Awards">
-  <div class="wrap sec">
-    <div class="kicker fade">07 — Awards &amp; recognition</div>
-    <h2 class="rv">Mostly <em>business and computer science</em> competitions.</h2>
-    <div style="margin-top:3rem">
-      <div class="award fade"><span class="yr">2026</span>
-        <div><h4>Business Professionals of America — State</h4>
-          <p>Four events at the Texas state conference, four placements.</p></div>
-        <div class="pl">1st · Digital Marketing<br>2nd · Digital Communication &amp; Design<br>3rd · Information Tech<br>5th · Computer Programming</div></div>
-      <div class="award fade"><span class="yr">2025</span>
-        <div><h4>BPA State qualifier</h4><p>Made it to the state conference again.</p></div><div class="pl"></div></div>
-      <div class="award fade"><span class="yr">2024</span>
-        <div><h4>BPA Regionals</h4><p>My first year competing.</p></div>
-        <div class="pl">3rd · Computer Science Concepts<br>7th · Information Technology Concepts</div></div>
-      <div class="award fade"><span class="yr">2026</span>
-        <div><h4>AP Scholar with Distinction</h4><p>Awarded junior year.</p></div><div class="pl"></div></div>
-      <div class="award fade"><span class="yr">2025</span>
-        <div><h4>AP Scholar with Honor</h4><p>Awarded sophomore year.</p></div><div class="pl"></div></div>
-      <div class="award fade"><span class="yr">2024</span>
-        <div><h4>UIL Solo &amp; Ensemble</h4><p>Qualified for the state contest freshman year.</p></div><div class="pl"></div></div>
+  <!-- The awards read like an instrument tape: the list slides under a fixed
+       reading pointer, the row on the pointer is lit, and the readout on the
+       left rolls its last digit to that row's year. Rows run chronologically
+       so the tape ends on the state placements. Each row can be clicked, or
+       focused and entered, to bring it to the pointer. -->
+  <div class="tstage" id="tstage" style="height:320lvh">
+    <div class="tpin">
+      <div class="wrap tlay">
+        <header class="ttitle">
+          <div class="kicker">07 — Awards &amp; recognition</div>
+          <h2 class="rv tname">Mostly <em>business and computer science</em> competitions.</h2>
+        </header>
+        <div class="tread" aria-hidden="true">
+          <div class="tyear"><span>202</span><span class="troll"><span class="tstrip"><i>4</i><i>5</i><i>6</i></span></span></div>
+          <div class="trail"><i></i><span>2024</span><span>2025</span><span>2026</span></div>
+          <div class="tcount"><b id="tNum">01</b><span>/ 06</span></div>
+        </div>
+        <div class="twin">
+          <ol class="ttrack" id="ttrack">
+            <li class="trow" tabindex="0" data-yr="2024"><span class="tyr">2024</span><div class="tbody"><h4>UIL Solo &amp; Ensemble</h4><p>Qualified for the state contest freshman year.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2024"><span class="tyr">2024</span><div class="tbody"><h4>BPA Regionals</h4><p>My first year competing.</p></div><div class="tpl">3rd · Computer Science Concepts<br>7th · Information Technology Concepts</div></li>
+            <li class="trow" tabindex="0" data-yr="2025"><span class="tyr">2025</span><div class="tbody"><h4>AP Scholar with Honor</h4><p>Awarded sophomore year.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2025"><span class="tyr">2025</span><div class="tbody"><h4>BPA State qualifier</h4><p>Made it to the state conference again.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2026"><span class="tyr">2026</span><div class="tbody"><h4>AP Scholar with Distinction</h4><p>Awarded junior year.</p></div><div class="tpl"></div></li>
+            <li class="trow" tabindex="0" data-yr="2026"><span class="tyr">2026</span><div class="tbody"><h4>Business Professionals of America — State</h4>
+          <p>Four events at the Texas state conference, four placements.</p></div><div class="tpl">1st · Digital Marketing<br>2nd · Digital Communication &amp; Design<br>3rd · Information Tech<br>5th · Computer Programming</div></li>
+          </ol>
+        </div>
+      </div>
     </div>
-
-    <div class="grid2" style="margin-top:3.4rem">
+  </div>
+  <div class="vfull">
+    <div class="wrap">
+      <div class="grid2" style="margin-top:3.4rem">
       <div class="panel fade"><h3>School</h3>
         <dl class="rows">
           <div><dt>High school</dt><dd>Lebanon Trail High School, Frisco ISD — Frisco, TX</dd></div>
@@ -911,6 +996,7 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
           <div><dt>Tools</dt><dd>Fusion 360, Arduino IDE, 3D printing</dd></div>
           <div><dt>Areas</dt><dd>Embedded systems, real-time control logic, sensor filtering, physics modeling, failure analysis</dd></div>
         </dl></div>
+    </div>
     </div>
   </div>
 </section>
@@ -929,7 +1015,7 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
       </div>
     </div>
   </div>
-  <div class="wrap"><footer><span>Rajit Sinha · Plano, Texas</span><span>Saturn V, lunar module and EVA glove models: NASA, public domain</span><span>Designed and built from scratch</span></footer></div>
+  <div class="wrap"><footer><span>Rajit Sinha · Plano, Texas</span><span>Saturn V and lunar module models: NASA, public domain</span><span>Designed and built from scratch</span></footer></div>
 </section>
 
 </main>
@@ -1056,11 +1142,19 @@ function pinChapter(el){
    in the flow. Measuring that would make a trigger's start move with the very
    scroll position it exists to define. Resolve through the pinned section
    instead, which is static and therefore tells the truth. */
-function docRect(el,sy){
-  let r=el.getBoundingClientRect(),pin=el.closest(".pin");
-  if(!pin||pin===el)return{top:r.top+sy,height:r.height};
+function docRect(el){
+  /* Measured against where the page really is, never against the scroll that
+     was asked for. The two differ whenever a scroll is clamped at the end of
+     the document -- a jump past the end, a max that went stale when the page
+     got shorter -- and measuring against the requested value shifts every
+     trigger by the overshoot at once. Whole chapters then answer for the wrong
+     range of scroll: after one clamped jump, the top of the page drew the
+     contact chapter until the next re-measure. The scroller always scrolls
+     before it applies, so scrollY is the position being applied. */
+  let Y=window.scrollY,r=el.getBoundingClientRect(),pin=el.closest(".pin");
+  if(!pin||pin===el)return{top:r.top+Y,height:r.height};
   let sec=pin.parentElement,pr=pin.getBoundingClientRect(),sr=sec.getBoundingClientRect();
-  return{top:sr.top+sy+(r.top-pr.top),height:r.height}
+  return{top:sr.top+Y+(r.top-pr.top),height:r.height}
 }
 function ee(e,t){
   t.pin&&pinChapter(e);
@@ -1068,7 +1162,7 @@ function ee(e,t){
      until its bottom does — exactly the span its sticky child is held for. */
   let n={el:e,start:t.start??(t.pin?"top top":"top bottom"),end:t.end??(t.pin?"bottom bottom":"bottom top"),onUpdate:t.onUpdate||null,onToggle:t.onToggle||null,once:!!t.once,scene:!!t.scene,pin:!!t.pin,_s:0,_e:1,_p:-1,_active:!1,_done:!1};
   return Pe.push(n),n
-}function Ze(e,t,n){let[r,m]=e.split(/\s+/),f=t.top+n,h=t.height,x=r==="top"?f:r==="center"?f+h/2:r==="bottom"?f+h:f+h*(parseFloat(r)/100),E=m==="top"?0:m==="center"?innerHeight/2:m==="bottom"?innerHeight:innerHeight*(parseFloat(m)/100);return x-E}function ht(e){for(let t of Pe){let n=docRect(t.el,e);t._s=Ze(t.start,n,0),t._e=Ze(t.end,n,0),t._e-t._s<1&&(t._e=t._s+1)}qe=!1}function $e(e){qe&&ht(e);let t=null,ft2=null;for(let n of Pe)n.scene&&(e>=n._s&&e<=n._e?(!t||n._s>t._s)&&(t=n):n._e<e&&(!ft2||n._e>ft2._e)&&(ft2=n));if(t){let n=re((e-t._s)/(t._e-t._s));t.onUpdate(n)}else ft2&&ft2.onUpdate(1);for(let n of Pe){if(n.scene||n.once&&n._done)continue;let r=re((e-n._s)/(n._e-n._s)),m=r>0&&r<1;m!==n._active&&(n._active=m,n.onToggle&&n.onToggle(m,r)),r!==n._p&&(n._p=r,n.onUpdate&&n.onUpdate(r),n.once&&r>=1&&(n._done=!0))}}function We(e){return(function t(n){[].slice.call(n.childNodes).forEach(r=>{if(r.nodeType===3){let m=document.createDocumentFragment();r.nodeValue.split(/(\s+)/).filter(f=>f.length).forEach(f=>{let h=document.createElement("span");h.className="w",h.textContent=f,m.appendChild(h)}),n.replaceChild(m,r)}else r.nodeType===1&&!r.classList.contains("w")&&t(r)})})(e),[].slice.call(e.querySelectorAll(".w"))}function ke(e,t=128){let n=document.createElement("canvas");n.width=n.height=t;let r=n.getContext("2d"),m=r.createRadialGradient(t/2,t/2,0,t/2,t/2,t/2);e.forEach(([h,x])=>m.addColorStop(h,x)),r.fillStyle=m,r.fillRect(0,0,t,t);let f=new a.CanvasTexture(n);return f.colorSpace=a.SRGBColorSpace,f}function Ue(e,t){let{base:n,light:r,dark:m,octaves:f=5,contrast:h=1,craters:x=0}=t,E=document.createElement("canvas");E.width=e,E.height=e/2;let j=E.getContext("2d"),K=j.createImageData(E.width,E.height),H=v=>{let Y=Math.sin(v*127.1)*43758.5453;return Y-Math.floor(Y)},g=[];for(let v=0;v<f;v++){let Y=4<<v,u=new Float32Array(Y*Y);for(let b=0;b<Y*Y;b++)u[b]=H(b+v*9871);g.push({n:Y,g:u})}let B=(v,Y)=>{let u=0,b=.5,Z=0;for(let{n:T,g:_}of g){let U=v*T,R=Y*T,$=Math.floor(U),S=Math.floor(R),W=U-$,y=R-S,A=q=>q*q*(3-2*q),P=A(W),V=A(y),z=(q,i)=>_[(i%T+T)%T*T+(q%T+T)%T],ae=s(z($,S),z($+1,S),P),Q=s(z($,S+1),z($+1,S+1),P);u+=s(ae,Q,V)*b,Z+=b,b*=.5}return u/Z},G=[];for(let v=0;v<x;v++)G.push({x:H(v*3.3),y:H(v*7.7),r:.004+H(v*11.1)*.03});let X=v=>[v>>16&255,v>>8&255,v&255],J=X(n),D=X(r),te=X(m);for(let v=0;v<E.height;v++)for(let Y=0;Y<E.width;Y++){let u=Y/E.width,b=v/E.height,Z=B(u,b);Z=re((Z-.5)*h+.5);for(let S of G){let W=Math.min(Math.abs(u-S.x),1-Math.abs(u-S.x)),y=b-S.y,A=Math.sqrt(W*W+y*y);A<S.r?Z*=.58+.42*(A/S.r):A<S.r*1.25&&(Z*=1.06)}let T=Z,_=(v*E.width+Y)*4,U=T<.5?T*2:(T-.5)*2,R=T<.5?te:J,$=T<.5?J:D;K.data[_]=R[0]+($[0]-R[0])*U,K.data[_+1]=R[1]+($[1]-R[1])*U,K.data[_+2]=R[2]+($[2]-R[2])*U,K.data[_+3]=255}j.putImageData(K,0,0);let O=new a.CanvasTexture(E);return O.colorSpace=a.SRGBColorSpace,O.anisotropy=4,O}
+}function Ze(e,t,n){let[r,m]=e.split(/\s+/),f=t.top+n,h=t.height,x=r==="top"?f:r==="center"?f+h/2:r==="bottom"?f+h:f+h*(parseFloat(r)/100),E=m==="top"?0:m==="center"?innerHeight/2:m==="bottom"?innerHeight:innerHeight*(parseFloat(m)/100);return x-E}function ht(e){for(let t of Pe){let n=docRect(t.el);t._s=Ze(t.start,n,0),t._e=Ze(t.end,n,0),t._e-t._s<1&&(t._e=t._s+1)}qe=!1}function $e(e){qe&&ht(e);let t=null,ft2=null;for(let n of Pe)n.scene&&(e>=n._s&&e<=n._e?(!t||n._s>t._s)&&(t=n):n._e<e&&(!ft2||n._e>ft2._e)&&(ft2=n));if(t){let n=re((e-t._s)/(t._e-t._s));t.onUpdate(n)}else ft2&&ft2.onUpdate(1);for(let n of Pe){if(n.scene||n.once&&n._done)continue;let r=re((e-n._s)/(n._e-n._s)),m=r>0&&r<1;m!==n._active&&(n._active=m,n.onToggle&&n.onToggle(m,r)),r!==n._p&&(n._p=r,n.onUpdate&&n.onUpdate(r),n.once&&r>=1&&(n._done=!0))}}function We(e){return(function t(n){[].slice.call(n.childNodes).forEach(r=>{if(r.nodeType===3){let m=document.createDocumentFragment();r.nodeValue.split(/(\s+)/).filter(f=>f.length).forEach(f=>{let h=document.createElement("span");h.className="w",h.textContent=f,m.appendChild(h)}),n.replaceChild(m,r)}else r.nodeType===1&&!r.classList.contains("w")&&t(r)})})(e),[].slice.call(e.querySelectorAll(".w"))}function ke(e,t=128){let n=document.createElement("canvas");n.width=n.height=t;let r=n.getContext("2d"),m=r.createRadialGradient(t/2,t/2,0,t/2,t/2,t/2);e.forEach(([h,x])=>m.addColorStop(h,x)),r.fillStyle=m,r.fillRect(0,0,t,t);let f=new a.CanvasTexture(n);return f.colorSpace=a.SRGBColorSpace,f}function Ue(e,t){let{base:n,light:r,dark:m,octaves:f=5,contrast:h=1,craters:x=0}=t,E=document.createElement("canvas");E.width=e,E.height=e/2;let j=E.getContext("2d"),K=j.createImageData(E.width,E.height),H=v=>{let Y=Math.sin(v*127.1)*43758.5453;return Y-Math.floor(Y)},g=[];for(let v=0;v<f;v++){let Y=4<<v,u=new Float32Array(Y*Y);for(let b=0;b<Y*Y;b++)u[b]=H(b+v*9871);g.push({n:Y,g:u})}let B=(v,Y)=>{let u=0,b=.5,Z=0;for(let{n:T,g:_}of g){let U=v*T,R=Y*T,$=Math.floor(U),S=Math.floor(R),W=U-$,y=R-S,A=q=>q*q*(3-2*q),P=A(W),V=A(y),z=(q,i)=>_[(i%T+T)%T*T+(q%T+T)%T],ae=s(z($,S),z($+1,S),P),Q=s(z($,S+1),z($+1,S+1),P);u+=s(ae,Q,V)*b,Z+=b,b*=.5}return u/Z},G=[];for(let v=0;v<x;v++)G.push({x:H(v*3.3),y:H(v*7.7),r:.004+H(v*11.1)*.03});let X=v=>[v>>16&255,v>>8&255,v&255],J=X(n),D=X(r),te=X(m);for(let v=0;v<E.height;v++)for(let Y=0;Y<E.width;Y++){let u=Y/E.width,b=v/E.height,Z=B(u,b);Z=re((Z-.5)*h+.5);for(let S of G){let W=Math.min(Math.abs(u-S.x),1-Math.abs(u-S.x)),y=b-S.y,A=Math.sqrt(W*W+y*y);A<S.r?Z*=.58+.42*(A/S.r):A<S.r*1.25&&(Z*=1.06)}let T=Z,_=(v*E.width+Y)*4,U=T<.5?T*2:(T-.5)*2,R=T<.5?te:J,$=T<.5?J:D;K.data[_]=R[0]+($[0]-R[0])*U,K.data[_+1]=R[1]+($[1]-R[1])*U,K.data[_+2]=R[2]+($[2]-R[2])*U,K.data[_+3]=255}j.putImageData(K,0,0);let O=new a.CanvasTexture(E);return O.colorSpace=a.SRGBColorSpace,O.anisotropy=4,O}
 
 /* ---------------------------------------------------------------------------
    Planet surfaces.
@@ -1313,19 +1407,39 @@ function wireModel(root,o){
     g.add(n),m4.decompose(n.position,n.quaternion,n.scale)
   }
   mats.push(core);
-  if(segs.length){
-    let lg=new a.BufferGeometry();
-    lg.setAttribute("position",new a.BufferAttribute(new Float32Array(segs),3));
-    let lm=new a.LineBasicMaterial({color:o.wire,transparent:!0,opacity:o.wireOp,
-      blending:a.AdditiveBlending,depthWrite:!1});
-    g.add(new a.LineSegments(lg,lm));mats.push(lm)
+  /* One LineSegments and one Points per layer. A banded model gets a layer per
+     band, split at the given fractions of its height and centred on itself,
+     so a spent stage can tumble about its own middle rather than the model's
+     origin. The shell stays whole and is clipped per frame instead. */
+  function layer(host,sg,dt){
+    if(sg.length){let lg=new a.BufferGeometry();lg.setAttribute("position",new a.BufferAttribute(new Float32Array(sg),3));
+      let lm=new a.LineBasicMaterial({color:o.wire,transparent:!0,opacity:o.wireOp,blending:a.AdditiveBlending,depthWrite:!1});
+      host.add(new a.LineSegments(lg,lm)),mats.push(lm),host.userData.mats.push(lm)}
+    if(dt.length){let pg=new a.BufferGeometry();pg.setAttribute("position",new a.BufferAttribute(new Float32Array(dt),3));
+      let pm=new a.PointsMaterial({color:o.dot,size:o.dotSize,transparent:!0,opacity:o.dotOp,blending:a.AdditiveBlending,depthWrite:!1,sizeAttenuation:!0});
+      host.add(new a.Points(pg,pm)),mats.push(pm),host.userData.mats.push(pm)}
   }
-  if(dots.length){
-    let pg=new a.BufferGeometry();
-    pg.setAttribute("position",new a.BufferAttribute(new Float32Array(dots),3));
-    let pm=new a.PointsMaterial({color:o.dot,size:o.dotSize,transparent:!0,opacity:o.dotOp,
-      blending:a.AdditiveBlending,depthWrite:!1,sizeAttenuation:!0});
-    g.add(new a.Points(pg,pm));mats.push(pm)
+  g.userData.mats=[];
+  if(!o.bands)layer(g,segs,dots);
+  else{
+    let lo=1e9,hi=-1e9;
+    for(let i=1;i<segs.length;i+=3)segs[i]<lo&&(lo=segs[i]),segs[i]>hi&&(hi=segs[i]);
+    let hgt=hi-lo||1,cuts=o.bands.map(b=>lo+b*hgt),band=y=>y<cuts[0]?0:y<cuts[1]?1:2,SB=[[],[],[]],DB=[[],[],[]];
+    for(let i=0;i<segs.length;i+=6)SB[band((segs[i+1]+segs[i+4])/2)].push(segs[i],segs[i+1],segs[i+2],segs[i+3],segs[i+4],segs[i+5]);
+    for(let i=0;i<dots.length;i+=3)DB[band(dots[i+1])].push(dots[i],dots[i+1],dots[i+2]);
+    g.userData.bands=[0,1,2].map(bi=>{
+      let all=SB[bi].concat(DB[bi]),c=[0,0,0],m=all.length/3||1;
+      for(let i=0;i<all.length;i+=3)c[0]+=all[i],c[1]+=all[i+1],c[2]+=all[i+2];
+      c=c.map(v=>v/m);
+      let sh=arr=>{for(let i=0;i<arr.length;i+=3)arr[i]-=c[0],arr[i+1]-=c[1],arr[i+2]-=c[2];return arr},
+          gB=new a.Group;
+      gB.userData.mats=[],gB.userData.c=c,gB.position.set(c[0],c[1],c[2]);
+      layer(gB,sh(SB[bi]),sh(DB[bi]));
+      gB.userData.base=gB.userData.mats.map(x=>x.opacity);
+      return g.add(gB),gB
+    });
+    g.userData.split=o.bands,g.userData.minY=lo,g.userData.hgt=hgt,
+    g.userData.plane=new a.Plane(new a.Vector3(0,1,0),1e6),core.clippingPlanes=[g.userData.plane]
   }
   g.userData.mats=mats;g.userData.base=mats.map(m=>m.opacity);
   return g
@@ -1347,7 +1461,7 @@ function onLand(lon,lat){
     let dx=dl*Math.cos(lat),dy=lat-L[1];
     if(dx*dx+dy*dy<L[2]*L[2]*1.4)return!0}
   return Math.abs(lat)>1.19}
-function Ne(e){let t=new a.WebGLRenderer({canvas:e,antialias:!0,powerPreference:"high-performance"});t.setPixelRatio(Math.min(devicePixelRatio||1,1.85)),t.setSize(innerWidth,innerHeight,!1),t.toneMapping=a.ACESFilmicToneMapping,t.toneMappingExposure=1;let n=new a.Scene,r=new a.PerspectiveCamera(42,innerWidth/innerHeight,.1,4e3);r.position.set(0,2,26);let m=new a.DirectionalLight(16773856,3.1);m.position.set(-9,5,8),n.add(m,new a.AmbientLight(3820138,.3));let f=new a.DirectionalLight(5082623,1.1);f.position.set(10,-3,-7),n.add(f);let h=new a.BufferGeometry,x=3e3,E=new Float32Array(x*3),j=new Float32Array(x*3),K=new Float32Array(x);for(let M=0;M<x;M++){let k=320+Math.random()*900,p=Math.random()*Math.PI*2,ce=Math.acos(2*Math.random()-1);E[M*3]=k*Math.sin(ce)*Math.cos(p),E[M*3+1]=k*Math.cos(ce),E[M*3+2]=k*Math.sin(ce)*Math.sin(p);let we=Math.random(),pe=we>.86?[1,.82,.62]:we>.7?[.78,.86,1]:[1,1,1],le=.45+Math.random()*.55;j[M*3]=pe[0]*le,j[M*3+1]=pe[1]*le,j[M*3+2]=pe[2]*le,K[M]=Math.random()<.04?5.5+Math.random()*5:1.1+Math.random()*2.2}h.setAttribute("position",new a.BufferAttribute(E,3)),h.setAttribute("color",new a.BufferAttribute(j,3)),h.setAttribute("aScale",new a.BufferAttribute(K,1));let H=new a.ShaderMaterial({uniforms:{uTex:{value:ke([[0,"rgba(255,255,255,1)"],[.35,"rgba(255,255,255,.55)"],[1,"rgba(255,255,255,0)"]],64)},uTime:{value:0},uOpacity:{value:1}},vertexShader:`attribute float aScale; varying vec3 vC; varying float vT;
+function Ne(e){let t=new a.WebGLRenderer({canvas:e,antialias:!0,powerPreference:"high-performance"});t.setPixelRatio(Math.min(devicePixelRatio||1,1.85)),t.setSize(innerWidth,innerHeight,!1),t.toneMapping=a.ACESFilmicToneMapping,t.toneMappingExposure=1;/* the Saturn V's occluding shell is clipped at the joint of a stage that has separated */t.localClippingEnabled=!0;let n=new a.Scene,r=new a.PerspectiveCamera(42,innerWidth/innerHeight,.1,4e3);r.position.set(0,2,26);let m=new a.DirectionalLight(16773856,3.1);m.position.set(-9,5,8),n.add(m,new a.AmbientLight(3820138,.3));let f=new a.DirectionalLight(5082623,1.1);f.position.set(10,-3,-7),n.add(f);let h=new a.BufferGeometry,x=3e3,E=new Float32Array(x*3),j=new Float32Array(x*3),K=new Float32Array(x);for(let M=0;M<x;M++){let k=320+Math.random()*900,p=Math.random()*Math.PI*2,ce=Math.acos(2*Math.random()-1);E[M*3]=k*Math.sin(ce)*Math.cos(p),E[M*3+1]=k*Math.cos(ce),E[M*3+2]=k*Math.sin(ce)*Math.sin(p);let we=Math.random(),pe=we>.86?[1,.82,.62]:we>.7?[.78,.86,1]:[1,1,1],le=.45+Math.random()*.55;j[M*3]=pe[0]*le,j[M*3+1]=pe[1]*le,j[M*3+2]=pe[2]*le,K[M]=Math.random()<.04?5.5+Math.random()*5:1.1+Math.random()*2.2}h.setAttribute("position",new a.BufferAttribute(E,3)),h.setAttribute("color",new a.BufferAttribute(j,3)),h.setAttribute("aScale",new a.BufferAttribute(K,1));let H=new a.ShaderMaterial({uniforms:{uTex:{value:ke([[0,"rgba(255,255,255,1)"],[.35,"rgba(255,255,255,.55)"],[1,"rgba(255,255,255,0)"]],64)},uTime:{value:0},uOpacity:{value:1}},vertexShader:`attribute float aScale; varying vec3 vC; varying float vT;
       uniform float uTime;
       void main(){ vC=color; vT=fract(sin(position.x*12.9898+position.y*78.233)*43758.5453);
         vec4 mv=modelViewMatrix*vec4(position,1.0);
@@ -1375,20 +1489,98 @@ function Ne(e){let t=new a.WebGLRenderer({canvas:e,antialias:!0,powerPreference:
           vec3 col=mix(uColor,uWarm,graze*0.55);
           float f=rim*mix(0.06,1.0,lit);
           gl_FragColor=vec4(col*uInt*(0.85+lit*0.5),f); }`}));B.add(J),B.position.set(0,-11,0);let D=new a.Group;n.add(D);let O=wireBody(14,{core:657930,wire:5592405,wireOp:.22,dot:11450029,dotOp:.6,dotSize:.085,pts:34e3,lat:13,lon:20,mask:(lo,la)=>!inMaria(lo,la),ring:12303291,ringOp:.62,rings:lunarRings()});D.add(O),D.position.set(120,30,-260),D.visible=!0;let v=new a.Group,Y=new a.MeshStandardMaterial({color:15265012,roughness:.42,metalness:.35}),u=new a.MeshStandardMaterial({color:2764864,roughness:.6,metalness:.4}),b=new a.MeshStandardMaterial({color:5082623,roughness:.35,metalness:.5,emissive:1785728,emissiveIntensity:.6}),Z=new a.Mesh(new a.CylinderGeometry(.3,.3,3.1,32),Y),T=new a.Mesh(new a.ConeGeometry(.3,1.05,32),Y.clone());T.material.transparent=!0;T.position.y=2.07;let _=new a.Mesh(new a.CylinderGeometry(.315,.315,.24,32),b);_.position.y=.55;let U=new a.Mesh(new a.CylinderGeometry(.3,.34,.5,32),u);U.position.y=-1.75,v.add(Z,T,_,U);let R=new a.Shape;R.moveTo(0,0),R.lineTo(.85,-.62),R.lineTo(.85,-.9),R.lineTo(0,-.9);let $=new a.ExtrudeGeometry(R,{depth:.05,bevelEnabled:!1});for(let M=0;M<3;M++){let k=new a.Mesh($,Y);k.position.set(0,-1.05,0),k.rotation.y=M*Math.PI*2/3,v.add(k)}let S=ke([[0,"rgba(255,244,214,1)"],[.22,"rgba(255,168,70,.92)"],[.55,"rgba(255,92,30,.42)"],[1,"rgba(255,60,0,0)"]],128),W=new a.Sprite(new a.SpriteMaterial({map:S,transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));W.position.y=-3.7,W.scale.set(.95,3.3,1),v.add(W);let y=new a.Sprite(new a.SpriteMaterial({map:S,transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));y.position.y=-2.25,y.scale.set(.5,.95,1),v.add(y);let A=new a.PointLight(16747069,0,26);A.position.y=-2.4,v.add(A),n.add(v);let P=46,V=ke([[0,"rgba(210,225,255,.75)"],[.45,"rgba(150,175,215,.28)"],[1,"rgba(120,140,180,0)"]],64),z=[];for(let M=0;M<P;M++){let k=new a.Sprite(new a.SpriteMaterial({map:V,transparent:!0,depthWrite:!1,opacity:0,blending:a.NormalBlending}));k.visible=!1,n.add(k),z.push({sprite:k,life:0,x:0,y:0,z:0,size:1})}let ae=0,Q=0,q=new a.Group,i=new a.Mesh(new a.SphereGeometry(1.5,30,18,0,Math.PI*2,0,Math.PI*.52),new a.MeshStandardMaterial({color:16747069,roughness:.85,metalness:0,side:a.DoubleSide,emissive:3478794,emissiveIntensity:.5}));q.add(i);let c=new a.LineBasicMaterial({color:12371670,transparent:!0,opacity:.5});for(let M=0;M<8;M++){let k=M/8*Math.PI*2,p=new a.BufferGeometry().setFromPoints([new a.Vector3(Math.cos(k)*1.45,0,Math.sin(k)*1.45),new a.Vector3(0,-1.7,0)]);q.add(new a.Line(p,c))}q.visible=!1,q.scale.setScalar(.01),n.add(q);let L=(()=>{let k=document.createElement("canvas");k.width=k.height=1024;let p=k.getContext("2d");p.fillStyle="#0a0e18",p.fillRect(0,0,1024,1024),p.strokeStyle="rgba(110,150,215,.3)",p.lineWidth=2;for(let pe=0;pe<=32;pe++){let le=pe*1024/32;p.beginPath(),p.moveTo(le,0),p.lineTo(le,1024),p.stroke(),p.beginPath(),p.moveTo(0,le),p.lineTo(1024,le),p.stroke()}let ce=p.createRadialGradient(1024/2,1024/2,0,1024/2,1024/2,1024/2);ce.addColorStop(0,"rgba(0,0,0,0)"),ce.addColorStop(.45,"rgba(0,0,0,.35)"),ce.addColorStop(1,"rgba(4,5,10,1)"),p.fillStyle=ce,p.fillRect(0,0,1024,1024);let we=new a.CanvasTexture(k);return we.colorSpace=a.SRGBColorSpace,we})(),d=new a.Mesh(new a.CircleGeometry(150,64),new a.MeshBasicMaterial({map:L,transparent:!0,opacity:0,depthWrite:!1}));d.rotation.x=-Math.PI/2,d.position.y=-9.2,d.visible=!1,n.add(d);let C=new a.Sprite(new a.SpriteMaterial({map:ke([[0,"rgba(90,150,255,.55)"],[.5,"rgba(50,90,180,.18)"],[1,"rgba(0,0,0,0)"]],128),transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));C.position.set(0,-9,-30),C.scale.set(150,26,1),n.add(C);let ue=new a.Group;ue.visible=!1,n.add(ue);
-/* Apollo hardware and NASA's glove. Each is a host group the chapter fills in
+/* Apollo hardware. Each is a host group the chapter fills in
    when its model arrives and empties when it leaves, so nothing here exists
    until it is scrolled to. */
-let svG=new a.Group;svG.visible=!1,n.add(svG);
+let svG=new a.Group;svG.visible=!1,svG.rotation.order="ZYX",n.add(svG);
+/* The Saturn V's exhaust. An open cylinder that flares from the nozzle, lit
+   by a flickering gradient -- white-hot at the nozzle, orange down its length,
+   gone at the tail -- and brightest where it faces the camera, so its sides
+   soften instead of showing a hard edge. Additive, so the bloom picks it up.
+   It lives outside the model's slot, which is emptied whenever the model is
+   released. */
+let svFx=new a.Group;svFx.visible=!1,svFx.rotation.order="ZYX",n.add(svFx);
+let svPG=new a.CylinderGeometry(.45,1,1,28,6,!0);svPG.translate(0,-.5,0);
+let svPlume=new a.Mesh(svPG,new a.ShaderMaterial({transparent:!0,depthWrite:!1,side:a.DoubleSide,blending:a.AdditiveBlending,
+  uniforms:{uTime:{value:0},uPower:{value:0}},
+  vertexShader:`varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+    void main(){ vUv=uv; vN=normalize(normalMatrix*normal);
+      vec4 mv=modelViewMatrix*vec4(position,1.0); vV=normalize(-mv.xyz);
+      gl_Position=projectionMatrix*mv; }`,
+  fragmentShader:`uniform float uTime; uniform float uPower;
+    varying vec2 vUv; varying vec3 vN; varying vec3 vV;
+    float hs(vec2 p){ return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453); }
+    float nz(vec2 p){ vec2 i=floor(p), f=fract(p), u=f*f*(3.0-2.0*f);
+      return mix(hs(i),hs(i+vec2(1.0,0.0)),u.x)+(hs(i+vec2(0.0,1.0))-hs(i))*u.y*(1.0-u.x)
+            +(hs(i+vec2(1.0))-hs(i+vec2(1.0,0.0)))*u.x*u.y; }
+    void main(){
+      float y=vUv.y;                                   /* 1 at the nozzle, 0 at the tail */
+      float face=pow(abs(dot(normalize(vN),normalize(vV))),1.4);
+      float along=smoothstep(0.0,0.35,y)*mix(0.35,1.0,y);
+      float flick=nz(vec2(vUv.x*7.0, y*9.0-uTime*16.0));
+      vec3 col=mix(vec3(1.0,0.36,0.12),mix(vec3(1.0,0.66,0.28),vec3(1.0,0.97,0.9),smoothstep(0.6,1.0,y)),smoothstep(0.15,0.75,y));
+      float al=face*along*(0.7+0.3*flick)*uPower;
+      gl_FragColor=vec4(col*1.5, al); }`}));
+svFx.add(svPlume);
+let svGlow=new a.Sprite(new a.SpriteMaterial({map:S,transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));svFx.add(svGlow);
+/* smoke, spawned at the nozzle while there is air to make it */
+let svPool=[];for(let q2=0;q2<64;q2++){let sp2=new a.Sprite(new a.SpriteMaterial({map:V,transparent:!0,depthWrite:!1,opacity:0,blending:a.NormalBlending}));sp2.visible=!1,n.add(sp2),svPool.push({sp:sp2,life:0,v:new a.Vector3,size:1})}
+let svPi=0,svAcc=0,svA=new a.Vector3,svB=new a.Vector3;
 let lmG=new a.Group;lmG.visible=!1,n.add(lmG);
-let ngG=new a.Group;ngG.visible=!1,n.add(ngG);
-let SLOT={saturn:svG,lm:lmG,ngl:ngG};
-let De=[],he=new mt(t);he.addPass(new pt(n,r));let Oe=new ft(new a.Vector2(innerWidth*.5,innerHeight*.5),.62,.72,.62);he.addPass(Oe),he.addPass(new gt);let l={camX:0,camY:2,camZ:26,tgtX:0,tgtY:0,tgtZ:0,roll:0,fov:42,starOpacity:1,earthK:1,earthY:-11,earthScale:1,earthX:-13,moonK:0,moonX:120,moonY:30,moonZ:-260,moonScale:1,rocketK:0,rocketY:-6,rocketX:0,rocketZ:0,rocketTilt:0,thrust:0,chuteK:0,noseK:0,groundK:0,gloveK:0,gloveSpin:0,gloveExplode:0,bloom:.62,exposure:1,trailOn:0,saturnK:0,saturnX:0,saturnY:0,saturnZ:0,saturnScale:1,saturnTilt:0,saturnSpin:0,lmK:0,lmX:0,lmY:0,lmZ:0,lmScale:1,lmSpin:0,nglK:0,nglX:0,nglY:0,nglZ:0,nglScale:1,nglSpin:0},Ft=new a.Vector3,ie=0,He=2,me=0,Me=16;function dt(M){Me=Me*.9+M*1e3*.1,Me>26?me+=Me>55?3:1:me=Math.max(0,me-1),me>12&&He===2?(He=1,me=0,Me=16,t.setPixelRatio(Math.min(devicePixelRatio||1,1)),he.setPixelRatio&&he.setPixelRatio(1),Be()):me>14&&He===1&&(He=0,me=0,Ye=!1)}let Ye=!0;function ut(M){ie+=M,H.uniforms.uTime.value=ie,H.uniforms.uOpacity.value=l.starOpacity,r.fov=l.fov,r.updateProjectionMatrix(),r.position.set(l.camX,l.camY,l.camZ),r.up.set(Math.sin(l.roll),Math.cos(l.roll),0),r.lookAt(l.tgtX,l.tgtY,l.tgtZ),g.rotation.y=ie*.006,B.visible=l.earthK>.01,B.position.set(l.earthX,l.earthY,0),B.scale.setScalar(l.earthScale),X.rotation.y=ie*.012,bodyOpacity(X,l.earthK),J.material.uniforms.uInt.value=1.15*l.earthK,D.visible=l.moonK>.01,D.position.set(l.moonX,l.moonY,l.moonZ),D.scale.setScalar(l.moonScale),O.rotation.y=ie*.008,v.visible=l.rocketK>.01,v.position.set(l.rocketX,l.rocketY,l.rocketZ),v.rotation.z=l.rocketTilt;let k=1+Math.sin(ie*41)*.06+Math.sin(ie*97)*.03;if(W.material.opacity=l.thrust*.85,W.scale.set(.78+l.thrust*.26,(1.5+l.thrust*2.2)*k,1),W.position.y=-2.35-(.45+l.thrust*.95)*k,y.material.opacity=l.thrust,y.scale.set(.34+l.thrust*.2,(.5+l.thrust*.7)*k,1),A.intensity=l.thrust*9,l.trailOn>.02&&v.visible&&(Q+=M,Q>.026)){Q=0;let p=z[ae];ae=(ae+1)%P,p.life=1,p.x=l.rocketX+Math.sin(l.rocketTilt)*2.15+(Math.random()-.5)*.18,p.y=l.rocketY-Math.cos(l.rocketTilt)*2.15,p.z=l.rocketZ+(Math.random()-.5)*.18,p.size=.5+Math.random()*.4,p.sprite.visible=!0}for(let p of z){if(p.life<=0){p.sprite.visible=!1;continue}p.life-=M*.42,p.size+=M*1.5,p.sprite.position.set(p.x,p.y,p.z),p.sprite.scale.setScalar(p.size*2.4),p.sprite.material.opacity=Math.max(0,p.life)*.5*l.trailOn}let nk=l.noseK||0;if(T.position.set(nk*4.6,2.07+nk*1.7-nk*nk*5.8,-nk*1.3),T.rotation.z=-nk*5.4,T.rotation.x=nk*3.9,T.material.opacity=Math.max(0,1-Math.max(0,nk-.45)*1.9),q.visible=l.chuteK>.02,q.visible){let p=l.chuteK,bl=1-Math.pow(1-p,2.6);q.position.set(l.rocketX,l.rocketY+2.25+bl*1.45,l.rocketZ),q.scale.set(.07+bl*1.03,.34+bl*.74,.07+bl*1.03),q.rotation.z=l.rocketTilt*.4+Math.sin(ie*1.7)*.05,i.material.emissiveIntensity=.5+Math.sin(ie*3)*.12}svG.visible=l.saturnK>.01;
-if(svG.visible){svG.position.set(l.saturnX,l.saturnY,l.saturnZ),svG.scale.setScalar(l.saturnScale),svG.rotation.set(0,l.saturnSpin,l.saturnTilt);let w=svG.userData.wire;w&&bodyOpacity(w,l.saturnK)}
+let SLOT={saturn:svG,lm:lmG};
+let De=[],he=new mt(t);he.addPass(new pt(n,r));let Oe=new ft(new a.Vector2(innerWidth*.5,innerHeight*.5),.62,.72,.62);he.addPass(Oe),he.addPass(new gt);let l={camX:0,camY:2,camZ:26,tgtX:0,tgtY:0,tgtZ:0,roll:0,fov:42,starOpacity:1,earthK:1,earthY:-11,earthScale:1,earthX:-13,moonK:0,moonX:120,moonY:30,moonZ:-260,moonScale:1,rocketK:0,rocketY:-6,rocketX:0,rocketZ:0,rocketTilt:0,thrust:0,chuteK:0,noseK:0,groundK:0,gloveK:0,gloveSpin:0,gloveExplode:0,gloveLift:0,gloveFade:1,bloom:.62,exposure:1,trailOn:0,saturnK:0,saturnX:0,saturnY:0,saturnZ:0,saturnScale:1,saturnTilt:0,saturnSpin:0,lmK:0,lmX:0,lmY:0,lmZ:0,lmScale:1,lmSpin:0,saturnThrust:0,saturnNozzle:0,saturnPlume:0,saturnSmoke:0,saturnShake:0,saturnSep1:0,saturnSep2:0},Ft=new a.Vector3,ie=0,He=2,me=0,Me=16;function dt(M){Me=Me*.9+M*1e3*.1,Me>26?me+=Me>55?3:1:me=Math.max(0,me-1),me>12&&He===2?(He=1,me=0,Me=16,t.setPixelRatio(Math.min(devicePixelRatio||1,1)),he.setPixelRatio&&he.setPixelRatio(1),Be()):me>14&&He===1&&(He=0,me=0,Ye=!1)}let Ye=!0;function ut(M){ie+=M,H.uniforms.uTime.value=ie,H.uniforms.uOpacity.value=l.starOpacity,r.fov=l.fov,r.updateProjectionMatrix(),r.position.set(l.camX+Math.sin(ie*37.3)*l.saturnShake*.1,l.camY+Math.sin(ie*43.1+1.3)*l.saturnShake*.1,l.camZ),r.up.set(Math.sin(l.roll),Math.cos(l.roll),0),r.lookAt(l.tgtX+Math.sin(ie*31.7+.4)*l.saturnShake*.05,l.tgtY+Math.sin(ie*47.9)*l.saturnShake*.05,l.tgtZ),g.rotation.y=ie*.006,B.visible=l.earthK>.01,B.position.set(l.earthX,l.earthY,0),B.scale.setScalar(l.earthScale),X.rotation.y=ie*.012,bodyOpacity(X,l.earthK),J.material.uniforms.uInt.value=1.15*l.earthK,D.visible=l.moonK>.01,D.position.set(l.moonX,l.moonY,l.moonZ),D.scale.setScalar(l.moonScale),O.rotation.y=ie*.008,v.visible=l.rocketK>.01,v.position.set(l.rocketX,l.rocketY,l.rocketZ),v.rotation.z=l.rocketTilt;let k=1+Math.sin(ie*41)*.06+Math.sin(ie*97)*.03;if(W.material.opacity=l.thrust*.85,W.scale.set(.78+l.thrust*.26,(1.5+l.thrust*2.2)*k,1),W.position.y=-2.35-(.45+l.thrust*.95)*k,y.material.opacity=l.thrust,y.scale.set(.34+l.thrust*.2,(.5+l.thrust*.7)*k,1),A.intensity=l.thrust*9,l.trailOn>.02&&v.visible&&(Q+=M,Q>.026)){Q=0;let p=z[ae];ae=(ae+1)%P,p.life=1,p.x=l.rocketX+Math.sin(l.rocketTilt)*2.15+(Math.random()-.5)*.18,p.y=l.rocketY-Math.cos(l.rocketTilt)*2.15,p.z=l.rocketZ+(Math.random()-.5)*.18,p.size=.5+Math.random()*.4,p.sprite.visible=!0}for(let p of z){if(p.life<=0){p.sprite.visible=!1;continue}p.life-=M*.42,p.size+=M*1.5,p.sprite.position.set(p.x,p.y,p.z),p.sprite.scale.setScalar(p.size*2.4),p.sprite.material.opacity=Math.max(0,p.life)*.5*l.trailOn}let nk=l.noseK||0;if(T.position.set(nk*4.6,2.07+nk*1.7-nk*nk*5.8,-nk*1.3),T.rotation.z=-nk*5.4,T.rotation.x=nk*3.9,T.material.opacity=Math.max(0,1-Math.max(0,nk-.45)*1.9),q.visible=l.chuteK>.02,q.visible){let p=l.chuteK,bl=1-Math.pow(1-p,2.6);q.position.set(l.rocketX,l.rocketY+2.25+bl*1.45,l.rocketZ),q.scale.set(.07+bl*1.03,.34+bl*.74,.07+bl*1.03),q.rotation.z=l.rocketTilt*.4+Math.sin(ie*1.7)*.05,i.material.emissiveIntensity=.5+Math.sin(ie*3)*.12}svG.visible=l.saturnK>.01;
+if(svG.visible){
+  svG.position.set(l.saturnX,l.saturnY,l.saturnZ),svG.scale.setScalar(l.saturnScale),svG.rotation.set(0,l.saturnSpin,l.saturnTilt);
+  let w=svG.userData.wire;
+  if(w){
+    bodyOpacity(w,l.saturnK);
+    let bands=w.userData.bands;
+    if(bands){
+      /* A spent stage drops back down the stack's own axis, tumbling about its
+         own middle and dimming as it goes. */
+      let kk=w.scale.x||1;
+      for(let bi=0;bi<2;bi++){
+        let gB=bands[bi],sp=bi?l.saturnSep2:l.saturnSep1,c=gB.userData.c,mm=gB.userData.mats,bb=gB.userData.base,fd=1-I(.2,1,sp);
+        gB.position.set(c[0],c[1]-sp*sp*.9/kk,c[2]),gB.rotation.set(sp*.9*(bi?-1:1),0,sp*.35);
+        for(let mi=0;mi<mm.length;mi++)mm[mi].opacity=bb[mi]*l.saturnK*fd
+      }
+      /* The shell is clipped at the joint of the stage that has gone, so what
+         is left of the stack does not carry a silhouette of it. */
+      let cut=l.saturnSep2>0?w.userData.split[1]:l.saturnSep1>0?w.userData.split[0]:-1;
+      if(cut<0)w.userData.plane.set(svA.set(0,1,0),1e6);
+      else svG.updateMatrixWorld(!0),svA.set(0,1,0).applyQuaternion(svG.quaternion),
+        svB.set(0,w.userData.minY+cut*w.userData.hgt,0).applyMatrix4(w.matrixWorld),
+        w.userData.plane.setFromNormalAndCoplanarPoint(svA,svB)
+    }
+  }
+}
+svFx.visible=svG.visible&&l.saturnThrust>.01;
+if(svFx.visible){
+  /* nozzle height, radius and flame length for the stage that is burning,
+     in rocket heights; the S-IC's cluster, the S-II's, the single J-2 */
+  let S2=l.saturnScale,st=l.saturnNozzle|0,nzY=[-.5,-.1,.12][st],rad=[.055,.047,.022][st],len=[1.05,.62,.4][st],
+      fl=1+Math.sin(ie*43)*.06+Math.sin(ie*97)*.035,alt=l.saturnPlume,wd=rad*S2*(1+alt*1.6);
+  svFx.position.set(l.saturnX,l.saturnY,l.saturnZ),svFx.rotation.set(0,0,l.saturnTilt);
+  svPlume.position.y=nzY*S2,svPlume.scale.set(wd,len*S2*(.8+alt*.9)*fl,wd);
+  svPlume.material.uniforms.uTime.value=ie,svPlume.material.uniforms.uPower.value=l.saturnThrust*l.saturnK;
+  svGlow.position.y=nzY*S2,svGlow.scale.setScalar(rad*S2*7*(.6+.4*l.saturnThrust)*fl),svGlow.material.opacity=l.saturnThrust*l.saturnK*.95;
+  if(l.saturnSmoke>.02&&(svAcc+=M*l.saturnSmoke)>.022){
+    svAcc=0,svFx.updateMatrixWorld(!0);
+    let pp=svPool[svPi],spread=1-alt;svPi=(svPi+1)%svPool.length;
+    pp.sp.position.copy(svB.set((Math.random()-.5)*rad*S2,(nzY-len*.3)*S2,(Math.random()-.5)*rad*S2).applyMatrix4(svFx.matrixWorld));
+    pp.v.set(0,-1,0).applyQuaternion(svFx.quaternion).multiplyScalar(S2*(.25+Math.random()*.2)),
+    pp.v.x+=(Math.random()-.5)*S2*.5*spread,pp.v.z+=(Math.random()-.5)*S2*.5*spread,
+    pp.life=1,pp.size=rad*S2*(4+Math.random()*3),pp.sp.visible=!0
+  }
+}
+for(let pp of svPool){
+  if(pp.life<=0){pp.sp.visible=!1;continue}
+  pp.life-=M*.55,pp.sp.position.addScaledVector(pp.v,M),pp.v.multiplyScalar(Math.max(0,1-M*.9)),pp.size+=M*l.saturnScale*.35,
+  pp.sp.scale.setScalar(pp.size),pp.sp.material.opacity=svG.visible?Math.max(0,pp.life)*.42:0
+}
 lmG.visible=l.lmK>.01;
 if(lmG.visible){lmG.position.set(l.lmX,l.lmY,l.lmZ),lmG.scale.setScalar(l.lmScale),lmG.rotation.y=l.lmSpin;let w=lmG.userData.wire;w&&bodyOpacity(w,l.lmK)}
-ngG.visible=l.nglK>.01;
-if(ngG.visible){ngG.position.set(l.nglX,l.nglY,l.nglZ),ngG.scale.setScalar(l.nglScale),ngG.rotation.y=l.nglSpin;let w=ngG.userData.wire;w&&bodyOpacity(w,l.nglK)}
-if(d.visible=C.visible=l.groundK>.01,d.material.opacity=l.groundK*.72,C.material.opacity=l.groundK*.8,ue.visible=l.gloveK>.01,ue.visible){ue.rotation.y=l.gloveSpin,ue.scale.setScalar(l.gloveK*l.gloveScale);for(let p of De)p.mesh.position.copy(p.dir).multiplyScalar(l.gloveExplode*p.f),p.mesh.material.opacity=l.gloveK}Oe.strength=Ye?l.bloom:0,Oe.enabled=Ye,t.toneMappingExposure=l.exposure,he.render(),dt(M)}function Be(){/* a hidden or not-yet-laid-out tab can report 0 here, which makes the bloom composer allocate zero-size render targets and spam GL warnings */let W2=Math.max(1,innerWidth),H2=Math.max(1,innerHeight);t.setSize(W2,H2,!1),he.setSize(W2,H2),r.aspect=W2/H2,r.updateProjectionMatrix()}/* Build the wire treatment for a loaded model and hang it in its slot. The
+if(d.visible=C.visible=l.groundK>.01,d.material.opacity=l.groundK*.72,C.material.opacity=l.groundK*.8,ue.visible=l.gloveK*l.gloveFade>.01,ue.visible){ue.rotation.y=l.gloveSpin,ue.position.y=l.gloveLift,ue.scale.setScalar(l.gloveK*l.gloveScale);for(let p of De)p.mesh.position.copy(p.dir).multiplyScalar(l.gloveExplode*p.f),p.mesh.material.opacity=l.gloveK*l.gloveFade}Oe.strength=Ye?l.bloom:0,Oe.enabled=Ye,t.toneMappingExposure=l.exposure,he.render(),dt(M)}function Be(){/* a hidden or not-yet-laid-out tab can report 0 here, which makes the bloom composer allocate zero-size render targets and spam GL warnings */let W2=Math.max(1,innerWidth),H2=Math.max(1,innerHeight);t.setSize(W2,H2,!1),he.setSize(W2,H2),r.aspect=W2/H2,r.updateProjectionMatrix()}/* Build the wire treatment for a loaded model and hang it in its slot. The
    host keeps a reference so the frame loop can fade it, and so unmounting can
    dispose the linework it generated — the model's own meshes are released by
    the model pipeline, but these buffers were made here. */
@@ -1410,7 +1602,7 @@ function unmountWire(slot){
   w&&w.traverse(O2=>{(O2.isLineSegments||O2.isPoints)&&(O2.geometry.dispose(),O2.material.dispose())});
   host.clear(),host.userData.wire=null
 }
-return addEventListener("resize",Be,{passive:!0}),l.gloveScale=3.4,{scene:n,camera:r,renderer:t,state:l,update:ut,resize:Be,gloveGroup:ue,setGlovePieces(M){De=M},mountWire,unmountWire,slotGroup(s){return SLOT[s]},THREE:a}}import*as Ae from"./assets/vendor/three.bundle.js";import{GLTFLoader as bt}from"./assets/vendor/three.bundle.js";import{DRACOLoader as Dt}from"./assets/vendor/DRACOLoader.js";import*as w from"./assets/vendor/three.bundle.js";import{OrbitControls as Et,GLTFLoader as vt,RoomEnvironment as xt}from"./assets/vendor/three.bundle.js";(function(){let e=document.getElementById("codeOut");if(!e)return;let t=e.closest(".codecard"),n=document.getElementById("codeNote"),r=["A single bad pressure sample can fake a peak. Two filters stop that.","The part that matters: where will it stop, not where is it now.","Three independent triggers. Any one of them opens the chute."],m=/\b(if|else|for|while|return|void|float|int|long|bool|const|static|unsigned|true|false|break|continue|struct|define|include|byte|uint8_t|uint16_t|uint32_t)\b/,f=/(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|(#\w+)|(\b\d+\.?\d*f?\b)|([A-Za-z_]\w*)/g,h=H=>H.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");function x(H){return h(H).split(`
+return addEventListener("resize",Be,{passive:!0}),l.gloveScale=3.4,{scene:n,camera:r,renderer:t,state:l,update:ut,resize:Be,gloveGroup:ue,earthGroup:B,moonGroup:D,setGlovePieces(M){De=M},mountWire,unmountWire,slotGroup(s){return SLOT[s]},THREE:a}}import*as Ae from"./assets/vendor/three.bundle.js";import{GLTFLoader as bt}from"./assets/vendor/three.bundle.js";import{DRACOLoader as Dt}from"./assets/vendor/DRACOLoader.js";import*as w from"./assets/vendor/three.bundle.js";import{OrbitControls as Et,GLTFLoader as vt,RoomEnvironment as xt}from"./assets/vendor/three.bundle.js";(function(){let e=document.getElementById("codeOut");if(!e)return;let t=e.closest(".codecard"),n=document.getElementById("codeNote"),r=["A single bad pressure sample can fake a peak. Two filters stop that.","The part that matters: where will it stop, not where is it now.","Three independent triggers. Any one of them opens the chute."],m=/\b(if|else|for|while|return|void|float|int|long|bool|const|static|unsigned|true|false|break|continue|struct|define|include|byte|uint8_t|uint16_t|uint32_t)\b/,f=/(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|(#\w+)|(\b\d+\.?\d*f?\b)|([A-Za-z_]\w*)/g,h=H=>H.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");function x(H){return h(H).split(`
 `).map(g=>{let B=g.replace(f,(G,X,J,D,te,O)=>X?'<span class="tk-c">'+X+"</span>":J?'<span class="tk-s">'+J+"</span>":D?'<span class="tk-p">'+D+"</span>":te?'<span class="tk-n">'+te+"</span>":O?m.test(O)?'<span class="tk-k">'+O+"</span>":O:G);return'<span class="line">'+(B===""?" ":B)+"</span>"}).join("")}let E=0;function j(H){E=H;let g=document.getElementById("ex"+H).textContent.replace(/^\n/,"").replace(/\s+$/,"");e.innerHTML=x(g),n&&(n.textContent=r[H]||""),t.querySelectorAll(".codehead .tab").forEach(G=>G.classList.toggle("is-on",+G.dataset.tab===H));let B=e.closest(".codewrap");B&&(B.scrollTop=0)}t.querySelectorAll(".codehead .tab").forEach(H=>H.addEventListener("click",()=>j(+H.dataset.tab)));let K=document.getElementById("copyBtn");K&&K.addEventListener("click",async()=>{let H=document.getElementById("ex"+E).textContent.replace(/^\n/,"");try{await navigator.clipboard.writeText(H),K.textContent="Copied",setTimeout(()=>K.textContent="Copy",1400)}catch{K.textContent="Ctrl+C"}}),j(0)})();(function(){let e=document.getElementById("sim");if(!e)return;let t=9.81,n=1.225,r=3.280839895,m=.00367,f=.75,h={name:"AeroTech F50T",imp:76.8,avg:53.7,f0:75,burn:1.4,prop:.038};h.f1=2*h.avg-h.f0;let x={m:580,ap:.05,delay:.5,target:750,compensate:!0},E=JSON.parse(JSON.stringify(x));function j(u,b,Z){let T=.5*n*m,_=.5*n*(m+(b?f*u.ap:0)),U=u.target/r,R=u.m/1e3,$=R+h.prop,S=.001,W=0,y=0,A=0,P=0,V=null,z=[];for(;y<h.burn;){W++%20===0&&z.push([y,A*r]);let Q=y/h.burn,q=$-h.prop*Q,c=(h.f0+(h.f1-h.f0)*Q)/q-t-T/q*P*P;P+=c*S,A+=P*S,y+=S}let ae={v:P*r,h:A*r,t:y};for(;P>0&&y<30;){if(W++%20===0&&z.push([y,A*r]),b&&V===null){let i,c,L;if(Z){let d=Math.sqrt(R*t/T),C=Math.atan(P/d)-t/d*u.delay;C<0&&(C=0),c=d*Math.tan(C),i=R/(2*T)*Math.log((1+P*P/(d*d))/(1+c*c/(d*d))),L=R/(2*_)*Math.log(1+_*c*c/(R*t))}else i=0,L=R/(2*_)*Math.log(1+_*P*P/(R*t));A+i+L>=U&&(V={t:y,h:A})}let Q=V&&y>=V.t+u.delay?_:T,q=-t-Q/R*P*P;P+=q*S,A+=P*S,y+=S}return z.push([y,A*r]),{apogee:A*r,t:y,burnout:ae,dep:V?{t:V.t,ft:V.h*r}:null,trace:z}}let K=700,H=236,g=44,B=12,G=12,X=22,J=1e3,D=7.5,te=(u,b,Z)=>u.map((T,_)=>(_?"L":"M")+b(T[0]).toFixed(1)+" "+Z(T[1]).toFixed(1)).join("");function O(){let u=j(x,!0,x.compensate),b=j(x,!1,!1),Z=y=>g+Math.min(y,D)/D*(K-g-B),T=y=>Math.max(G,H-X-Math.min(y,J)/J*(H-G-X)),_="";for(let y=0;y<=4;y++){let A=J*y/4,P=T(A);_+=`<line class="grid-l" x1="${g}" y1="${P.toFixed(1)}" x2="${K-B}" y2="${P.toFixed(1)}"/><text class="axis-t" x="${g-7}" y="${(P+3).toFixed(1)}" text-anchor="end">${A}</text>`}for(let y=0;y<=Math.floor(D);y+=2)_+=`<text class="axis-t" x="${Z(y).toFixed(1)}" y="${H-X+14}" text-anchor="middle">${y}s</text>`;let U=Z(u.burnout.t);_+=`<line class="burn-l" x1="${U.toFixed(1)}" y1="${G}" x2="${U.toFixed(1)}" y2="${H-X}"/><text class="axis-t" x="${(U+5).toFixed(1)}" y="${G+9}">BURNOUT</text>`;let R=T(x.target);_+=`<line class="target" x1="${g}" y1="${R.toFixed(1)}" x2="${K-B}" y2="${R.toFixed(1)}"/><text class="axis-t" x="${K-B}" y="${(R-5).toFixed(1)}" text-anchor="end" style="fill:var(--blue)">TARGET ${x.target} FT</text>`,_+=`<path class="curve-off" d="${te(b.trace,Z,T)}"/><path class="curve-on" d="${te(u.trace,Z,T)}"/>`,u.dep&&(_+=`<circle class="dep" cx="${Z(u.dep.t).toFixed(1)}" cy="${T(u.dep.ft).toFixed(1)}" r="4.5"/>`),e.querySelector(".sim-plot").innerHTML=_;let $=Math.round(u.apogee-x.target),S=Math.round(b.apogee-x.target),W=$===S?"bad":"good";e.querySelector("[data-out=apogee]").innerHTML=Math.round(u.apogee)+" ft<small>"+(u.dep?"chute released at "+Math.round(u.dep.ft)+" ft":"never reached target &mdash; no deploy")+"</small>",e.querySelector("[data-out=miss]").innerHTML='<span class="'+W+'">'+($>0?"+":"")+$+" ft</span><small>off the "+x.target+" ft target</small>",e.querySelector("[data-out=off]").innerHTML=Math.round(b.apogee)+" ft<small>chute waits for apogee</small>",e.querySelector("[data-out=cost]").innerHTML='<span class="'+(S===0?"good":"bad")+'">'+(S>0?"+":"")+S+" ft</span><small>"+(S>=0?"past target without the release system":"it cannot reach the target at this mass")+"</small>",e.querySelector(".sim-motor").innerHTML=h.name+" &middot; "+h.imp+" N&middot;s over "+h.burn+" s &mdash; burns out at <b>"+Math.round(u.burnout.v)+" ft/s</b> and <b>"+Math.round(u.burnout.h)+" ft</b> at this mass"}let v={m:u=>u+" g"+(u>650?"  \xB7  over ARC limit":""),ap:u=>u.toFixed(3)+" m\xB2",delay:u=>u.toFixed(2)+" s",target:u=>u+" ft"};function Y(){Object.keys(v).forEach(u=>{let b=e.querySelector("[data-p="+u+"]");b&&(b.value=x[u],e.querySelector("[data-v="+u+"]").textContent=v[u](x[u]))}),e.querySelector("[data-p=compensate]").checked=x.compensate,O()}e.addEventListener("input",u=>{let b=u.target.dataset.p;b&&(x[b]=b==="compensate"?u.target.checked:parseFloat(u.target.value),b!=="compensate"&&(e.querySelector("[data-v="+b+"]").textContent=v[b](x[b])),O())}),e.querySelector(".sim-reset").addEventListener("click",()=>{x=JSON.parse(JSON.stringify(E)),Y()}),Y()})();var Ve={"Main glove":{color:8884390,group:"Main glove",explode:0},"Glove entrance":{color:10189823,group:"Glove entrance",explode:.85},Coupler:{color:13620964,group:"Coupler",explode:.85},"Thumb cover":{color:5082623,group:"Finger covers",explode:.85},"Index cover":{color:5082623,group:"Finger covers",explode:.85},"Middle cover":{color:5082623,group:"Finger covers",explode:.85},"Ring cover":{color:5082623,group:"Finger covers",explode:.85},"Pinky cover":{color:5082623,group:"Finger covers",explode:.85}},ze={Coupler:{axis:[-.0266,-.9655,-.2589],dist:.5305},"Glove entrance":{axis:[-.0266,-.9655,-.2589],dist:.7841},"Pinky cover":{axis:[.0072,.9993,-.0362],dist:.7966},"Ring cover":{axis:[-.0286,.9947,-.0987],dist:.8403},"Middle cover":{axis:[-.0215,.9982,.0559],dist:.9537},"Index cover":{axis:[-.0539,.998,.0344],dist:.8634},"Thumb cover":{axis:[-.5879,.7885,-.1808],dist:.532}},be=[{id:"all",label:"All parts",members:null,note:"Eight bodies, modelled in Fusion 360. Drag the slider to pull them apart."},{id:"covers",label:"Finger covers",members:["Thumb cover","Index cover","Middle cover","Ring cover","Pinky cover"],test:e=>/cover/i.test(e),note:"One per digit, each sized to its own finger. Hover any of them for the name."},{id:"main",label:"Main glove",members:["Main glove"],note:"The pressure envelope and everything wrapped around it \u2014 five layers between the hand and the lunar surface."},{id:"coupler",label:"Coupler",members:["Coupler"],note:"The joint that mates the glove to the suit sleeve."},{id:"entrance",label:"Glove entrance",members:["Glove entrance"],note:"The opening the hand passes through when donning the glove."}],se=e=>String(e).toLowerCase().replace(/[\s_]+/g," ").trim(),Le={};for(let e of Object.keys(Ve))Le[se(e)]=Object.assign({label:e},Ve[e]);var Fe={};for(let e of Object.keys(ze))Fe[se(e)]=ze[e];function yt(e){let t=e.dataset.src,n=e.querySelector(".v3d-tip"),r=e.querySelector(".v3d-explode"),m=e.querySelector(".v3d-legend"),f=e.querySelector(".v3d-load"),h;try{h=new w.WebGLRenderer({antialias:!0,alpha:!0,powerPreference:"high-performance"})}catch{f.textContent="WebGL unavailable";return}h.setPixelRatio(Math.min(devicePixelRatio||1,2)),h.toneMapping=w.ACESFilmicToneMapping,h.toneMappingExposure=1.05,e.appendChild(h.domElement);let x=new w.Scene,E=new w.PerspectiveCamera(35,1,.1,100),j=new w.PMREMGenerator(h);x.environment=j.fromScene(new xt,.04).texture;let K=new w.DirectionalLight(14477055,2.1);K.position.set(3,5,4);let H=new w.DirectionalLight(5082623,1.5);H.position.set(-4,1,-3),x.add(K,H,new w.HemisphereLight(9414092,658450,.7));let g=new Et(E,h.domElement);g.enableDamping=!0,g.dampingFactor=.07,g.enablePan=!1,g.minDistance=2.2,g.maxDistance=14,g.autoRotate=!Se,g.autoRotateSpeed=.55,g.enableZoom=Ce,g.enabled=!Ce,g.addEventListener("start",()=>{g.autoRotate=!1});let B=new w.Group;x.add(B);let G=[],X=!1,J=1.2,D=0,te=be[0],O=null,v=()=>{let c=J*(1+.62*D)/Math.sin(w.MathUtils.degToRad(E.fov)/2);return E.aspect<1&&(c/=E.aspect),c*1.02};function Y(){let i=e.clientWidth,c=e.clientHeight;!i||!c||(h.setSize(i,c,!1),E.aspect=i/c,E.updateProjectionMatrix())}new ResizeObserver(Y).observe(e);let u=e.parentElement.querySelector(".v3d-note"),b=e.parentElement.querySelector(".v3d-stat"),Z=e.querySelector(".v3d-ui");function T(i){f.innerHTML="<b>Model didn't load</b><br>"+i,f.classList.add("err"),console.error("[glove]",i)}function _(i){let c=[];if(i.scene.traverse(d=>{d.isMesh&&c.push(d)}),!c.length)return T("The file loaded but contains no meshes.");for(let d of c){let C=Le[se(d.name)]||{color:8884390,group:"Other",explode:.85,label:d.name};d.material=new w.MeshStandardMaterial({color:C.color,metalness:.22,roughness:.46,emissive:0,envMapIntensity:.9}),d.geometry.computeBoundingSphere();let N=Fe[se(C.label)];G.push({mesh:d,f:C.explode,label:C.label,group:C.group,dir:N?new w.Vector3(N.axis[0],N.axis[1],N.axis[2]).multiplyScalar(N.dist):d.geometry.boundingSphere.center.clone()}),B.add(d)}J=new w.Box3().setFromObject(B).getBoundingSphere(new w.Sphere).radius;let L=v();E.position.set(L*.42,L*.3,L*.86),g.target.set(0,0,0),g.update(),e.classList.add("ready"),S(be[0])}fetch(t).then(i=>{if(!i.ok)throw new Error("HTTP "+i.status+" &mdash; nothing at <code>"+t+"</code>");return i.arrayBuffer()}).then(i=>{let c=String.fromCharCode(...new Uint8Array(i,0,4));if(c!=="glTF")throw new Error("The server returned something that isn't a .glb (got <code>"+c.replace(/[^\x20-\x7e]/g,"?")+"</code>). Usually a 404 page.");new vt().parse(i,"",_,L=>T("Couldn't decode the model. "+(L&&L.message||"")))}).catch(i=>T(i.message||String(i)));function U(){let i=G.filter(c=>c.mesh.visible).length<2;for(let c of G)c.mesh.position.copy(c.dir).multiplyScalar(i?0:D*c.f)}function R(i){if(D=i,U(),D>0&&(O=null),!X&&(!te||te.id==="all")){let c=v();E.position.setLength(c),g.minDistance=Math.min(2.2,c*.55)}}r.addEventListener("input",()=>R(r.value/100));function $(){let i=G.filter(N=>N.mesh.visible);if(!i.length)return;let c=new w.Box3;for(let N of i)c.expandByObject(N.mesh);let L=c.getBoundingSphere(new w.Sphere),d=L.radius/Math.sin(w.MathUtils.degToRad(E.fov)/2);E.aspect<1&&(d/=E.aspect),d=oe(d*1.35,.05,40);let C=E.position.clone().sub(g.target).normalize();O={t0:performance.now(),dur:Se?0:620,p0:E.position.clone(),t0v:g.target.clone(),p1:L.center.clone().addScaledVector(C,d),t1v:L.center.clone()},g.minDistance=d*.35,g.maxDistance=d*4}function S(i){te=i;let c=!!i.members,L=c?i.members.map(se):null;for(let d of G)d.mesh.visible=!c||L.indexOf(se(d.label))!==-1||(i.test?i.test(d.label):!1),d.mesh.material.opacity=1,d.mesh.material.transparent=!1,d.mesh.material.emissive.setHex(0);if(U(),u&&(u.textContent=i.note),b){let d=G.filter(N=>N.mesh.visible),C=d.reduce((N,xe)=>N+(xe.mesh.geometry.index?xe.mesh.geometry.index.count:xe.mesh.geometry.attributes.position.count)/3,0);b.textContent=d.length+(d.length===1?" body \xB7 ":" bodies \xB7 ")+C.toLocaleString()+" triangles"}e.parentElement.querySelectorAll(".v3d-tabs .tab").forEach(d=>d.classList.toggle("is-on",d.dataset.view===i.id)),m.querySelectorAll("button").forEach(d=>d.classList.toggle("sel",d.dataset.group===i.label)),X=!1,g.autoRotate=!Se,$()}e.parentElement.querySelectorAll(".v3d-tabs .tab").forEach(i=>i.addEventListener("click",()=>{let c=be.find(L=>L.id===i.dataset.view);c&&e.classList.contains("ready")&&S(c)})),m.querySelectorAll("button").forEach(i=>i.addEventListener("click",()=>{let c=be.find(L=>L.label===i.dataset.group)||be[0];e.classList.contains("ready")&&S(c)})),e.querySelector("[data-act=in]").onclick=()=>W(.82),e.querySelector("[data-act=out]").onclick=()=>W(1.22),e.querySelector("[data-act=reset]").onclick=()=>{X=!1,r.value=0,R(0),S(be[0])};function W(i){X=!0,g.autoRotate=!1,E.position.setLength(oe(E.position.length()*i,g.minDistance,g.maxDistance))}let y=new w.Raycaster,A=new w.Vector2,P=null;function V(i){for(let c of G){let L=c.mesh.visible&&i&&c.group===i,d=c.mesh.visible&&i&&!L;c.mesh.material.emissive.setHex(L?2244718:0),c.mesh.material.opacity=d?.28:1,c.mesh.material.transparent=d}m.querySelectorAll("button").forEach(c=>c.classList.toggle("on",c.dataset.group===i))}h.domElement.addEventListener("pointermove",i=>{if(!e.classList.contains("ready"))return;let c=e.getBoundingClientRect();A.x=(i.clientX-c.left)/c.width*2-1,A.y=-((i.clientY-c.top)/c.height)*2+1,y.setFromCamera(A,E);let L=y.intersectObjects(G.filter(C=>C.mesh.visible).map(C=>C.mesh),!1)[0],d=L?L.object.name:null;if(d!==P){P=d;let C=G.find(N=>N.mesh.name===d);V(C?C.group:null),n.textContent=C?C.label:"",n.classList.toggle("on",!!C)}P&&(n.style.left=i.clientX-c.left+"px",n.style.top=i.clientY-c.top+"px")},{passive:!0}),h.domElement.addEventListener("pointerleave",()=>{P=null,V(null),n.classList.remove("on")}),m.querySelectorAll("button").forEach(i=>{i.addEventListener("pointerenter",()=>V(i.dataset.group)),i.addEventListener("pointerleave",()=>V(null))});let z=e.querySelector(".v3d-gate"),ae=e.querySelector(".v3d-exit");z&&z.addEventListener("click",()=>{e.classList.add("live"),g.enabled=!0}),ae&&ae.addEventListener("click",()=>{e.classList.remove("live"),g.enabled=!1});let Q=!1;function q(){if(Q){if(O){let i=O.dur?Math.min(1,(performance.now()-O.t0)/O.dur):1,c=1-Math.pow(1-i,3);E.position.lerpVectors(O.p0,O.p1,c),g.target.lerpVectors(O.t0v,O.t1v,c),i>=1&&(O=null)}g.update(),h.render(x,E),requestAnimationFrame(q)}}new IntersectionObserver(i=>{let c=i[0].isIntersecting;c&&!Q?(Q=!0,Y(),q()):c||(Q=!1)},{rootMargin:"200px"}).observe(e)}document.querySelectorAll(".v3d").forEach(e=>{new IntersectionObserver((t,n)=>{t[0].isIntersecting&&(n.disconnect(),yt(e))},{rootMargin:"600px"}).observe(e)});var Re=Ne(document.getElementById("gl")),o=Re.state;window.__world=Re;window.__scroller=ne;window.__applyScroll=$e;var F=e=>document.querySelector(e),Ee=e=>[].slice.call(document.querySelectorAll(e));
 /* ---------------------------------------------------------------------------
    Decks.
@@ -1497,17 +1689,68 @@ function buildDeck(sel,groups,vhPerStep){
     }
   }})
 }
+/* ---------------------------------------------------------------------------
+   Awards: an instrument tape.
+
+   The list slides under a fixed pointer. The row on it is lit, and the year
+   readout rolls its last digit to that row's year, the way an altimeter tape
+   and its drum read the same number. Each row parks on the pointer for a
+   stretch of scroll -- the deck dwell again -- and rows are clickable: a click
+   scrolls the tape to that row rather than jumping the page past it.
+
+   Drawn from the section's progress alone, like everything else here.
+   --------------------------------------------------------------------------- */
+function buildTape(){
+  let st=F("#tstage");if(!st)return;
+  let rows=[].slice.call(st.querySelectorAll(".trow")),n=rows.length,
+      track=F("#ttrack"),strip=st.querySelector(".tstrip"),rail=st.querySelector(".trail"),num=F("#tNum"),
+      yrs=rows.map(r=>+r.dataset.yr),y0=Math.min.apply(0,yrs),y1=Math.max.apply(0,yrs),
+      words=We(st.querySelector(".tname")),centres=[],on=-1;
+  /* row centres down the track; rows differ in height, so measured, not assumed */
+  function measure(){let t=0;centres=rows.map(r=>{let h=r.offsetHeight,c=t+h/2;return t+=h,c})}
+  measure(),addEventListener("resize",measure,{passive:!0}),addEventListener("load",measure,{passive:!0});
+  /* the heading arrives with the section, before the tape pins */
+  ee(st,{start:"top bottom",end:"top top",onUpdate(p){
+    let m=words.length;
+    for(let j=0;j<m;j++){
+      let w=fe(re((p*1.6-(m>1?j/(m-1)*.5:0))/.6));
+      words[j].style.setProperty("--wo",w.toFixed(3)),
+      words[j].style.setProperty("--wy",((1-w)*22).toFixed(1)+"px"),
+      words[j].style.setProperty("--wr",((1-w)*1.4).toFixed(2)+"deg")
+    }
+  }});
+  let tr=ee(st,{start:"top top",end:"bottom bottom",onUpdate(p){
+    let a=deckAt(p,n)*(n-1),i0=Math.floor(a),i1=Math.min(n-1,i0+1),f=a-i0;
+    centres.length||measure();
+    track.style.setProperty("--tt",(-(centres[i0]+(centres[i1]-centres[i0])*f)).toFixed(1)+"px");
+    for(let i=0;i<n;i++)rows[i].style.setProperty("--k",re(1-Math.abs(a-i)).toFixed(3));
+    let near=Math.round(a);
+    if(near!==on){on>=0&&rows[on].classList.remove("on"),rows[near].classList.add("on"),on=near,
+      num.textContent=String(near+1).padStart(2,"0")}
+    let yr=yrs[i0]+(yrs[i1]-yrs[i0])*f;
+    strip.style.setProperty("--ty",(yr-y0).toFixed(4)),
+    rail.style.setProperty("--tp",(y1>y0?(yr-y0)/(y1-y0):0).toFixed(4))
+  }});
+  /* where row i parks: the middle of its dwell */
+  let park=i=>tr._s+(i>=n-1?1:(i+DWELL/2)/(n-1))*(tr._e-tr._s);
+  rows.forEach((r,i)=>{
+    let go=()=>ne.jump(park(i));
+    r.addEventListener("click",go),
+    /* stopPropagation, or the page scroller also takes Space as page-down */
+    r.addEventListener("keydown",ev=>{(ev.key==="Enter"||ev.key===" ")&&(ev.preventDefault(),ev.stopPropagation(),go())})
+  })
+}
 buildDeck("#sec-rocketry",[[0,1,2],[3],[4],[5],[6]],130);
 buildDeck("#sec-glove",[[0,1,2],[3],[4]],130);
-buildDeck("#sec-awards",[[0,1,2],[3]],130);
-Ee(".rv").filter(e=>!e.closest(".deck")).forEach(e=>{let t=We(e);ee(e,{start:"top 88%",end:"top 42%",onUpdate(n){let r=t.length,m=.5;for(let f=0;f<r;f++){let h=r>1?f/(r-1)*m:0,x=fe(re((n-h)/(1-m)));t[f].style.setProperty("--wo",x.toFixed(3)),t[f].style.setProperty("--wy",((1-x)*26).toFixed(1)+"px"),t[f].style.setProperty("--wr",((1-x)*1.6).toFixed(2)+"deg")}}})});Ee(".fade").filter(e=>!e.closest(".deck")).forEach((e,t)=>{ee(e,{start:"top 92%",end:"top 62%",onUpdate(n){let r=fe(n);e.style.setProperty("--fo",r.toFixed(3)),e.style.setProperty("--fy",((1-r)*34).toFixed(1)+"px")}})});var Tt=F("#hudNum"),Mt=F("#hudName"),wt=F("#hudBar"),st=Ee(".railwrap a"),Xe=Ee("[data-chapter]");function St(e){let t=Xe[e];t&&(Tt.textContent=String(e+1).padStart(2,"0"),Mt.textContent=t.dataset.chapter,st.forEach((n,r)=>n.classList.toggle("on",r===e)),Ee(".nav ul a").forEach(n=>n.classList.toggle("on",n.dataset.ch===String(e))))}Xe.forEach((e,t)=>{ee(e,{start:"top 55%",end:"bottom 45%",onToggle(n){n&&St(t)}})});/* Only one scene trigger runs per frame, so a fast scroll can jump straight from
+buildTape();
+Ee(".rv").filter(e=>!e.closest(".deck,.tstage")).forEach(e=>{let t=We(e);ee(e,{start:"top 88%",end:"top 42%",onUpdate(n){let r=t.length,m=.5;for(let f=0;f<r;f++){let h=r>1?f/(r-1)*m:0,x=fe(re((n-h)/(1-m)));t[f].style.setProperty("--wo",x.toFixed(3)),t[f].style.setProperty("--wy",((1-x)*26).toFixed(1)+"px"),t[f].style.setProperty("--wr",((1-x)*1.6).toFixed(2)+"deg")}}})});Ee(".fade").filter(e=>!e.closest(".deck,.tstage")).forEach((e,t)=>{ee(e,{start:"top 92%",end:"top 62%",onUpdate(n){let r=fe(n);e.style.setProperty("--fo",r.toFixed(3)),e.style.setProperty("--fy",((1-r)*34).toFixed(1)+"px")}})});var Tt=F("#hudNum"),Mt=F("#hudName"),wt=F("#hudBar"),st=Ee(".railwrap a"),Xe=Ee("[data-chapter]");function St(e){let t=Xe[e];t&&(Tt.textContent=String(e+1).padStart(2,"0"),Mt.textContent=t.dataset.chapter,st.forEach((n,r)=>n.classList.toggle("on",r===e)),Ee(".nav ul a").forEach(n=>n.classList.toggle("on",n.dataset.ch===String(e))))}Xe.forEach((e,t)=>{ee(e,{start:"top 55%",end:"bottom 45%",onToggle(n){n&&St(t)}})});/* Only one scene trigger runs per frame, so a fast scroll can jump straight from
    one chapter to another without the ones in between ever getting a turn. Every
    handler therefore starts from this full baseline and then sets what it needs —
    otherwise props from the chapter you left (the glove, the Moon) stay on screen
    until reload. The positions here are the post-transit deep-space defaults so a
    reload part-way down the page still puts the bodies where that chapter wants
    them; chapters before the transit set their own. */
-function ve(){o.rocketK=0,o.chuteK=0,o.noseK=0,o.trailOn=0,o.thrust=0,o.groundK=0,o.gloveK=0,o.saturnK=0,o.lmK=0,o.nglK=0,o.earthK=0,o.moonK=0,o.roll=0,o.exposure=1,o.earthX=20,o.earthY=-120,o.earthScale=.22,o.moonX=-9,o.moonY=-40,o.moonZ=-52,o.moonScale=1.9}ee(F("#hero"),{scene:!0,start:"top top",end:"bottom top",onUpdate(e){ve(),o.earthK=1,o.moonK=0,o.camX=s(0,3.2,e),o.camY=s(2,6.5,e),o.camZ=s(26,34,e),o.tgtX=0,o.tgtZ=0,o.tgtY=s(-2,-6,e),o.earthY=s(-15,-21,e),o.earthX=s(16,20,e),o.earthScale=s(1,.86,e),o.starOpacity=1,o.bloom=s(.62,.5,e),F(".cue").style.opacity=(1-re(e*4)).toFixed(2)}});var ge=.2,de=.55,Te=.68,Rt=F("#teleAlt"),Ht=F("#teleVel"),je=F("#telePhase"),Pt=F("#teleT"),Ct=F(".tele"),Je=F("#ascentCap");function kt(e){let t,n;if(e<ge){let r=e/ge;t=263*r*r,n=296*r}else if(e<Te){let r=(e-ge)/(Te-ge);t=263+608*(1-Math.pow(1-r,1.75)),n=296*Math.pow(1-r,1.25)}else{let r=(e-Te)/(1-Te);t=871*(1-r),n=-21.6*I(0,.18,r)}return{alt:t,vel:n}}
+function ve(){o.rocketK=0,o.chuteK=0,o.noseK=0,o.trailOn=0,o.thrust=0,o.groundK=0,o.gloveK=0,o.gloveLift=0,o.gloveFade=1,o.saturnK=0,o.saturnThrust=0,o.saturnSmoke=0,o.saturnShake=0,o.saturnSep1=0,o.saturnSep2=0,o.lmK=0,o.earthK=0,o.moonK=0,o.roll=0,o.exposure=1,o.earthX=20,o.earthY=-120,o.earthScale=.22,o.moonX=-9,o.moonY=-40,o.moonZ=-52,o.moonScale=1.9}ee(F("#hero"),{scene:!0,start:"top top",end:"bottom top",onUpdate(e){ve(),o.earthK=1,o.moonK=0,o.camX=s(0,3.2,e),o.camY=s(2,6.5,e),o.camZ=s(26,34,e),o.tgtX=0,o.tgtZ=0,o.tgtY=s(-2,-6,e),o.earthY=s(-15,-21,e),o.earthX=s(16,20,e),o.earthScale=s(1,.86,e),o.starOpacity=1,o.bloom=s(.62,.5,e),F(".cue").style.opacity=(1-re(e*4)).toFixed(2)}});var ge=.2,de=.55,Te=.68,Rt=F("#teleAlt"),Ht=F("#teleVel"),je=F("#telePhase"),Pt=F("#teleT"),Ct=F(".tele"),Je=F("#ascentCap");function kt(e){let t,n;if(e<ge){let r=e/ge;t=263*r*r,n=296*r}else if(e<Te){let r=(e-ge)/(Te-ge);t=263+608*(1-Math.pow(1-r,1.75)),n=296*Math.pow(1-r,1.25)}else{let r=(e-Te)/(1-Te);t=871*(1-r),n=-21.6*I(0,.18,r)}return{alt:t,vel:n}}
 
 /* The single trajectory this whole stage agrees on. The rocket is placed on it,
    the drawn arc is sampled from it, and the tilt is its tangent — before this
@@ -1524,52 +1767,270 @@ function ascentPath(f){
    and onto the pad while the rocket fades up, so the chapter opens instead of
    cutting. e in [.86,1] hands the camera over to the orbital framing that
    #sec-rocketry starts from. Flight time f runs over what is left. */
-ee(F("#stage-ascent"),{scene:!0,pin:!0,onUpdate(e){ve();let ti=re(e/AP0),tf=fe(ti),to=fe(I(.86,1,e)),f=re((e-AP0)/(1-AP0)),{alt:t,vel:n}=kt(f),p=ascentPath(f),p2=ascentPath(Math.min(1,f+.005)),cb=I(de,de+.1,f);o.rocketK=I(.22,.6,ti)*(1-I(.82,.93,e)),o.rocketX=p.x,o.rocketY=p.y,o.rocketZ=p.z,o.rocketTilt=s(-Math.atan2(p2.x-p.x,p2.y-p.y),Math.sin(f*11)*.13,cb),o.thrust=f<=0?I(.85,1,ti)*.55:f<ge?s(.55,1,re(f/(ge*.4))):Math.max(0,1-(f-ge)*16),o.trailOn=f<=0?I(.85,1,ti):f<de?1:Math.max(0,1-(f-de)*5),o.chuteK=(f>de?I(de,de+.09,f):0)*(1-I(.82,.93,e)),o.noseK=f>de?I(de,de+.05,f):0,o.groundK=I(.45,.95,ti)*(1-I(.28,.5,f));let fx=o.rocketX+s(6.5,12.5,f),fy=o.rocketY+s(1.2,3.4,f),fz=s(15,27,f);o.camX=s(s(3.2,fx,tf),9,to),o.camY=s(s(6.5,fy,tf),6,to),o.camZ=s(s(34,fz,tf),30,to),o.tgtX=s(s(0,o.rocketX,tf),0,to),o.tgtY=s(s(-6,o.rocketY+1,tf),-4,to),o.tgtZ=s(s(0,o.rocketZ,tf),0,to),o.earthK=s(1-I(.55,1,ti),1,to),o.earthY=s(s(-21,-33,tf),-24,to),o.earthScale=s(s(.86,2.4,tf),.72,to),o.starOpacity=s(s(1,s(.78,1,I(.25,.6,f)),tf),.9,to),o.bloom=s(s(.5,.5+o.thrust*.55,tf),.45,to),o.exposure=s(1+o.thrust*.14,1,to),Ct.style.setProperty("--teleO",(I(.5,1,ti)*(1-I(.86,.96,e))).toFixed(3)),Rt.textContent=Math.round(t).toLocaleString(),Ht.textContent=Math.round(n),Pt.textContent=(f*8.4).toFixed(1);let m="Boost",g2=!0;f>=ge&&(m="Coast",g2=!1),f>=de-.005&&f<de+.06?(m="Release",g2=!0):f>=de+.06&&(m="Descent",g2=!1),je.textContent=m,je.classList.toggle("hot",g2);let h=I(.04,.18,f),x=1-I(.8,.94,f);Je.style.setProperty("--capO",(h*x).toFixed(3)),Je.style.setProperty("--capY",((1-h)*20).toFixed(1)+"px")}});ee(F("#sec-rocketry"),{scene:!0,pin:!0,onUpdate(e){ve(),o.earthK=1,o.camX=s(9,-6,e),o.camY=s(6,2,e),o.camZ=s(30,26,e),o.tgtX=0,o.tgtY=s(-4,-8,e),o.tgtZ=0,o.earthY=s(-24,-34,e),o.earthScale=s(.72,.6,e),o.starOpacity=s(.9,.75,Math.sin(e*Math.PI)),o.bloom=.45,o.exposure=1}});var Qe=F("#transitCap"),et=F("#transitTitle");/* The Apollo chapter. A Saturn V climbs out and pitches over, stages away,
-   and leaves the lunar module to make the crossing while the Earth shrinks
-   behind and the Moon comes up. Both are real NASA hardware, which is why the
-   Saturn V is here and not over his own rocket's telemetry two chapters up —
-   that one is a 470 g airframe on an F50T and the numbers beside it are its
-   own. */
-var svCap=F("#saturnCap");
+ee(F("#stage-ascent"),{scene:!0,pin:!0,onUpdate(e){ve();let ti=re(e/AP0),tf=fe(ti),to=fe(I(.86,1,e)),f=re((e-AP0)/(1-AP0)),{alt:t,vel:n}=kt(f),p=ascentPath(f),p2=ascentPath(Math.min(1,f+.005)),cb=I(de,de+.1,f);o.rocketK=I(.22,.6,ti)*(1-I(.82,.93,e)),o.rocketX=p.x,o.rocketY=p.y,o.rocketZ=p.z,o.rocketTilt=s(-Math.atan2(p2.x-p.x,p2.y-p.y),Math.sin(f*11)*.13,cb),o.thrust=f<=0?I(.85,1,ti)*.55:f<ge?s(.55,1,re(f/(ge*.4))):Math.max(0,1-(f-ge)*16),o.trailOn=f<=0?I(.85,1,ti):f<de?1:Math.max(0,1-(f-de)*5),o.chuteK=(f>de?I(de,de+.09,f):0)*(1-I(.82,.93,e)),o.noseK=f>de?I(de,de+.05,f):0,o.groundK=I(.45,.95,ti)*(1-I(.28,.5,f));let fx=o.rocketX+s(6.5,12.5,f),fy=o.rocketY+s(1.2,3.4,f),fz=s(15,27,f);o.camX=s(s(3.2,fx,tf),9,to),o.camY=s(s(6.5,fy,tf),6,to),o.camZ=s(s(34,fz,tf),30,to),o.tgtX=s(s(0,o.rocketX,tf),0,to),o.tgtY=s(s(-6,o.rocketY+1,tf),-4,to),o.tgtZ=s(s(0,o.rocketZ,tf),0,to),o.earthK=s(1-I(.55,1,ti),1,to),o.earthY=s(s(-21,-33,tf),-24,to),o.earthScale=s(s(.86,2.4,tf),.72,to),o.starOpacity=s(s(1,s(.78,1,I(.25,.6,f)),tf),.9,to),o.bloom=s(s(.5,.5+o.thrust*.55,tf),.45,to),o.exposure=s(1+o.thrust*.14,1,to),Ct.style.setProperty("--teleO",(I(.5,1,ti)*(1-I(.86,.96,e))).toFixed(3)),Rt.textContent=Math.round(t).toLocaleString(),Ht.textContent=Math.round(n),Pt.textContent=(f*8.4).toFixed(1);let m="Boost",g2=!0;f>=ge&&(m="Coast",g2=!1),f>=de-.005&&f<de+.06?(m="Release",g2=!0):f>=de+.06&&(m="Descent",g2=!1),je.textContent=m,je.classList.toggle("hot",g2);let h=I(.04,.18,f),x=1-I(.8,.94,f);Je.style.setProperty("--capO",(h*x).toFixed(3)),Je.style.setProperty("--capY",((1-h)*20).toFixed(1)+"px")}});ee(F("#sec-rocketry"),{scene:!0,pin:!0,onUpdate(e){ve(),o.earthK=1,o.camX=s(9,-6,e),o.camY=s(6,2,e),o.camZ=s(30,26,e),o.tgtX=0,o.tgtY=s(-4,-8,e),o.tgtZ=0,o.earthY=s(-24,-34,e),o.earthScale=s(.72,.6,e),o.starOpacity=s(.9,.75,Math.sin(e*Math.PI)),o.bloom=.45,o.exposure=1}});var Qe=F("#transitCap"),et=F("#transitTitle");/* ---------------------------------------------------------------------------
+   The Apollo chapter, flown as one flight: ignition, liftoff, staging, Earth
+   orbit, trans-lunar injection, the crossing, and lunar orbit.
+
+   The Saturn V stands on the Earth, lights, holds, and climbs -- slowly, then
+   hard -- along a single trajectory whose tangent is its axis, rolling onto its
+   heading after it clears the tower and pitching over into its gravity turn.
+   Each of its first two stages burns out, drops away tumbling, and the next
+   lights. It levels into orbit, relights for trans-lunar injection, and
+   releases the lunar module, which crosses to the Moon and goes into orbit
+   around it, passing behind it.
+
+   Everything here is a function of the chapter's progress. The flicker, the
+   smoke and the launch shake are the only things that move on their own, and
+   none of them is part of the scroll state.
+
+   Two placement rules keep the brightest things off the words. The title card
+   holds the middle of the screen during the crossing, so for exactly that
+   stretch the lunar module is pinned in screen space to the band below it.
+   Both captions sit at the left, so the launch is framed right of centre and
+   lunar orbit is centred right.
+   --------------------------------------------------------------------------- */
+var svCap=F("#saturnCap"),
+    AP={E:[0,-52],Re:37.8,S:7,hOrb:16,phEnd:.9,w:3,lift:.1,orb:.44,tliA:.5,tliB:.6,
+        /* the pad shot aims high enough that the Earth's limb stays ~80px
+           clear of the caption beside it */
+        padC:[9.5,-11.2,22],padT:[-3.2,-8.8,0]},
+    apCam=new a.PerspectiveCamera(42,1,.1,4e3),apV=new a.Vector3();
+/* base of the stack during the climb, u in 0..1: altitude on a smootherstep,
+   so it creeps off the pad and levels into orbit, and downrange angle on a
+   steep power, so it goes up long before it goes across */
+function apBase(u){
+  let x=re(u),h=AP.hOrb*x*x*x*(x*(x*6-15)+10),ph=AP.phEnd*Math.pow(x,3.6),R=AP.Re+h;
+  return[AP.E[0]+Math.sin(ph)*R,AP.E[1]+Math.cos(ph)*R]
+}
+/* the orbit it levels into, and the burn that raises it toward the Moon */
+function apOrbit(e){
+  /* the burn raises the orbit on a cubic; past cutoff the climb carries on at
+     the rate the burn ended with, so the path has no corner where it stops --
+     a corner there snapped the stack's axis and the chasing camera with it */
+  let ph=AP.phEnd+(e-AP.orb)*AP.w,d=AP.tliB-AP.tliA,t=re((e-AP.tliA)/d),
+      R=AP.Re+AP.hOrb+40*t*t*t+(e>AP.tliB?120*(e-AP.tliB)/d:0);
+  return[AP.E[0]+Math.sin(ph)*R,AP.E[1]+Math.cos(ph)*R]
+}
+/* base and axis angle together, the axis always the path's own tangent */
+function apPath(e){
+  let p,q2;
+  if(e<AP.orb){let u=Math.min(1,re((e-AP.lift)/(AP.orb-AP.lift))+.002);p=apBase(u-.002),q2=apBase(u)}
+  else p=apOrbit(e),q2=apOrbit(e+.002);
+  let dx=q2[0]-p[0],dy=q2[1]-p[1];
+  return[p[0],p[1],Math.hypot(dx,dy)<1e-9?0:-Math.atan2(dx,dy)]
+}
+/* the camera this frame will be drawn from, rebuilt from state already
+   written, so things can be placed by where they land on screen */
+function apLook(){
+  apCam.aspect=innerWidth/Math.max(1,innerHeight),apCam.fov=o.fov,apCam.updateProjectionMatrix(),
+  apCam.position.set(o.camX,o.camY,o.camZ),apCam.up.set(Math.sin(o.roll),Math.cos(o.roll),0),
+  apCam.lookAt(o.tgtX,o.tgtY,o.tgtZ),apCam.updateMatrixWorld(!0)
+}
+function apAt(nx,ny,d){
+  return apV.set(nx,ny,.5).unproject(apCam).sub(apCam.position).normalize().multiplyScalar(d).add(apCam.position)
+}
 ee(F("#stage-transit"),{scene:!0,pin:!0,onUpdate(e){
   ve();
-  let t=fe(e),
-      up=I(0,.44,e),                       /* the ascent, over the first half */
-      sv=I(.02,.13,e)*(1-I(.33,.45,e)),    /* Saturn V fades in, then stages */
-      lm=I(.43,.55,e)*(1-I(.95,1,e)),      /* what is left after staging */
-      cr=I(.45,1,e);                       /* the crossing */
-  o.earthK=1,o.moonK=I(0,.07,e),
-  o.moonX=s(120,-4,t),o.moonY=s(30,-14,t),o.moonZ=s(-260,-30,t),o.moonScale=s(1,1.45,t),
-  o.earthY=s(-34,-120,t),o.earthScale=s(.6,.22,t),
-  o.saturnK=sv,
-  o.saturnX=s(-3.2,4.4,up),o.saturnY=s(-15,7.5,up),o.saturnZ=s(-4,-15,up),
-  o.saturnScale=s(9.5,5.2,up),
-  /* a gravity turn, not a vertical climb: it leans downrange as it goes */
-  o.saturnTilt=-up*up*.7,o.saturnSpin=.55,
-  o.lmK=lm,
-  o.lmX=s(2.2,-1.4,cr),o.lmY=s(-1.8,.6,cr),o.lmZ=s(-26,-11,cr),
-  o.lmScale=s(4.5,10.5,cr),o.lmSpin=-.8+cr*1.6,
-  o.camX=s(-6,0,t),o.camY=s(2,5,t),o.camZ=s(26,30,t),
-  o.tgtX=0,o.tgtY=s(-8,-2,t),o.tgtZ=s(0,-18,t),
-  o.starOpacity=s(.9,1,t),o.bloom=s(.45,.7,t),o.roll=Math.sin(e*Math.PI)*.06;
-  let sc=I(.05,.15,e)*(1-I(.3,.42,e));
-  svCap&&(svCap.style.setProperty("--capO",sc.toFixed(3)),
-          svCap.style.setProperty("--capY",((1-sc)*20).toFixed(1)+"px"));
-  let n=I(.46,.58,e)*(1-I(.7,.8,e));
+  let S2=AP.S,u=re((e-AP.lift)/(AP.orb-AP.lift)),P=apPath(e),tilt=P[2],
+      ax=-Math.sin(tilt),ay=Math.cos(tilt),cx=P[0]+ax*S2/2,cy=P[1]+ay*S2/2;
+
+  /* The Earth. The flight computer chapter hands over a small one low on the
+     right; the pad needs a large one underneath. Cross between them while
+     neither is showing, and later park it where the glove chapter expects.
+     The pad Earth and the stack only fade in once the camera is most of the way
+     into the pad shot: any sooner and the limb crosses the caption. */
+  o.earthK=e<.03?1-I(0,.025,e):e<.72?I(.045,.075,e)*(1-I(.595,.64,e)):I(.73,.76,e);
+  e<.03?(o.earthX=20,o.earthY=-34,o.earthScale=.6):e<.72&&(o.earthX=AP.E[0],o.earthY=AP.E[1],o.earthScale=4.2);
+
+  /* The stack. */
+  let thr=e<=AP.lift?I(.065,.1,e)
+         :e<AP.orb?(u<.46?1-I(.43,.46,u):u<.79?I(.5,.56,u)*(1-I(.76,.79,u)):I(.84,.9,u)*(1-I(.96,1,u)))
+         :I(AP.tliA,AP.tliA+.02,e)*(1-I(AP.tliB-.03,AP.tliB,e));
+  o.saturnK=I(.045,.075,e)*(1-I(.6,.645,e)),
+  o.saturnX=cx,o.saturnY=cy,o.saturnZ=0,o.saturnScale=S2,o.saturnTilt=tilt,
+  o.saturnSpin=.55+I(.03,.2,u)*1.2,
+  o.saturnSep1=I(.46,.62,u),o.saturnSep2=I(.8,.95,u),
+  o.saturnThrust=thr,o.saturnNozzle=u<.46?0:u<.79?1:2,
+  o.saturnPlume=I(.05,.9,u),o.saturnSmoke=I(.07,.1,e)*(1-I(.25,.5,u)),o.saturnShake=I(.07,.1,e)*(1-I(.15,.45,u));
+
+  /* The camera. Into the pad shot from where the last chapter left it; then a
+     chase in which the aim keeps up but the camera lags and falls back, so the
+     stack climbs out of the frame and then away; then, at injection, a swing
+     to look ahead to where the Moon is coming up. */
+  let k0=I(0,.07,e),camX=s(-6,AP.padC[0],k0),camY=s(2,AP.padC[1],k0),camZ=s(26,AP.padC[2],k0),
+      tX=s(0,AP.padT[0],k0),tY=s(-8,AP.padT[1],k0),tZ=0;
+  if(e>AP.lift){
+    let kt=I(.02,.3,u),kc=I(.08,.55,u),ko=I(.25,1,u);
+    tX=s(tX,cx-S2*.25,kt),tY=s(tY,cy+S2*.1,kt),
+    camX=s(camX,cx+s(11,26,ko),kc),camY=s(camY,cy+s(-4,-10,ko),kc),camZ=s(camZ,s(26,110,ko),kc)
+  }
+  let ks=I(.5,.62,e);
+  tX=s(tX,cx+25,ks),tY=s(tY,cy+10,ks),tZ=s(tZ,-40,ks),
+  camX=s(camX,cx-30,ks),camY=s(camY,cy+14,ks),camZ=s(camZ,70,ks);
+
+  /* The crossing: a deep-space framing, the Earth gone behind, the Moon coming
+     up ahead. */
+  let cw=I(.62,.68,e),pc=[camX,camY,camZ,tX,tY,tZ];
+  camX=s(camX,0,cw),camY=s(camY,6,cw),camZ=s(camZ,40,cw),tX=s(tX,0,cw),tY=s(tY,2,cw),tZ=s(tZ,-60,cw);
+  /* Lunar orbit: ease to the framing the glove chapter opens on. */
+  let ke2=I(.8,.9,e);
+  o.camX=s(camX,0,ke2),o.camY=s(camY,5,ke2),o.camZ=s(camZ,30,ke2),
+  o.tgtX=s(tX,0,ke2),o.tgtY=s(tY,-2,ke2),o.tgtZ=s(tZ,-18,ke2),o.roll=0;
+
+  /* The Moon: in ahead during the burn, closing along the top band through the
+     crossing -- the title card holds the middle then, and the Moon's approach
+     used to pass behind it -- down to its orbit right of centre once the card
+     has gone, and last of all, after the caption, to where the glove chapter
+     expects it. */
+  let mA=I(.52,.79,e),mf=I(.79,.87,e),mEnd=I(.975,1,e),
+      mx=s(s(s(170,120,mA),15,mf),-4,mEnd),my=s(s(s(140,95,mA),-5,mf),-14,mEnd),mz=s(s(s(-600,-300,mA),-45,mf),-30,mEnd);
+  o.moonK=I(.52,.6,e),o.moonX=mx,o.moonY=my,o.moonZ=mz,o.moonScale=s(s(1,1.25,mf),1.45,mEnd);
+
+  /* The lunar module: out of the top of the stack, pinned under the title card
+     for the crossing, then into an inclined orbit that carries it behind the
+     Moon. The move from the stack to the pinned spot is blended on screen, not
+     in the world: the stack stays where the camera had it before the swing, and
+     the module slides from there to its spot at a matching apparent size.
+     Blended in world space, the camera's swing flung it off the bottom-right
+     corner and back. */
+  let lx=cx+ax*S2*(.32+I(.6,.66,e)*.5),ly=cy+ay*S2*(.32+I(.6,.66,e)*.5),lz=0,lsc=S2*.13;
+  if(e>.6){
+    o.camX=pc[0],o.camY=pc[1],o.camZ=pc[2],o.tgtX=pc[3],o.tgtY=pc[4],o.tgtZ=pc[5],apLook();
+    apV.set(lx,ly,lz);
+    let d0=apV.distanceTo(apCam.position);apV.project(apCam);
+    let n0=apV.x,m0=apV.y,z0=lsc/d0;
+    o.camX=camX,o.camY=camY,o.camZ=camZ,o.tgtX=tX,o.tgtY=tY,o.tgtZ=tZ,apLook();
+    let c=re((e-.62)/.18),fh=2*22*Math.tan(Math.PI*21/180),d=s(d0,22,cw),
+        A=apAt(s(n0,s(-.72,.15,c),cw),s(m0,-.7,cw),d);
+    lx=A.x,ly=A.y,lz=A.z,lsc=s(z0,.075*fh/.78/22,cw)*d;
+    o.camX=s(camX,0,ke2),o.camY=s(camY,5,ke2),o.camZ=s(camZ,30,ke2),o.tgtX=s(tX,0,ke2),o.tgtY=s(tY,-2,ke2),o.tgtZ=s(tZ,-18,ke2)
+  }
+  let kr=I(.8,.86,e),ps=(e-.8)/.2*Math.PI*2*1.2-Math.PI/2,rho=14*o.moonScale*1.55;
+  o.lmK=I(.59,.635,e)*(1-I(.93,.97,e)),
+  o.lmX=s(lx,mx+Math.cos(ps)*rho,kr),o.lmY=s(ly,my+Math.sin(ps)*rho*.28,kr),o.lmZ=s(lz,mz+Math.sin(ps)*rho,kr),
+  o.lmScale=s(lsc,2.2,kr),o.lmSpin=e*9;
+
+  o.starOpacity=s(.9,1,I(0,.07,e)),
+  o.bloom=s(.45,.7,I(.62,.8,e))+(e<AP.orb?thr*.22:0),o.exposure=1+(e<AP.orb?thr*.06:0);
+
+  /* Words. */
+  let sc=I(.03,.07,e)*(1-I(.2,.26,e));
+  svCap&&(svCap.style.setProperty("--capO",sc.toFixed(3)),svCap.style.setProperty("--capY",((1-sc)*20).toFixed(1)+"px"));
+  let n=I(.645,.68,e)*(1-I(.77,.8,e));
   et.style.opacity=n.toFixed(3),
   et.style.transform="translateY("+((1-n)*18).toFixed(1)+"px) scale("+(.985+n*.015).toFixed(4)+")";
-  let r=I(.8,.88,e)*(1-I(.95,1,e));
+  let r=I(.86,.9,e)*(1-I(.95,.972,e));
   Qe.style.setProperty("--capO",r.toFixed(3)),Qe.style.setProperty("--capY",((1-r)*20).toFixed(1)+"px")
-}});var tt=F("#gloveCap");ee(F("#stage-glove"),{scene:!0,pin:!0,onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.moonX=s(-4,-9,e),o.moonY=s(-14,-19,e),o.moonZ=s(-30,-38,e),o.moonScale=1.45,o.gloveK=I(0,.14,e),o.gloveSpin=e*Math.PI*1.35-.5,o.gloveExplode=I(.32,.78,e),
-/* NASA's own EVA glove, held alongside his. It arrives a moment later and
-   only turns — it is the reference, so it should not compete with the
-   assembly coming apart next to it. */
-o.nglK=I(.14,.3,e)*(1-I(.84,.97,e)),o.nglX=-9.5,o.nglY=-.2,o.nglZ=-3,
-/* NASA's model is wide and flat where his is tall, so matching it on the
-   normalised box would leave it looking like a footnote. Sized on its longest
-   axis instead, and kept clear of his to the left even when his is fully
-   exploded. */
-o.nglScale=6,o.nglSpin=.35+e*1.05,o.camX=s(0,2.5,Math.sin(e*Math.PI)),o.camY=s(5,1.5,fe(e)),o.camZ=s(30,20,fe(e)),o.tgtX=0,o.tgtY=s(-2,.5,e),o.tgtZ=s(-18,-2,e),o.roll=0,o.bloom=s(.7,.55,I(0,.25,e)),o.starOpacity=1;let t=I(.06,.2,e)*(1-I(.8,.96,e));tt.style.setProperty("--capO",t.toFixed(3)),tt.style.setProperty("--capY",((1-t)*20).toFixed(1)+"px")}});ee(F("#sec-glove"),{scene:!0,pin:!0,onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.gloveK=Math.max(0,1-e*6),o.gloveSpin=Math.PI*1.35-.5+e*.4,o.gloveExplode=1,o.camX=0,o.tgtX=0,o.bloom=.55;let q=I(0,.6,e);o.moonScale=s(1.45,1.9,q),o.moonY=s(-19,-34,q),o.moonZ=s(-38,-52,q),o.camY=s(1.5,3,q),o.camZ=s(20,28,q),o.tgtY=s(.5,-3,q),o.tgtZ=s(-2,-20,q),o.starOpacity=s(1,.8,q)}});ee(F("#sec-outreach"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){ve(),o.moonK=1,o.earthK=1;let q=I(0,.6,e);o.moonScale=s(1.9,2.2,q),o.moonX=s(-9,-30,q),o.moonY=s(-34,-40,q),o.camX=s(0,6,q),o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.starOpacity=.8,o.bloom=s(.55,.45,q)}});ee(F("#sec-awards"),{scene:!0,pin:!0,onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.moonX=s(-30,-52,q),o.moonScale=s(2.2,1.8,q),o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=1,o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.moonScale=s(1.8,1,t),o.moonX=s(-52,-34,t),o.moonZ=s(-52,-90,t),o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});var ot=F("#hstage"),Ie=F("#htrack");var HCARDS=Ee(".hcard").length||1;ot&&Ie&&ee(ot,{start:"top top",end:"bottom bottom",onUpdate(e){let t=Math.max(0,Ie.scrollHeight-Ie.parentElement.clientHeight);Ie.style.setProperty("--hy",(-e*t).toFixed(1)+"px"),F("#hProg").style.setProperty("--p",e.toFixed(3)),F("#hCount").textContent=String(Math.min(HCARDS,Math.floor(e*(HCARDS-.001))+1)).padStart(2,"0")}});var nt=F(".nav"),at=0,_e=!1;st.forEach((e,t)=>e.addEventListener("click",n=>{n.preventDefault();let r=Xe[t];r&&ne.jump(r.getBoundingClientRect().top+ne.current)}));Ee('a[href^="#"]').forEach(e=>e.addEventListener("click",t=>{let n=document.querySelector(e.getAttribute("href"));n&&(t.preventDefault(),ne.jump(n.getBoundingClientRect().top+ne.current))}));var rt=performance.now();function ct(e){let t=Math.min(.05,(e-rt)/1e3);rt=e;let n=ne.update(t);$e(n),wt.style.setProperty("--p",(ne.max?re(n/ne.max):0).toFixed(4));let r=n-at;n>160&&r>1&&!_e?(nt.classList.add("away"),_e=!0):(r<-1||n<160)&&_e&&(nt.classList.remove("away"),_e=!1),at=n,it.forEach((m,f)=>{let h=m.scrollWidth/2||1;m._x=((m._x||0)-(.35+Math.abs(ne.velocity)*.05)*(f%2?-1:1))%h,m.style.setProperty("--mx",(f%2?m._x-h:m._x).toFixed(1)+"px")}),Re.update(t),requestAnimationFrame(ct)}requestAnimationFrame(ct);setTimeout(ye,400);addEventListener("load",()=>{ye(),ne._measure()});/* ---------------------------------------------------------------------------
+}});var tt=F("#gloveCap");ee(F("#stage-glove"),{scene:!0,pin:!0,onUpdate(e){ve(),o.moonK=1,o.earthK=1,o.moonX=s(-4,-9,e),o.moonY=s(-14,-19,e),o.moonZ=s(-30,-38,e),o.moonScale=1.45,o.gloveK=I(0,.14,e),o.gloveSpin=e*Math.PI*1.35-.5,o.gloveExplode=I(.32,.78,e),o.camX=s(0,2.5,Math.sin(e*Math.PI)),o.camY=s(5,1.5,fe(e)),o.camZ=s(30,20,fe(e)),o.tgtX=0,o.tgtY=s(-2,.5,e),o.tgtZ=s(-18,-2,e),o.roll=0,o.bloom=s(.7,.55,I(0,.25,e)),o.starOpacity=1;let t=I(.06,.2,e)*(1-I(.8,.96,e));tt.style.setProperty("--capO",t.toFixed(3)),tt.style.setProperty("--capY",((1-t)*20).toFixed(1)+"px")}});/* The glove leaves the way the page arrives.
+
+   This scene now begins the moment the chapter's first panel starts rising
+   into view, one viewport before the pin engages. Across that viewport the
+   exploded assembly is carried upward at the same rate the copy rises -- one
+   viewport of scroll spans ~15.4 world units at the glove's depth, and it
+   clears the top of the frame after ~13.9 -- dissolving as it goes.
+
+   The camera does not move anywhere in this chapter. Before, the glove sat in
+   front of the heading for a whole viewport and then shrank away while the
+   camera dollied out: its size is tied to gloveK, so fading it that way read
+   as a zoom. The fade now goes through gloveFade, which leaves the size alone,
+   and the pull-back to the wide framing happens as the outreach intro arrives
+   instead. gloveK only drops once the glove is already invisible, so the
+   handover to the next chapter has no step.
+
+   The Moon fades out over the first 13% of the same arrival, rather than
+   moving, and is gone before the chapter's kicker -- 132px into its panel,
+   so 14.6% of the way in -- reaches the bottom of the screen. It sits large in the lower left of this framing, exactly where the
+   heading rises in, and no position it could slide to clears the heading
+   from the start of the rise -- measured across the whole arrival, not
+   assumed. The section's panels then sit on a plain starfield. */
+var sglT=ee(F("#sec-glove"),{scene:!0,pin:!0,start:"top bottom",onUpdate(e){
+  ve();
+  let r=e*(sglT._e-sglT._s)/innerHeight,   /* viewports of arrival so far */
+      a=re(r);
+  o.moonK=1-I(0,.13,a),o.earthK=1,
+  o.gloveK=1-I(1,1.25,r),o.gloveExplode=1,
+  o.gloveSpin=Math.PI*1.35-.5+a*.35,
+  o.gloveLift=a*15.4,o.gloveFade=1-I(.45,.92,a),
+  o.camX=0,o.camY=1.5,o.camZ=20,o.tgtX=0,o.tgtY=.5,o.tgtZ=-2,o.roll=0,
+  o.moonX=-9,o.moonY=-19,o.moonZ=-38,o.moonScale=1.45,
+  o.starOpacity=1,o.bloom=.55
+}});ee(F("#sec-outreach"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){
+  ve(),o.earthK=1;
+  let q=I(0,.6,e),
+      /* The glove section ends on its close framing with the Moon faded out.
+         The camera eases back to this chapter's wide framing while the intro
+         arrives -- with no body on screen, the move does not read as a zoom --
+         and the Moon fades back in only once the camera has settled, on a path
+         measured 105px clear of the intro copy. It leaves again by 88%, before
+         the awards tape's first line shows at 90.2%: no position it could hold
+         there stays clear of the tape's rows as they slide up into place. */
+      b=I(0,.22,e);
+  o.moonK=I(.22,.34,e)*(1-I(.8,.88,e)),
+  o.moonScale=s(1.9,2.2,q),o.moonX=s(-9,-30,q),o.moonY=s(-34,-40,q),
+  o.camX=s(0,s(0,6,q),b),o.camY=s(1.5,3,b),o.camZ=s(20,28,b),
+  o.tgtX=0,o.tgtY=s(.5,-3,b),o.tgtZ=s(-2,-20,b),
+  o.starOpacity=s(1,.8,b),o.bloom=s(.55,s(.55,.45,q),b)
+}});/* No Moon over the awards. As the tape pins, its rows slide up through the
+   whole right side of the screen, and a search over every Moon position that
+   would also suit the contact chapter found none that stays clear of them.
+   The Earth rises alone. */
+ee(F("#sec-awards"),{scene:!0,start:"top 70%",end:"bottom 30%",onUpdate(e){ve(),o.moonK=0,o.earthK=1,o.camX=6,o.camY=3,o.camZ=28,o.tgtX=0,o.tgtY=-3,o.tgtZ=-20,o.bloom=.45;let q=I(0,.6,e);o.earthScale=s(.22,.5,q),o.earthY=s(-120,-40,q),o.starOpacity=s(.8,1,q)}});/* Contact. The Moon used to sit behind the links. It now fades in upper right
+   at a position measured against every line of contact copy -- kicker,
+   heading, links and footer -- across the whole chapter, with 188px at its
+   closest, and it holds still while the camera pulls back, so it settles into
+   frame instead of sweeping across the words. The Earth's arc ends further
+   right, 66px clear of the footer it used to cover. */
+ee(F("#contact"),{scene:!0,start:"top 70%",end:"bottom bottom",onUpdate(e){ve();let t=fe(e);o.moonK=I(.1,.22,e),o.earthK=1,o.camZ=s(28,44,t),o.camY=s(3,8,t),o.camX=s(6,0,t),o.tgtX=0,o.tgtZ=-20,o.starOpacity=1,o.tgtY=s(-3,-10,t),o.earthScale=s(.5,.95,t),o.earthY=s(-40,-30,t),o.earthX=s(20,36,t),o.moonScale=1.2,o.moonX=63,o.moonY=1,o.moonZ=-90,o.bloom=s(.45,.75,t)}});var it=Ee(".marquee .track");it.forEach(e=>{e.innerHTML=e.innerHTML+e.innerHTML});/* ---------------------------------------------------------------------------
+   Outreach: a deck the scroll deals through.
+
+   The five cards are one stack seen in perspective. As you scroll, the card on
+   top tips back and is flung up past the viewer while the next one comes
+   forward from behind it, and the figures on each card count up as it
+   arrives. Each card parks for a stretch of scroll -- the same dwell the
+   chapter decks use -- so it can be read before the next one is dealt.
+
+   Written from the chapter's progress alone, so the deck is in the same state
+   however you arrived at a given point.
+   --------------------------------------------------------------------------- */
+var ot=F("#hstage"),Ie=F("#htrack"),HC=Ee(".hcard"),HCARDS=HC.length||1,
+    /* each title kept as a template, so a card can be drawn at any point of
+       its count without reading back what the DOM last showed */
+    HT=HC.map(c=>{let h=c.querySelector("h3"),p=h.textContent.split(/(\d[\d,]*)/);
+      return{h,p,v:p.map((x,i)=>i%2?+x.replace(/,/g,""):0),last:h.textContent}});
+function hTitle(t,k){
+  let out="";
+  for(let i=0;i<t.p.length;i++)out+=i%2?Math.round(t.v[i]*k).toLocaleString("en-US"):t.p[i];
+  out!==t.last&&(t.h.textContent=out,t.last=out)
+}
+ot&&Ie&&ee(ot,{start:"top top",end:"bottom bottom",onUpdate(e){
+  let n=HCARDS,a=deckAt(e,n)*(n-1);
+  for(let i=0;i<n;i++){
+    let d=i-a,c=HC[i].style,cy,cz,rx,sc,op,zi;
+    if(d>=0){
+      /* still in the stack: each card further back sits lower, deeper and a
+         touch smaller so the pile reads as a pile; three show */
+      let k=Math.min(d,3);
+      cy=k*16,cz=-k*60,rx=0,sc=1-k*.04,op=d>3?0:1-k*.18,zi=100-i
+    }else{
+      /* dealt: tips back about its bottom edge and is flung up toward the
+         viewer, gone before it is a whole step away. Tipping it back swings
+         its top corner toward the camera, where perspective magnifies it
+         most, so it pivots just below its middle, travels at most 150px under
+         a 1600px perspective, and takes no extra scale -- measured, that keeps
+         even its nearest corner out of the photo's column. */
+      let t=Math.min(1,-d);
+      cy=-t*t*230,cz=t*150,rx=-t*48,sc=1,op=1-I(.15,.82,t),zi=200+i
+    }
+    Se&&(cz=0,rx=0);
+    c.setProperty("--cy",cy.toFixed(1)+"px"),c.setProperty("--cz",cz.toFixed(1)+"px"),
+    c.setProperty("--crx",rx.toFixed(2)+"deg"),c.setProperty("--cs",sc.toFixed(4)),
+    c.setProperty("--co",op.toFixed(3)),c.zIndex=zi;
+    /* a card counts up as it comes to the top of the stack, and holds once dealt */
+    hTitle(HT[i],d<=0?1:fe(re(1-d)))
+  }
+  F("#hProg").style.setProperty("--p",e.toFixed(3)),
+  F("#hCount").textContent=String(Math.min(n,Math.round(a)+1)).padStart(2,"0")
+}});var nt=F(".nav"),at=0,_e=!1;st.forEach((e,t)=>e.addEventListener("click",n=>{n.preventDefault();let r=Xe[t];r&&ne.jump(r.getBoundingClientRect().top+ne.current)}));Ee('a[href^="#"]').forEach(e=>e.addEventListener("click",t=>{let n=document.querySelector(e.getAttribute("href"));n&&(t.preventDefault(),ne.jump(n.getBoundingClientRect().top+ne.current))}));var rt=performance.now();function ct(e){let t=Math.min(.05,(e-rt)/1e3);rt=e;let n=ne.update(t);$e(n),wt.style.setProperty("--p",(ne.max?re(n/ne.max):0).toFixed(4));let r=n-at;n>160&&r>1&&!_e?(nt.classList.add("away"),_e=!0):(r<-1||n<160)&&_e&&(nt.classList.remove("away"),_e=!1),at=n,it.forEach((m,f)=>{let h=m.scrollWidth/2||1;m._x=((m._x||0)-(.35+Math.abs(ne.velocity)*.05)*(f%2?-1:1))%h,m.style.setProperty("--mx",(f%2?m._x-h:m._x).toFixed(1)+"px")}),Re.update(t),requestAnimationFrame(ct)}requestAnimationFrame(ct);setTimeout(ye,400);addEventListener("load",()=>{ye(),ne._measure()});/* ---------------------------------------------------------------------------
    Model pipeline.
 
    Nothing here is needed at first paint, and four of the five NASA models ship
@@ -1679,16 +2140,11 @@ function wireSlot(slot,url,opts,after){
   }
 }
 var svSlot=wireSlot("saturn","assets/model/nasa-saturn-v.glb",
-      {core:0x07080e,wire:0x9fb8e6,wireOp:.46,dot:0xd6e2f7,dotOp:.5,dotSize:.045,pts:2600,angle:20}),
+      {core:0x07080e,wire:0x9fb8e6,wireOp:.46,dot:0xd6e2f7,dotOp:.5,dotSize:.045,pts:2600,angle:20,bands:[.40,.62]}),
     lmSlot=wireSlot("lm","assets/model/nasa-lunar-module.glb",
-      {core:0x06070c,wire:0x8fa8d4,wireOp:.4,dot:0xc3d3ee,dotOp:.45,dotSize:.04,pts:2400,angle:26}),
-    /* cool grey, so his glove stays the blue one and NASA's reads as the
-       reference standing next to it */
-    nglSlot=wireSlot("ngl","assets/model/nasa-astronaut-glove.glb",
-      {core:0x06070c,wire:0xb9c4d8,wireOp:.55,dot:0xdde5f2,dotOp:.5,dotSize:.05,pts:1600,angle:18});
+      {core:0x06070c,wire:0x8fa8d4,wireOp:.4,dot:0xc3d3ee,dotOp:.45,dotSize:.04,pts:2400,angle:26});
 chapterModel(F("#stage-transit"),"assets/model/nasa-saturn-v.glb",svSlot.mount,svSlot.unmount);
 chapterModel(F("#stage-transit"),"assets/model/nasa-lunar-module.glb",lmSlot.mount,lmSlot.unmount);
-chapterModel(F("#stage-glove"),"assets/model/nasa-astronaut-glove.glb",nglSlot.mount,nglSlot.unmount);
 
 </script>
 </body>
