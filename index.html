@@ -1575,7 +1575,7 @@ function Ne(e){let t=new a.WebGLRenderer({canvas:e,antialias:!0,powerPreference:
           float graze=(1.0-abs(sun))*lit;
           vec3 col=mix(uColor,uWarm,graze*0.55);
           float f=rim*mix(0.06,1.0,lit);
-          gl_FragColor=vec4(col*uInt*(0.85+lit*0.5),f); }`}));B.add(J),B.position.set(0,-11,0);let D=new a.Group;n.add(D);let O=wireBody(14,{core:657930,wire:5592405,wireOp:.22,dot:11450029,dotOp:.6,dotSize:.085,pts:34e3,lat:13,lon:20,mask:(lo,la)=>!inMaria(lo,la),ring:12303291,ringOp:.62,rings:lunarRings()});D.add(O),D.position.set(120,30,-260),D.visible=!0;let v=new a.Group,Y=new a.MeshStandardMaterial({color:15265012,roughness:.42,metalness:.35}),u=new a.MeshStandardMaterial({color:2764864,roughness:.6,metalness:.4}),b=new a.MeshStandardMaterial({color:5082623,roughness:.35,metalness:.5,emissive:1785728,emissiveIntensity:.6}),Z=new a.Mesh(new a.CylinderGeometry(.3,.3,3.1,32),Y),T=new a.Mesh(new a.ConeGeometry(.3,1.05,32),Y.clone());T.material.transparent=!0;T.position.y=2.07;let _=new a.Mesh(new a.CylinderGeometry(.315,.315,.24,32),b);_.position.y=.55;let U=new a.Mesh(new a.CylinderGeometry(.3,.34,.5,32),u);U.position.y=-1.75,v.add(Z,T,_,U);let R=new a.Shape;R.moveTo(0,0),R.lineTo(.85,-.62),R.lineTo(.85,-.9),R.lineTo(0,-.9);let $=new a.ExtrudeGeometry(R,{depth:.05,bevelEnabled:!1});for(let M=0;M<3;M++){let k=new a.Mesh($,Y);k.position.set(0,-1.05,0),k.rotation.y=M*Math.PI*2/3,v.add(k)}let S=ke([[0,"rgba(255,244,214,1)"],[.22,"rgba(255,168,70,.92)"],[.55,"rgba(255,92,30,.42)"],[1,"rgba(255,60,0,0)"]],128),W=new a.Sprite(new a.SpriteMaterial({map:S,transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));W.position.y=-3.7,W.scale.set(.95,3.3,1),v.add(W);let y=new a.Sprite(new a.SpriteMaterial({map:S,transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));y.position.y=-2.25,y.scale.set(.5,.95,1),v.add(y);let A=new a.PointLight(16747069,0,26);A.position.y=-2.4,v.add(A),n.add(v);let P=46,V=ke([[0,"rgba(210,225,255,.75)"],[.45,"rgba(150,175,215,.28)"],[1,"rgba(120,140,180,0)"]],64),z=[];for(let M=0;M<P;M++){let k=new a.Sprite(new a.SpriteMaterial({map:V,transparent:!0,depthWrite:!1,opacity:0,blending:a.NormalBlending}));k.visible=!1,n.add(k),z.push({sprite:k,life:0,x:0,y:0,z:0,size:1})}let ae=0,Q=0,q=new a.Group,i=new a.Mesh(new a.SphereGeometry(1.5,30,18,0,Math.PI*2,0,Math.PI*.52),new a.MeshStandardMaterial({color:16747069,roughness:.85,metalness:0,side:a.DoubleSide,emissive:3478794,emissiveIntensity:.5}));q.add(i);let c=new a.LineBasicMaterial({color:12371670,transparent:!0,opacity:.5});for(let M=0;M<8;M++){let k=M/8*Math.PI*2,p=new a.BufferGeometry().setFromPoints([new a.Vector3(Math.cos(k)*1.45,0,Math.sin(k)*1.45),new a.Vector3(0,-1.7,0)]);q.add(new a.Line(p,c))}q.visible=!1,q.scale.setScalar(.01),n.add(q);let L=(()=>{let k=document.createElement("canvas");k.width=k.height=1024;let p=k.getContext("2d");p.fillStyle="#0a0e18",p.fillRect(0,0,1024,1024),p.strokeStyle="rgba(110,150,215,.3)",p.lineWidth=2;for(let pe=0;pe<=32;pe++){let le=pe*1024/32;p.beginPath(),p.moveTo(le,0),p.lineTo(le,1024),p.stroke(),p.beginPath(),p.moveTo(0,le),p.lineTo(1024,le),p.stroke()}let ce=p.createRadialGradient(1024/2,1024/2,0,1024/2,1024/2,1024/2);ce.addColorStop(0,"rgba(0,0,0,0)"),ce.addColorStop(.45,"rgba(0,0,0,.35)"),ce.addColorStop(1,"rgba(4,5,10,1)"),p.fillStyle=ce,p.fillRect(0,0,1024,1024);let we=new a.CanvasTexture(k);return we.colorSpace=a.SRGBColorSpace,we})(),d=new a.Mesh(new a.CircleGeometry(150,64),new a.MeshBasicMaterial({map:L,transparent:!0,opacity:0,depthWrite:!1}));d.rotation.x=-Math.PI/2,d.position.y=-9.2,d.visible=!1,n.add(d);let C=new a.Sprite(new a.SpriteMaterial({map:ke([[0,"rgba(90,150,255,.55)"],[.5,"rgba(50,90,180,.18)"],[1,"rgba(0,0,0,0)"]],128),transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));C.position.set(0,-9,-30),C.scale.set(150,26,1),n.add(C);let ue=new a.Group;ue.visible=!1,n.add(ue);
+          gl_FragColor=vec4(col*uInt*(0.85+lit*0.5),f); }`}));B.add(J),B.position.set(0,-11,0);let D=new a.Group;n.add(D);let O=wireBody(14,{core:657930,wire:5592405,wireOp:.22,dot:11450029,dotOp:.6,dotSize:.085,pts:34e3,lat:13,lon:20,mask:(lo,la)=>!inMaria(lo,la),ring:12303291,ringOp:.62,rings:lunarRings()});D.add(O),D.position.set(120,30,-260),D.visible=!0;let S=ke([[0,"rgba(255,244,214,1)"],[.22,"rgba(255,168,70,.92)"],[.55,"rgba(255,92,30,.42)"],[1,"rgba(255,60,0,0)"]],128),V=ke([[0,"rgba(210,225,255,.75)"],[.45,"rgba(150,175,215,.28)"],[1,"rgba(120,140,180,0)"]],64);let L=(()=>{let k=document.createElement("canvas");k.width=k.height=1024;let p=k.getContext("2d");p.fillStyle="#0a0e18",p.fillRect(0,0,1024,1024),p.strokeStyle="rgba(110,150,215,.3)",p.lineWidth=2;for(let pe=0;pe<=32;pe++){let le=pe*1024/32;p.beginPath(),p.moveTo(le,0),p.lineTo(le,1024),p.stroke(),p.beginPath(),p.moveTo(0,le),p.lineTo(1024,le),p.stroke()}let ce=p.createRadialGradient(1024/2,1024/2,0,1024/2,1024/2,1024/2);ce.addColorStop(0,"rgba(0,0,0,0)"),ce.addColorStop(.45,"rgba(0,0,0,.35)"),ce.addColorStop(1,"rgba(4,5,10,1)"),p.fillStyle=ce,p.fillRect(0,0,1024,1024);let we=new a.CanvasTexture(k);return we.colorSpace=a.SRGBColorSpace,we})(),d=new a.Mesh(new a.CircleGeometry(150,64),new a.MeshBasicMaterial({map:L,transparent:!0,opacity:0,depthWrite:!1}));d.rotation.x=-Math.PI/2,d.position.y=-9.2,d.visible=!1,n.add(d);let C=new a.Sprite(new a.SpriteMaterial({map:ke([[0,"rgba(90,150,255,.55)"],[.5,"rgba(50,90,180,.18)"],[1,"rgba(0,0,0,0)"]],128),transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0}));C.position.set(0,-9,-30),C.scale.set(150,26,1),n.add(C);let ue=new a.Group;ue.visible=!1,n.add(ue);
 /* Apollo hardware. Each is a host group the chapter fills in
    when its model arrives and empties when it leaves, so nothing here exists
    until it is scrolled to. */
@@ -1613,9 +1613,128 @@ let svGlow=new a.Sprite(new a.SpriteMaterial({map:S,transparent:!0,depthWrite:!1
 /* smoke, spawned at the nozzle while there is air to make it */
 let svPool=[];for(let q2=0;q2<64;q2++){let sp2=new a.Sprite(new a.SpriteMaterial({map:V,transparent:!0,depthWrite:!1,opacity:0,blending:a.NormalBlending}));sp2.visible=!1,n.add(sp2),svPool.push({sp:sp2,life:0,v:new a.Vector3,size:1})}
 let svPi=0,svAcc=0,svA=new a.Vector3,svB=new a.Vector3;
+/* ---------------------------------------------------------------------------
+   His rocket, in the same instrument language as the Saturn V and the lunar
+   module: a dark core that hides the far side, hard edges, a light scatter of
+   points, and the blue of its coupler band and fins kept as blue linework. It
+   used to be the one lit, glossy object on a page of linework.
+
+   It is built from primitives in two sections split at the coupler, because
+   that is where it comes apart: the servo releases the retainer, the airframe
+   separates on the shock cord and the parachute comes out between the halves.
+   Each section's origin is its joint face -- the end its cord is tied to -- so
+   the halves can be pulled apart and hung from those points directly.
+
+   The exhaust is the Saturn V's plume shader at this rocket's scale, and the
+   smoke is a short, faint trail laid along the flight path itself, so it
+   thins out behind the rocket instead of piling into a cloud around it.
+   --------------------------------------------------------------------------- */
+function rkSection(white,blue){
+  let g=new a.Group,parts=[];
+  for(let [list,op] of [[white,{core:0x07080e,wire:0x9fb8e6,wireOp:.72,dot:0xd6e2f7,dotOp:.5,dotSize:.028,pts:420,angle:20}],
+                        [blue,{core:0x07080e,wire:0x4d8dff,wireOp:.85,dot:0x9cc0ff,dotOp:.45,dotSize:.028,pts:160,angle:20}]]){
+    let root=new a.Group;
+    for(let [geo,y,ry] of list){let m=new a.Mesh(geo);m.position.y=y,m.rotation.y=ry||0,root.add(m)}
+    let w=wireModel(root,op);g.add(w),parts.push(w)
+  }
+  return g.userData.parts=parts,g.visible=!1,n.add(g),g
+}
+let rkFin=(()=>{let sh=new a.Shape;sh.moveTo(.28,0),sh.lineTo(.88,-.62),sh.lineTo(.88,-.9),sh.lineTo(.28,-.9);
+      let fg=new a.ExtrudeGeometry(sh,{depth:.05,bevelEnabled:!1});return fg.translate(0,0,-.025),fg})(),
+    rkCyl=(r0,r1,hh)=>new a.CylinderGeometry(r0,r1,hh,12),
+    /* lower section: body tube, aft flare, nozzle, a panel ring, fins, and the lower half of the band */
+    rkLow=rkSection([[rkCyl(.3,.3,2.1),-1.05],[rkCyl(.3,.34,.5),-2.3],[rkCyl(.13,.17,.14),-2.62],[rkCyl(.302,.302,.02),-.4],[rkCyl(.302,.302,.02),-.9],[rkCyl(.302,.302,.02),-1.4]],
+                    [[rkCyl(.315,.315,.12),-.06],[rkFin,-1.6,0],[rkFin,-1.6,Math.PI*2/3],[rkFin,-1.6,Math.PI*4/3]]),
+    /* upper section: the other half of the band, body tube, a panel ring and the nose cone */
+    rkUp=rkSection([[rkCyl(.3,.3,1),.5],[new a.ConeGeometry(.3,1.05,12),1.525],[rkCyl(.302,.302,.02),.32],[rkCyl(.302,.302,.02),.68]],
+                   [[rkCyl(.315,.315,.12),.06]]),
+    rkPlume=new a.Mesh(svPG,svPlume.material.clone()),
+    rkGlow=new a.Sprite(new a.SpriteMaterial({map:S,transparent:!0,depthWrite:!1,blending:a.AdditiveBlending,opacity:0})),
+    /* the parachute: a wire canopy in the page's hot accent, and its shroud lines */
+    rkChute=new a.Group,
+    rkCan=wireModel((()=>{let r=new a.Group;r.add(new a.Mesh(new a.SphereGeometry(1.5,16,6,0,Math.PI*2,0,Math.PI*.5)));return r})(),
+      {core:0x0a0603,wire:0xff8a3d,wireOp:.75,dot:0xffc08f,dotOp:.4,dotSize:.03,pts:500,angle:12}),
+    rkShM=new a.LineBasicMaterial({color:0xffb27a,transparent:!0,opacity:.45}),
+    rkShG=new a.BufferGeometry(),
+    /* the shock cord, redrawn each frame from one section to the canopy to the other */
+    RKN=25,rkCordG=new a.BufferGeometry(),rkCordM=new a.LineBasicMaterial({color:0xcfd8e6,transparent:!0,opacity:.6}),
+    rkCord=new a.Line(rkCordG,rkCordM),rkTrail=[];
+rkCan.traverse(x=>{x.isMesh&&(x.material.side=a.DoubleSide)});
+rkShG.setAttribute("position",new a.Float32BufferAttribute([0,1,2,3,4,5,6,7].flatMap(k2=>{let an=k2/8*Math.PI*2;return[Math.cos(an)*1.48,0,Math.sin(an)*1.48,0,-1.7,0]}),3));
+rkChute.add(rkCan,new a.LineSegments(rkShG,rkShM)),rkChute.visible=!1,n.add(rkChute);
+rkCordG.setAttribute("position",new a.BufferAttribute(new Float32Array(RKN*3),3)),rkCord.frustumCulled=!1,rkCord.visible=!1,n.add(rkCord);
+rkPlume.visible=rkGlow.visible=!1,n.add(rkPlume,rkGlow);
+for(let k2=0;k2<26;k2++){let t2=new a.Sprite(new a.SpriteMaterial({map:V,transparent:!0,depthWrite:!1,opacity:0}));t2.visible=!1,n.add(t2),rkTrail.push(t2)}
+/* Everything here is placed from state the scene already wrote -- flight time,
+   separation, deployment and hang -- so the rocket is in the same shape
+   however you scrolled to a point. Only the flame's flicker and the gentle
+   swing under the canopy use the clock. */
+function rkUpdate(){
+  let K=l.rocketK,on=K>.01;
+  rkLow.visible=rkUp.visible=on;
+  if(!on){rkPlume.visible=rkGlow.visible=rkChute.visible=rkCord.visible=!1;for(let t2 of rkTrail)t2.visible=!1;return}
+  let F=flight(),t=l.flightT,sep=l.sepK,hang=l.hangK,ck=l.chuteK,tilt=l.rocketTilt,
+      ax=-Math.sin(tilt),ay=Math.cos(tilt),
+      jx=l.rocketX+ax*.55,jy=l.rocketY+ay*.55,jz=l.rocketZ,   /* the coupler: where the airframe splits */
+      sw=Math.sin(ie*1.3)*.07*hang,ci=1-Math.pow(1-ck,2.6),
+      /* apart: the upper section is thrown forward along the axis and a little
+         aside, starting to turn. Hung: both under the canopy, each from the end
+         its cord is tied to -- the upper by its aft end, so nose down, the
+         lower by its forward end, so fins down. */
+      gap=sep*1.35,lat=sep*.22,
+      u1x=jx+ax*gap+ay*lat,u1y=jy+ay*gap-ax*lat,
+      c2x=jx-.6,c2y=jy+2.4,
+      ux=s(u1x,c2x-.55,hang),uy=s(u1y,c2y-1.1,hang),
+      cx=s((jx+u1x)/2-1.9*ci,c2x,hang),cy=s((jy+u1y)/2+.5*ci,c2y,hang),
+      rU=s(tilt+sep*.45,Math.PI+sw*1.3,hang),rL=s(tilt,-sw,hang);
+  rkLow.position.set(jx,jy,jz),rkLow.rotation.set(0,0,rL),
+  rkUp.position.set(ux,uy,jz),rkUp.rotation.set(0,0,rU);
+  for(let w of rkLow.userData.parts)bodyOpacity(w,K);
+  for(let w of rkUp.userData.parts)bodyOpacity(w,K);
+  /* the flame, from the nozzle of the lower section */
+  let thr=l.thrust*K,fl=1+Math.sin(ie*43)*.06+Math.sin(ie*97)*.035;
+  rkPlume.visible=rkGlow.visible=thr>.01;
+  if(thr>.01){
+    let nx=jx+Math.sin(rL)*2.69,ny=jy-Math.cos(rL)*2.69,wd=.3*(1+.25*l.thrust);
+    rkPlume.position.set(nx,ny,jz),rkPlume.rotation.set(0,0,rL),rkPlume.scale.set(wd,(1.1+1.7*l.thrust)*fl,wd),
+    rkPlume.material.uniforms.uTime.value=ie,rkPlume.material.uniforms.uPower.value=thr,
+    rkGlow.position.set(nx,ny,jz),rkGlow.scale.setScalar(1.1*(.6+.4*l.thrust)*fl),rkGlow.material.opacity=thr*.5
+  }
+  /* the smoke trail: faint puffs where the nozzle was a moment ago, read off
+     the flight path, widening and fading with age and gone soon after burnout */
+  let tr=l.trailOn*K;
+  for(let k2=0;k2<rkTrail.length;k2++){
+    let t2=rkTrail[k2],tt=t-(k2+1)*.075,age=t-tt,
+        a2=tt<0?0:tr*(tt<=F.burn?1:1-I(F.burn,F.burn+.8,tt))*(1-I(0,1.95,age));
+    t2.visible=a2>.004;
+    if(t2.visible){
+      let q=rkPath(tt),q2=rkPath(tt+.02),tl=-Math.atan2(q2.x-q.x,q2.y-q.y),dr=Math.sin(k2*12.9898)*age*.45;
+      t2.position.set(q.x+Math.sin(tl)*2.14+dr,q.y-Math.cos(tl)*2.14,q.z+Math.cos(k2*7.3)*age*.3),
+      t2.scale.setScalar(.3+age*1.1),t2.material.opacity=a2*.1
+    }
+  }
+  /* the canopy: packed and long as it leaves the airframe, a dome once full */
+  let bl=1-Math.pow(1-ck,2.6),cw=.07+bl*1.03,chh=.34+bl*.74;
+  rkChute.visible=ck>.02;
+  if(rkChute.visible)
+    rkChute.position.set(cx,cy+1.7*chh,jz),rkChute.scale.set(cw,chh,cw),
+    rkChute.rotation.set(0,ie*.12,(1-hang)*tilt*.6+Math.sin(ie*1.7)*.05*hang),
+    bodyOpacity(rkCan,K),rkShM.opacity=.45*K;
+  /* the cord: upper section to canopy to lower section, slack until the chute takes it up */
+  rkCord.visible=sep>.002;
+  if(rkCord.visible){
+    let P3=rkCordG.attributes.position.array,slack=1-I(.25,1,ck);
+    for(let k2=0;k2<RKN;k2++){
+      let s2=k2/(RKN-1),first=s2<.5,u=first?s2*2:(s2-.5)*2,
+          x0=first?ux:cx,y0=first?uy:cy,x1=first?cx:jx,y1=first?cy:jy,sag=Math.sin(Math.PI*u)*.35*slack;
+      P3[k2*3]=x0+(x1-x0)*u,P3[k2*3+1]=y0+(y1-y0)*u-sag,P3[k2*3+2]=jz
+    }
+    rkCordG.attributes.position.needsUpdate=!0,rkCordM.opacity=.6*K
+  }
+}
 let lmG=new a.Group;lmG.visible=!1,n.add(lmG);
 let SLOT={saturn:svG,lm:lmG};
-let De=[],he=new mt(t);he.addPass(new pt(n,r));let Oe=new ft(new a.Vector2(innerWidth*.5,innerHeight*.5),.62,.72,.62);he.addPass(Oe),he.addPass(new gt);let l={camX:0,camY:2,camZ:26,tgtX:0,tgtY:0,tgtZ:0,roll:0,fov:42,starOpacity:1,earthK:1,earthY:-11,earthScale:1,earthX:-13,moonK:0,moonX:120,moonY:30,moonZ:-260,moonScale:1,rocketK:0,rocketY:-6,rocketX:0,rocketZ:0,rocketTilt:0,thrust:0,chuteK:0,noseK:0,groundK:0,gloveK:0,gloveSpin:0,gloveExplode:0,gloveLift:0,gloveFade:1,bloom:.62,exposure:1,trailOn:0,saturnK:0,saturnX:0,saturnY:0,saturnZ:0,saturnScale:1,saturnTilt:0,saturnSpin:0,lmK:0,lmX:0,lmY:0,lmZ:0,lmScale:1,lmSpin:0,saturnThrust:0,saturnNozzle:0,saturnPlume:0,saturnSmoke:0,saturnShake:0,saturnSep1:0,saturnSep2:0},Ft=new a.Vector3,ie=0,He=2,me=0,Me=16;function dt(M){Me=Me*.9+M*1e3*.1,Me>26?me+=Me>55?3:1:me=Math.max(0,me-1),me>12&&He===2?(He=1,me=0,Me=16,t.setPixelRatio(Math.min(devicePixelRatio||1,1)),he.setPixelRatio&&he.setPixelRatio(1),Be()):me>14&&He===1&&(He=0,me=0,Ye=!1)}let Ye=!0;function ut(M){ie+=M,H.uniforms.uTime.value=ie,H.uniforms.uOpacity.value=l.starOpacity,r.fov=l.fov,r.updateProjectionMatrix(),r.position.set(l.camX+Math.sin(ie*37.3)*l.saturnShake*.1,l.camY+Math.sin(ie*43.1+1.3)*l.saturnShake*.1,l.camZ),r.up.set(Math.sin(l.roll),Math.cos(l.roll),0),r.lookAt(l.tgtX+Math.sin(ie*31.7+.4)*l.saturnShake*.05,l.tgtY+Math.sin(ie*47.9)*l.saturnShake*.05,l.tgtZ),g.rotation.y=ie*.006,B.visible=l.earthK>.01,B.position.set(l.earthX,l.earthY,0),B.scale.setScalar(l.earthScale),X.rotation.y=ie*.012,bodyOpacity(X,l.earthK),J.material.uniforms.uInt.value=1.15*l.earthK,D.visible=l.moonK>.01,D.position.set(l.moonX,l.moonY,l.moonZ),D.scale.setScalar(l.moonScale),O.rotation.y=ie*.008,v.visible=l.rocketK>.01,v.position.set(l.rocketX,l.rocketY,l.rocketZ),v.rotation.z=l.rocketTilt;let k=1+Math.sin(ie*41)*.06+Math.sin(ie*97)*.03;if(W.material.opacity=l.thrust*.85,W.scale.set(.78+l.thrust*.26,(1.5+l.thrust*2.2)*k,1),W.position.y=-2.35-(.45+l.thrust*.95)*k,y.material.opacity=l.thrust,y.scale.set(.34+l.thrust*.2,(.5+l.thrust*.7)*k,1),A.intensity=l.thrust*9,l.trailOn>.02&&v.visible&&(Q+=M,Q>.026)){Q=0;let p=z[ae];ae=(ae+1)%P,p.life=1,p.x=l.rocketX+Math.sin(l.rocketTilt)*2.15+(Math.random()-.5)*.18,p.y=l.rocketY-Math.cos(l.rocketTilt)*2.15,p.z=l.rocketZ+(Math.random()-.5)*.18,p.size=.5+Math.random()*.4,p.sprite.visible=!0}for(let p of z){if(p.life<=0){p.sprite.visible=!1;continue}p.life-=M*.42,p.size+=M*1.5,p.sprite.position.set(p.x,p.y,p.z),p.sprite.scale.setScalar(p.size*2.4),p.sprite.material.opacity=Math.max(0,p.life)*.5*l.trailOn}let nk=l.noseK||0;if(T.position.set(nk*4.6,2.07+nk*1.7-nk*nk*5.8,-nk*1.3),T.rotation.z=-nk*5.4,T.rotation.x=nk*3.9,T.material.opacity=Math.max(0,1-Math.max(0,nk-.45)*1.9),q.visible=l.chuteK>.02,q.visible){let p=l.chuteK,bl=1-Math.pow(1-p,2.6);q.position.set(l.rocketX,l.rocketY+2.25+bl*1.45,l.rocketZ),q.scale.set(.07+bl*1.03,.34+bl*.74,.07+bl*1.03),q.rotation.z=l.rocketTilt*.4+Math.sin(ie*1.7)*.05,i.material.emissiveIntensity=.5+Math.sin(ie*3)*.12}svG.visible=l.saturnK>.01;
+let De=[],he=new mt(t);he.addPass(new pt(n,r));let Oe=new ft(new a.Vector2(innerWidth*.5,innerHeight*.5),.62,.72,.62);he.addPass(Oe),he.addPass(new gt);let l={camX:0,camY:2,camZ:26,tgtX:0,tgtY:0,tgtZ:0,roll:0,fov:42,starOpacity:1,earthK:1,earthY:-11,earthScale:1,earthX:-13,moonK:0,moonX:120,moonY:30,moonZ:-260,moonScale:1,rocketK:0,rocketY:-6,rocketX:0,rocketZ:0,rocketTilt:0,thrust:0,chuteK:0,sepK:0,hangK:0,flightT:0,groundK:0,gloveK:0,gloveSpin:0,gloveExplode:0,gloveLift:0,gloveFade:1,bloom:.62,exposure:1,trailOn:0,saturnK:0,saturnX:0,saturnY:0,saturnZ:0,saturnScale:1,saturnTilt:0,saturnSpin:0,lmK:0,lmX:0,lmY:0,lmZ:0,lmScale:1,lmSpin:0,saturnThrust:0,saturnNozzle:0,saturnPlume:0,saturnSmoke:0,saturnShake:0,saturnSep1:0,saturnSep2:0},Ft=new a.Vector3,ie=0,He=2,me=0,Me=16;function dt(M){Me=Me*.9+M*1e3*.1,Me>26?me+=Me>55?3:1:me=Math.max(0,me-1),me>12&&He===2?(He=1,me=0,Me=16,t.setPixelRatio(Math.min(devicePixelRatio||1,1)),he.setPixelRatio&&he.setPixelRatio(1),Be()):me>14&&He===1&&(He=0,me=0,Ye=!1)}let Ye=!0;function ut(M){ie+=M,H.uniforms.uTime.value=ie,H.uniforms.uOpacity.value=l.starOpacity,r.fov=l.fov,r.updateProjectionMatrix(),r.position.set(l.camX+Math.sin(ie*37.3)*l.saturnShake*.1,l.camY+Math.sin(ie*43.1+1.3)*l.saturnShake*.1,l.camZ),r.up.set(Math.sin(l.roll),Math.cos(l.roll),0),r.lookAt(l.tgtX+Math.sin(ie*31.7+.4)*l.saturnShake*.05,l.tgtY+Math.sin(ie*47.9)*l.saturnShake*.05,l.tgtZ),g.rotation.y=ie*.006,B.visible=l.earthK>.01,B.position.set(l.earthX,l.earthY,0),B.scale.setScalar(l.earthScale),X.rotation.y=ie*.012,bodyOpacity(X,l.earthK),J.material.uniforms.uInt.value=1.15*l.earthK,D.visible=l.moonK>.01,D.position.set(l.moonX,l.moonY,l.moonZ),D.scale.setScalar(l.moonScale),O.rotation.y=ie*.008,rkUpdate();svG.visible=l.saturnK>.01;
 if(svG.visible){
   svG.position.set(l.saturnX,l.saturnY,l.saturnZ),svG.scale.setScalar(l.saturnScale),svG.rotation.set(0,l.saturnSpin,l.saturnTilt);
   let w=svG.userData.wire;
@@ -1867,24 +1986,101 @@ Ee(".rv").filter(e=>!e.closest(".deck,.tstage")).forEach(e=>{let t=We(e);ee(e,{s
    until reload. The positions here are the post-transit deep-space defaults so a
    reload part-way down the page still puts the bodies where that chapter wants
    them; chapters before the transit set their own. */
-function ve(){o.rocketK=0,o.chuteK=0,o.noseK=0,o.trailOn=0,o.thrust=0,o.groundK=0,o.gloveK=0,o.gloveLift=0,o.gloveFade=1,o.saturnK=0,o.saturnThrust=0,o.saturnSmoke=0,o.saturnShake=0,o.saturnSep1=0,o.saturnSep2=0,o.lmK=0,o.earthK=0,o.moonK=0,o.roll=0,o.exposure=1,o.earthX=20,o.earthY=-120,o.earthScale=.22,o.moonX=-9,o.moonY=-40,o.moonZ=-52,o.moonScale=1.9}ee(F("#hero"),{scene:!0,start:"top top",end:"bottom top",onUpdate(e){ve(),o.earthK=1,o.moonK=0,o.camX=s(0,3.2,e),o.camY=s(2,6.5,e),o.camZ=s(26,34,e),o.tgtX=0,o.tgtZ=0,o.tgtY=s(-2,-6,e),o.earthY=s(-15,-21,e),o.earthX=s(16,20,e),o.earthScale=s(1,.86,e),o.starOpacity=1,o.bloom=s(.62,.5,e),F(".cue").style.opacity=(1-re(e*4)).toFixed(2)}});var ge=.2,de=.55,Te=.68,Rt=F("#teleAlt"),Ht=F("#teleVel"),je=F("#telePhase"),Pt=F("#teleT"),Ct=F(".tele"),Je=F("#ascentCap");function kt(e){let t,n;if(e<ge){let r=e/ge;t=263*r*r,n=296*r}else if(e<Te){let r=(e-ge)/(Te-ge);t=263+608*(1-Math.pow(1-r,1.75)),n=296*Math.pow(1-r,1.25)}else{let r=(e-Te)/(1-Te);t=871*(1-r),n=-21.6*I(0,.18,r)}return{alt:t,vel:n}}
+function ve(){o.rocketK=0,o.chuteK=0,o.sepK=0,o.hangK=0,o.trailOn=0,o.thrust=0,o.groundK=0,o.gloveK=0,o.gloveLift=0,o.gloveFade=1,o.saturnK=0,o.saturnThrust=0,o.saturnSmoke=0,o.saturnShake=0,o.saturnSep1=0,o.saturnSep2=0,o.lmK=0,o.earthK=0,o.moonK=0,o.roll=0,o.exposure=1,o.earthX=20,o.earthY=-120,o.earthScale=.22,o.moonX=-9,o.moonY=-40,o.moonZ=-52,o.moonScale=1.9}ee(F("#hero"),{scene:!0,start:"top top",end:"bottom top",onUpdate(e){ve(),o.earthK=1,o.moonK=0,o.camX=s(0,3.2,e),o.camY=s(2,6.5,e),o.camZ=s(26,34,e),o.tgtX=0,o.tgtZ=0,o.tgtY=s(-2,-6,e),o.earthY=s(-15,-21,e),o.earthX=s(16,20,e),o.earthScale=s(1,.86,e),o.starOpacity=1,o.bloom=s(.62,.5,e),F(".cue").style.opacity=(1-re(e*4)).toFixed(2)}});var ge=.2,de=.55,Te=.68,Rt=F("#teleAlt"),Ht=F("#teleVel"),je=F("#telePhase"),Pt=F("#teleT"),Ct=F(".tele"),Je=F("#ascentCap");/* ---------------------------------------------------------------------------
+   The flight, from the flight computer's own model.
 
-/* The single trajectory this whole stage agrees on. The rocket is placed on it,
-   the drawn arc is sampled from it, and the tilt is its tangent — before this
-   they were three unrelated formulas, which is why the rocket flew beside its
-   own predicted path instead of along it. Height comes straight from the
-   telemetry model so the numbers on screen match what you can see. */
-var AP0=.14;
-function ascentPath(f){
-  var A=kt(f),r=re(A.alt/871),d=re((f-.02)/.98);
-  return{x:-1.6+9.8*Math.pow(d,1.42),y:-7.6+17.4*r,z:2-7.2*Math.pow(d,1.25)}
+   Every number the telemetry shows comes from the same physics as the apogee
+   simulator in the next chapter, run once: an AeroTech F50T (76.8 N s over
+   1.4 s, thrust falling from 75 N), 580 g at burnout, CdA 0.00367 m2, and the
+   release logic -- fire when the predicted coast plus the parachute's braking
+   reaches 750 ft, allowing 0.5 s for the servo to move. That gives burnout at
+   1.4 s, the release at 2.97 s, the chute out at 3.47 s and apogee at 750 ft,
+   5.31 s. The model stops at apogee; past it the rocket comes down under its
+   parachute at 20 ft/s, which would land it at about T+43 s.
+
+   Scroll does not run flight time evenly -- a linear mapping would spend
+   nearly nine tenths of the chapter on the descent. It passes through knots
+   at the events on a monotone cubic, so the playback rate never jumps, and
+   altitude, velocity and T+ are all read from the table at the time shown, so
+   they always agree with one another.
+   --------------------------------------------------------------------------- */
+var FLc;
+function flight(){
+  if(FLc)return FLc;
+  let g=9.81,rho=1.225,FT=3.280839895,kR=.5*rho*.00367,kC=.5*rho*(.00367+.75*.05),M=.58,prop=.038,burn=1.4,
+      f0=75,f1=2*53.7-75,delay=.5,H=750/FT,vt=20/FT,kD=M*g/(vt*vt),dt=.001,SP=.01,
+      t=0,h=0,v=0,n=0,rel=-1,A=[0],Vv=[0],
+      step=acc=>{v+=acc*dt,h+=v*dt,t+=dt,++n%10===0&&(A.push(h*FT),Vv.push(v*FT))};
+  for(;t<burn;){let q=t/burn,m=M+prop*(1-q);step((f0+(f1-f0)*q)/m-g-kR/m*v*v)}
+  for(;v>0;){
+    if(rel<0){let d=Math.sqrt(M*g/kR),C=Math.max(0,Math.atan(v/d)-g/d*delay),c=d*Math.tan(C),
+        i=M/(2*kR)*Math.log((1+v*v/(d*d))/(1+c*c/(d*d))),L=M/(2*kC)*Math.log(1+kC*c*c/(M*g));h+i+L>=H&&(rel=t)}
+    step(-g-(rel>=0&&t>=rel+delay?kC:kR)/M*v*v)
+  }
+  let apo=t;
+  for(;h>0;)step(-g+kD/M*v*v);
+  let at=(arr,x)=>{let k=Math.max(0,x)/SP,i=Math.min(arr.length-2,Math.floor(k)),u=Math.min(1,k-i);return arr[i]+(arr[i+1]-arr[i])*u};
+  return FLc={burn,rel,open:rel+delay,apo,land:t,alt:x=>Math.max(0,at(A,x)),vel:x=>at(Vv,x)}
+}
+/* chapter progress to flight time, through the events */
+function flightTime(f){
+  let F=flight();
+  if(!F.map){
+    let X=[0,.16,.36,.5,.64,1],Y=[0,F.burn,F.rel,F.open,F.apo,F.land],N=X.length,d=[],m=[];
+    for(let i=0;i<N-1;i++)d.push((Y[i+1]-Y[i])/(X[i+1]-X[i]));
+    m[0]=d[0],m[N-1]=d[N-2];
+    for(let i=1;i<N-1;i++){let h0=X[i]-X[i-1],h1=X[i+1]-X[i];m[i]=3*(h0+h1)/((2*h1+h0)/d[i-1]+(h1+2*h0)/d[i])}
+    F.map={X,Y,m}
+  }
+  let {X,Y,m}=F.map,x=re(f),i=0;
+  for(;i<X.length-2&&x>X[i+1];)i++;
+  let h=X[i+1]-X[i],u=(x-X[i])/h,u2=u*u,u3=u2*u;
+  return(2*u3-3*u2+1)*Y[i]+(u3-2*u2+u)*h*m[i]+(3*u2-2*u3)*Y[i+1]+(u3-u2)*h*m[i+1]
+}
+/* Where the rocket is at flight time t: height straight from the table, and a
+   downrange drift that weathercocks early and then carries on slowly with the
+   wind under the chute. The drawn trail is read off this same path. */
+function rkPath(t){
+  let F=flight();
+  return{x:-1.6+5.6*(1-Math.exp(-t/3.2))+.16*Math.max(0,t-F.apo),y:-7.6+17.4*F.alt(t)/750,z:2-5.4*(1-Math.exp(-t/4))}
 }
 
 /* e in [0,AP0] is the approach: the camera flies down out of the hero framing
    and onto the pad while the rocket fades up, so the chapter opens instead of
    cutting. e in [.86,1] hands the camera over to the orbital framing that
-   #sec-rocketry starts from. Flight time f runs over what is left. */
-ee(F("#stage-ascent"),{scene:!0,pin:!0,onUpdate(e){ve();let ti=re(e/AP0),tf=fe(ti),to=fe(I(.86,1,e)),f=re((e-AP0)/(1-AP0)),{alt:t,vel:n}=kt(f),p=ascentPath(f),p2=ascentPath(Math.min(1,f+.005)),cb=I(de,de+.1,f);o.rocketK=I(.22,.6,ti)*(1-I(.82,.93,e)),o.rocketX=p.x,o.rocketY=p.y,o.rocketZ=p.z,o.rocketTilt=s(-Math.atan2(p2.x-p.x,p2.y-p.y),Math.sin(f*11)*.13,cb),o.thrust=f<=0?I(.85,1,ti)*.55:f<ge?s(.55,1,re(f/(ge*.4))):Math.max(0,1-(f-ge)*16),o.trailOn=f<=0?I(.85,1,ti):f<de?1:Math.max(0,1-(f-de)*5),o.chuteK=(f>de?I(de,de+.09,f):0)*(1-I(.82,.93,e)),o.noseK=f>de?I(de,de+.05,f):0,o.groundK=I(.45,.95,ti)*(1-I(.28,.5,f));let fx=o.rocketX+s(6.5,12.5,f),fy=o.rocketY+s(1.2,3.4,f),fz=s(15,27,f);o.camX=s(s(3.2,fx,tf),9,to),o.camY=s(s(6.5,fy,tf),6,to),o.camZ=s(s(34,fz,tf),30,to),o.tgtX=s(s(0,o.rocketX,tf),0,to),o.tgtY=s(s(-6,o.rocketY+1,tf),-4,to),o.tgtZ=s(s(0,o.rocketZ,tf),0,to),o.earthK=s(1-I(.55,1,ti),1,to),o.earthY=s(s(-21,-33,tf),-24,to),o.earthScale=s(s(.86,2.4,tf),.72,to),o.starOpacity=s(s(1,s(.78,1,I(.25,.6,f)),tf),.9,to),o.bloom=s(s(.5,.5+o.thrust*.55,tf),.45,to),o.exposure=s(1+o.thrust*.14,1,to),Ct.style.setProperty("--teleO",(I(.5,1,ti)*(1-I(.86,.96,e))).toFixed(3)),Rt.textContent=Math.round(t).toLocaleString(),Ht.textContent=Math.round(n),Pt.textContent=(f*8.4).toFixed(1);let m="Boost",g2=!0;f>=ge&&(m="Coast",g2=!1),f>=de-.005&&f<de+.06?(m="Release",g2=!0):f>=de+.06&&(m="Descent",g2=!1),je.textContent=m,je.classList.toggle("hot",g2);let h=I(.04,.18,f),x=1-I(.8,.94,f);Je.style.setProperty("--capO",(h*x).toFixed(3)),Je.style.setProperty("--capY",((1-h)*20).toFixed(1)+"px")}});ee(F("#sec-rocketry"),{scene:!0,pin:!0,onUpdate(e){ve(),o.earthK=1,o.camX=s(9,-6,e),o.camY=s(6,2,e),o.camZ=s(30,26,e),o.tgtX=0,o.tgtY=s(-4,-8,e),o.tgtZ=0,o.earthY=s(-24,-34,e),o.earthScale=s(.72,.6,e),o.starOpacity=s(.9,.75,Math.sin(e*Math.PI)),o.bloom=.45,o.exposure=1}});var Qe=F("#transitCap"),et=F("#transitTitle");/* ---------------------------------------------------------------------------
+   #sec-rocketry starts from. Flight progress f runs over what is left. The
+   rocket's axis follows the path until the release, then the sections swing
+   from there into their hang under the canopy. */
+var AP0=.14;
+ee(F("#stage-ascent"),{scene:!0,pin:!0,onUpdate(e){
+  ve();
+  let FL=flight(),ti=re(e/AP0),tf=fe(ti),to=fe(I(.86,1,e)),f=re((e-AP0)/(1-AP0)),t=flightTime(f),
+      alt=FL.alt(t),vel=FL.vel(t),p=rkPath(t),tq=Math.min(t,FL.rel),pa=rkPath(Math.max(0,tq-.02)),pb=rkPath(tq+.02),
+      hang=I(FL.open+.2,FL.apo-.3,t);
+  o.rocketK=I(.22,.6,ti)*(1-I(.82,.93,e)),o.rocketX=p.x,o.rocketY=p.y,o.rocketZ=p.z,
+  o.rocketTilt=-Math.atan2(pb.x-pa.x,pb.y-pa.y),o.flightT=t,
+  o.thrust=f<=0?I(.85,1,ti)*.55:t<FL.burn?s(.55,1,I(0,.12,t))*(.72+.28*(1-t/FL.burn)):.72*(1-I(FL.burn,FL.burn+.15,t)),
+  o.trailOn=I(.85,1,ti)*s(.4,1,I(0,.04,f)),
+  o.sepK=I(FL.rel,FL.open,t),o.chuteK=I(FL.open-.1,FL.open+.7,t),o.hangK=hang,
+  o.groundK=I(.45,.95,ti)*(1-I(.28,.5,f));
+  let fx=o.rocketX+s(6.5,12.5,f),fy=o.rocketY+s(1.2,3.4,f)+hang*1.2,fz=s(15,27,f);
+  o.camX=s(s(3.2,fx,tf),9,to),o.camY=s(s(6.5,fy,tf),6,to),o.camZ=s(s(34,fz,tf),30,to),
+  o.tgtX=s(s(0,o.rocketX,tf),0,to),o.tgtY=s(s(-6,o.rocketY+1+hang*1.3,tf),-4,to),o.tgtZ=s(s(0,o.rocketZ,tf),0,to),
+  o.earthK=s(1-I(.55,1,ti),1,to),o.earthY=s(s(-21,-33,tf),-24,to),o.earthScale=s(s(.86,2.4,tf),.72,to),
+  o.starOpacity=s(s(1,s(.78,1,I(.25,.6,f)),tf),.9,to),
+  o.bloom=s(s(.5,.5+o.thrust*.3,tf),.45,to),o.exposure=s(1+o.thrust*.08,1,to),
+  Ct.style.setProperty("--teleO",(I(.5,1,ti)*(1-I(.86,.96,e))).toFixed(3)),
+  Rt.textContent=Math.round(alt).toLocaleString(),Ht.textContent=Math.round(vel),Pt.textContent=t.toFixed(1);
+  let m="Boost",hot=!0;
+  t>=FL.burn&&(m="Coast",hot=!1),
+  t>=FL.rel&&(m="Release",hot=!0),
+  t>=FL.open+.25&&(m="Braking",hot=!1),
+  t>=FL.apo-.35&&(m="Apogee",hot=!1),
+  t>=FL.apo+.45&&(m="Descent",hot=!1),
+  je.textContent=m,je.classList.toggle("hot",hot);
+  let h=I(.04,.18,f),x=1-I(.8,.94,f);
+  Je.style.setProperty("--capO",(h*x).toFixed(3)),Je.style.setProperty("--capY",((1-h)*20).toFixed(1)+"px")
+}});ee(F("#sec-rocketry"),{scene:!0,pin:!0,onUpdate(e){ve(),o.earthK=1,o.camX=s(9,-6,e),o.camY=s(6,2,e),o.camZ=s(30,26,e),o.tgtX=0,o.tgtY=s(-4,-8,e),o.tgtZ=0,o.earthY=s(-24,-34,e),o.earthScale=s(.72,.6,e),o.starOpacity=s(.9,.75,Math.sin(e*Math.PI)),o.bloom=.45,o.exposure=1}});var Qe=F("#transitCap"),et=F("#transitTitle");/* ---------------------------------------------------------------------------
    The Apollo chapter, flown as one flight: ignition, liftoff, staging, Earth
    orbit, trans-lunar injection, the crossing, and lunar orbit.
 

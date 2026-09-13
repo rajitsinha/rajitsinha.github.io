@@ -46,7 +46,7 @@
      A value only counts when its K is above VIS. */
   const GATE = {
     rocketX: "rocketK", rocketY: "rocketK", rocketZ: "rocketK", rocketTilt: "rocketK",
-    thrust: "rocketK", chuteK: "rocketK", noseK: "rocketK", trailOn: "rocketK",
+    thrust: "rocketK", chuteK: "rocketK", sepK: "rocketK", hangK: "rocketK", flightT: "rocketK", trailOn: "rocketK",
     gloveSpin: "gloveK", gloveExplode: "gloveK", gloveScale: "gloveK",
     gloveLift: "gloveK", gloveFade: "gloveK",
     earthX: "earthK", earthY: "earthK", earthScale: "earthK",
