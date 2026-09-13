@@ -16,30 +16,21 @@ is used in college applications, so licensing and professionalism matter.
 
 Live at `github.com/rajitsinha/rajitsinha.github.io` (GitHub Pages), tracked on `main`.
 
-**Live: `main` at `a33fd6c`**, tagged `live-before-feedback-fixes`. The rebuild
-(`rebuild/scroll-scenes`, four steps off the pre-rebuild checkpoint `2a70380`) and the
-full-viewport conversion are merged and deployed. A drawing-sheet re-skin was deployed and
-then reverted at the owner's request; that revert is `a33fd6c`.
+**Live: `main` at `8afa13d`**, the merge of the first feedback batch. The version before it
+is tagged `live-before-feedback-fixes` (`a33fd6c`) and that tag is pushed. Undo that
+deploy with `git revert -m 1 8afa13d` and push.
 
-**Feedback batch: on `fixes/feedback-batch`, not merged, not deployed.** One commit per
-item, each verified before the next:
+**Second batch: on `fixes/awards-round`, not merged, not deployed.** Newest first:
 
 ```
-7e369f2  outreach on phones: photo beside its caption, clear of the nav
-273864f  Apollo chapter: a launch, staging and an orbit instead of a glide
-e0cbe5a  Moon and Earth kept off the awards and contact text
-659be1f  awards: an instrument tape the scroll reads through
-586b0d6  glove section: the Moon fades out through the handover
-a983efa  scroll triggers measured against the real scroll position (a real bug)
-a77b2ae  outreach: a smaller photo, and a deck the scroll deals through
-546a028  glove section: the glove lifts away instead of zooming out
-2a98ead  bench-test video: stop the browser freezing
-2f8e044  NASA's glove removed
-de304b8  harness: occlusion check
+0eae569 Apollo: a lander you can see, and a handover from the stack that never jumps
+91621ff Ascent: his rocket in the outline style, flown on the apogee model
+bbb25ad School and skills: a centred board of rounded cards
+93fa719 Awards: rounded cards in one centred column
 ```
 
-To deploy: merge into `main` and push. To go back afterwards: `git revert -m 1 <merge>` and
-push, or reset `main` to the tag `live-before-feedback-fixes` (that one needs a force-push).
+To deploy: tag the live commit first (push the tag), merge with `--no-ff` so the whole batch
+reverts with `git revert -m 1 <merge>`, push, and give the owner that command.
 
 Gitignored on purpose: `index_(25).html` (previous site, reference only, **never
 edit**), `threejs-skills/` (separate git clone), `eftgtsetgsetges.html` (byte-identical
@@ -75,15 +66,17 @@ chose "keep content, rebuild presentation" over a blank slate.
   rocket — 470 g, 3D-printed airframe, F50T — and the telemetry beside it is his own
   flight computer's apogee prediction. The plan originally put the Saturn V here; it went
   to `#stage-transit` with the lunar module instead, because flying NASA hardware on his
-  numbers misrepresents his project on a site used for college applications. The whole
-  chapter is verified byte-identical to `2a70380`; keep it that way.
+  numbers misrepresents his project on a site used for college applications. Later the owner asked
+  for it to be redrawn in the outline style, to split at the coupler, and for its numbers
+  to come from his own apogee model. It is still his rocket and his numbers; keep it so.
 - **The scene engine stays hand-rolled.** Offered Lenis + GSAP ScrollTrigger, the owner
   chose to extend the native engine. Don't reopen it without asking.
 - **No NASA glove beside his.** Removed at his request; the chapter shows his glove alone,
   and the footer credit names only the Saturn V and lunar module models.
-- **Don't dim the lunar module's light.** When it covered the Apollo title he asked for a
-  fix that keeps it at full brightness. It is kept clear by placement instead: it sits
-  under the title card, positioned on screen (`apAt`).
+- **The lunar module is linework, not a light.** First he asked that its light not be dimmed
+  when it covered the Apollo title (it was moved under the card instead); then he asked
+  for less glow, because it rendered as a glowing ball. Its lines are normal-blended in a
+  colour just under the bloom threshold (`normal:!0` in `lmSlot`). Don't make it additive.
 - **The Saturn V flies a mission, not a glide.** Ignition, two staging events with each
   stage's own plume, orbit, a translunar burn, then the lunar module into lunar orbit. He
   asked for it to feel like a real launch.
@@ -96,8 +89,22 @@ chose "keep content, rebuild presentation" over a blank slate.
   video off that path. It cannot be reproduced in the preview pane, so it needs confirming
   on his machine.
 - The outreach photo stays small (a `26rem` column) and its stats are a deck the scroll
-  deals. Awards are an interactive tape, not a list. In contact, the Moon sits upper right,
+  deals. Awards are an interactive tape, not a list, in one centred column of rounded cards (he
+  disliked a square, off-centre first version). In contact, the Moon sits upper right,
   clear of the links.
+- **The ascent's numbers come from his apogee model** -- the same physics as the simulator
+  in the next chapter (`flight()`): F50T, 580 g at burnout, release at T+2.97 s, chute out
+  at 3.47 s, apogee 750 ft at 5.31 s. Past apogee it descends at 20 ft/s (his choice), so
+  it would land at about T+43 s. He objected to the old numbers (871 ft, and a descent of
+  about 50 ft in 0.1 s under the chute). Don't make them up again.
+- **His rocket splits in the middle**, at the coupler, with the parachute between the
+  sections (his answer when asked). Both halves hang under the canopy: upper nose-down,
+  lower fins-down.
+- The Saturn V to lunar module handover must not jump. Through the camera's swing, what is
+  on screen is placed where it would appear to a camera that stayed with the stack, then
+  moved on screen (`apNdc`/`apAt`). The lunar orbit crosses in front of the Moon, clear of
+  its surface.
+- School and skills is a centred board of rounded cards, not two tables.
 
 ## Reference sites — what was actually found
 
@@ -203,8 +210,10 @@ a short viewport grows the block rather than clipping it.
 The card stack inside it (`#hstage`, 300lvh) is now a deal: `deckAt()` gives it the same
 dwell, the top card tips back and flies up past the viewer, and each card's figures count
 up as it arrives (`hTitle`). `#sec-awards` is no longer a deck either: `buildTape()` makes
-it an instrument tape (`#tstage`, 320lvh) whose rows slide under a fixed pointer beside a
-year drum; rows are clickable and keyboard-focusable.
+it an instrument tape (`#tstage`, 320lvh) laid out as one centred column: the heading, a pill readout (year drum,
+rail, count) and a window of rounded cards. The card being read lights up and the list
+slides to keep it mid-window without ever showing empty space, so at the ends the
+highlight travels instead. Cards are clickable and keyboard-focusable.
 
 Things worth knowing before changing any of it:
 
@@ -242,6 +251,10 @@ Known and not fixed yet:
 - **Phones: the deck fit guard shrinks panels** to 0.56-0.88 at 375x812 (rocketry
   `[.56,.88,1,.64,.79]`, glove `[.61,.82,1]`), so body text gets small. It needs panels
   that pan through tall content, or a flowing layout below ~700 px.
+- **Phones: the 3D scenes sit behind the full-width captions** in the ascent and Apollo
+  chapters (the rocket and parachute cross the ascent caption; the Moon sits behind the
+  TAS caption). The captions stay on top and readable, but it is busy. The framing was only
+  tuned for desktop.
 
 ## Model pipeline — how it actually works now
 
@@ -312,6 +325,16 @@ Known and not fixed yet:
   module's world position during the camera's swing flung it off the corner of the screen
   and back, and no state seam flagged it, because every key was smooth. Project, blend in
   NDC, unproject (`apAt`).
+- **Glow does not reproduce in software GL.** The page's frame-time governor turns bloom
+  off when frames are slow, so SwiftShader captures show no glow at all. That hid the
+  lander's glowing-ball problem for a whole round. `tools/shot.mjs` drives headless Chrome
+  on the real GPU (`"gpu": true`) and captures what a visitor sees. It hard-codes this
+  machine's Chrome path.
+- **A slot's `Box3` includes spent stages.** Separated Saturn V bands keep their geometry
+  at zero opacity, so a bounding box of the slot overstates what is visible.
+- **An element whose opacity only a scene handler sets is visible until that handler first
+  runs.** The Apollo title rose up the screen at full opacity as the chapter scrolled in.
+  Give such elements a CSS starting value.
 
 ## Already fixed — don't regress
 
@@ -367,10 +390,10 @@ leaves the parked coordinates behind them, so an off-screen prop's position is u
 by design and must not be tested. **The gate applies to the purity check too** — without
 it, purity reports ~900 false drifts on a healthy page.
 
-Last run at 1440×900, on `273864f`: **0 steps across 30,904 pixels, 0 drift over 320
-probes**, clampCheck clean, occlusion 0 across the Apollo chapter at 5 px steps (the whole
-page at 30 px reports only the known Moon behind `#gloveCap`). At the end of the rebuild,
-also verified: hero + ascent + flight
+Last run at 1440×900, on the second batch: **seam 0 steps and purity 0 drift** across the
+ascent and Apollo chapters, clampCheck clean, occlusion 0 across Apollo at 10 px steps
+with the models mounted, and whole-page occlusion reporting only the known Moon behind
+`#gloveCap`. At the end of the rebuild, also verified: hero + ascent + flight
 computer sampled every 25 px from 0 to 8000 against `2a70380` served side by side, 0
 differences over 25 keys; and `gloveK`/`gloveExplode` checked against their original
 formulas at 200 positions with progress recovered from `gloveSpin` so pixel rounding
