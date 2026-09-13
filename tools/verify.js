@@ -53,9 +53,11 @@
     moonX: "moonK", moonY: "moonK", moonZ: "moonK", moonScale: "moonK",
     saturnX: "saturnK", saturnY: "saturnK", saturnZ: "saturnK",
     saturnScale: "saturnK", saturnTilt: "saturnK", saturnSpin: "saturnK",
+    saturnThrust: "saturnK", saturnSmoke: "saturnK", saturnShake: "saturnK", saturnPlume: "saturnK",
+    saturnSep1: "saturnK", saturnSep2: "saturnK", saturnNozzle: "saturnThrust",
     lmX: "lmK", lmY: "lmK", lmZ: "lmK", lmScale: "lmK", lmSpin: "lmK"
   };
-  const GATES = ["rocketK", "gloveK", "earthK", "moonK", "saturnK", "lmK"];
+  const GATES = ["rocketK", "gloveK", "earthK", "moonK", "saturnK", "lmK", "saturnThrust"];
   const VIS = 0.02;
 
   const keys = () => Object.keys(W.state).filter(k => typeof W.state[k] === "number").sort();
