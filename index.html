@@ -223,6 +223,10 @@ p{color:var(--dim);max-width:56ch}
 
 /* scene title cards that hold the middle of the screen */
 .card-title{text-align:center;width:100%}
+/* The Apollo chapter sets this card's opacity from its progress. Until that
+   first runs it sat at full opacity, rising up the bottom of the screen as the
+   chapter scrolled in, and then vanished the moment the pin engaged. */
+#transitTitle{opacity:0}
 .card-title .big{font-size:clamp(2.6rem,9vw,7.5rem);line-height:.94;letter-spacing:-.05em;
   font-weight:600}
 .card-title .big em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--blue)}
@@ -1500,10 +1504,10 @@ function wireModel(root,o){
      origin. The shell stays whole and is clipped per frame instead. */
   function layer(host,sg,dt){
     if(sg.length){let lg=new a.BufferGeometry();lg.setAttribute("position",new a.BufferAttribute(new Float32Array(sg),3));
-      let lm=new a.LineBasicMaterial({color:o.wire,transparent:!0,opacity:o.wireOp,blending:a.AdditiveBlending,depthWrite:!1});
+      let lm=new a.LineBasicMaterial({color:o.wire,transparent:!0,opacity:o.wireOp,blending:o.normal?a.NormalBlending:a.AdditiveBlending,depthWrite:!1});
       host.add(new a.LineSegments(lg,lm)),mats.push(lm),host.userData.mats.push(lm)}
     if(dt.length){let pg=new a.BufferGeometry();pg.setAttribute("position",new a.BufferAttribute(new Float32Array(dt),3));
-      let pm=new a.PointsMaterial({color:o.dot,size:o.dotSize,transparent:!0,opacity:o.dotOp,blending:a.AdditiveBlending,depthWrite:!1,sizeAttenuation:!0});
+      let pm=new a.PointsMaterial({color:o.dot,size:o.dotSize,transparent:!0,opacity:o.dotOp,blending:o.normal?a.NormalBlending:a.AdditiveBlending,depthWrite:!1,sizeAttenuation:!0});
       host.add(new a.Points(pg,pm)),mats.push(pm),host.userData.mats.push(pm)}
   }
   g.userData.mats=[];
@@ -2132,15 +2136,59 @@ function apPath(e){
   let dx=q2[0]-p[0],dy=q2[1]-p[1];
   return[p[0],p[1],Math.hypot(dx,dy)<1e-9?0:-Math.atan2(dx,dy)]
 }
-/* the camera this frame will be drawn from, rebuilt from state already
-   written, so things can be placed by where they land on screen */
-function apLook(){
+/* A camera pose is [camX,camY,camZ,tgtX,tgtY,tgtZ]. apLookAt loads one into a
+   scratch camera, so things can be placed by where they land on screen. */
+function apLookAt(v){
   apCam.aspect=innerWidth/Math.max(1,innerHeight),apCam.fov=o.fov,apCam.updateProjectionMatrix(),
-  apCam.position.set(o.camX,o.camY,o.camZ),apCam.up.set(Math.sin(o.roll),Math.cos(o.roll),0),
-  apCam.lookAt(o.tgtX,o.tgtY,o.tgtZ),apCam.updateMatrixWorld(!0)
+  apCam.position.set(v[0],v[1],v[2]),apCam.up.set(0,1,0),
+  apCam.lookAt(v[3],v[4],v[5]),apCam.updateMatrixWorld(!0)
 }
 function apAt(nx,ny,d){
   return apV.set(nx,ny,.5).unproject(apCam).sub(apCam.position).normalize().multiplyScalar(d).add(apCam.position)
+}
+/* where a world point lands under the loaded camera: [ndcX, ndcY, distance] */
+function apNdc(x,y,z){
+  apV.set(x,y,z);let d=apV.distanceTo(apCam.position);apV.project(apCam);return[apV.x,apV.y,d]
+}
+/* The camera before the swing. Into the pad shot from where the last chapter
+   left it; a chase in which the aim keeps up but the camera lags and falls
+   back, so the stack climbs out of the frame and then away; and through the
+   injection burn, a dolly back in close behind the stack, so the burn and the
+   lander coming out of it are seen at a size you can read. */
+function apCamPre(e){
+  let S2=AP.S,u=re((e-AP.lift)/(AP.orb-AP.lift)),P=apPath(e),ax=-Math.sin(P[2]),ay=Math.cos(P[2]),
+      cx=P[0]+ax*S2/2,cy=P[1]+ay*S2/2,k0=I(0,.07,e),
+      camX=s(-6,AP.padC[0],k0),camY=s(2,AP.padC[1],k0),camZ=s(26,AP.padC[2],k0),
+      tX=s(0,AP.padT[0],k0),tY=s(-8,AP.padT[1],k0),tZ=0;
+  if(e>AP.lift){
+    let kt=I(.02,.3,u),kc=I(.08,.55,u),ko=I(.25,1,u);
+    tX=s(tX,cx-S2*.25,kt),tY=s(tY,cy+S2*.1,kt),
+    camX=s(camX,cx+s(11,26,ko),kc),camY=s(camY,cy+s(-4,-10,ko),kc),camZ=s(camZ,s(26,110,ko),kc)
+  }
+  /* aimed between the stack and the Moon it is heading for, favouring the
+     stack, so the stack sits low in the frame and the Moon high on the side it
+     keeps for the crossing -- aimed evenly, the stack ran off the edge */
+  let ks=I(.5,.6,e),px=cx+14,py=cy+3,pz=32,M0=apMoon(e),
+      ax1=cx-px,ay1=cy-py,az1=-pz,n1=Math.hypot(ax1,ay1,az1)/.6,
+      ax2=M0[0]-px,ay2=M0[1]-py,az2=M0[2]-pz,n2=Math.hypot(ax2,ay2,az2)/.4;
+  return[s(camX,px,ks),s(camY,py,ks),s(camZ,pz,ks),
+         s(tX,px+(ax1/n1+ax2/n2)*20,ks),s(tY,py+(ay1/n1+ay2/n2)*20,ks),s(tZ,pz+(az1/n1+az2/n2)*20,ks)]
+}
+/* and after it: the swing out to the crossing's deep-space framing, then the
+   ease into the framing the glove chapter opens on */
+function apCamPost(e,pre){
+  let cw=I(.64,.72,e),ke=I(.8,.9,e),v=[0,6,40,0,2,-60],g=[0,5,30,0,-2,-18],r=[];
+  for(let i=0;i<6;i++)r.push(s(s(pre[i],v[i],cw),g[i],ke));
+  return r
+}
+/* the Moon's own path and scale, before any placing on screen: in ahead during
+   the burn, closing along the top band, down to its orbit right of centre
+   once the title has gone, and last, after the caption, to where the glove
+   chapter expects it */
+function apMoon(e){
+  let mA=I(.52,.79,e),mf=I(.8,.88,e),mEnd=I(.975,1,e);
+  return[s(s(s(170,120,mA),15,mf),-4,mEnd),s(s(s(140,95,mA),-5,mf),-14,mEnd),
+         s(s(s(-600,-300,mA),-45,mf),-30,mEnd),s(s(1,1.25,mf),1.45,mEnd)]
 }
 ee(F("#stage-transit"),{scene:!0,pin:!0,onUpdate(e){
   ve();
@@ -2151,85 +2199,87 @@ ee(F("#stage-transit"),{scene:!0,pin:!0,onUpdate(e){
      right; the pad needs a large one underneath. Cross between them while
      neither is showing, and later park it where the glove chapter expects.
      The pad Earth and the stack only fade in once the camera is most of the way
-     into the pad shot: any sooner and the limb crosses the caption. */
-  o.earthK=e<.03?1-I(0,.025,e):e<.72?I(.045,.075,e)*(1-I(.595,.64,e)):I(.73,.76,e);
+     into the pad shot: any sooner and the limb crosses the caption. It is gone
+     again before the camera swings, so it never sweeps across the frame. */
+  o.earthK=e<.03?1-I(0,.025,e):e<.72?I(.045,.075,e)*(1-I(.585,.62,e)):I(.73,.76,e);
   e<.03?(o.earthX=20,o.earthY=-34,o.earthScale=.6):e<.72&&(o.earthX=AP.E[0],o.earthY=AP.E[1],o.earthScale=4.2);
 
   /* The stack. */
   let thr=e<=AP.lift?I(.065,.1,e)
          :e<AP.orb?(u<.46?1-I(.43,.46,u):u<.79?I(.5,.56,u)*(1-I(.76,.79,u)):I(.84,.9,u)*(1-I(.96,1,u)))
          :I(AP.tliA,AP.tliA+.02,e)*(1-I(AP.tliB-.03,AP.tliB,e));
-  o.saturnK=I(.045,.075,e)*(1-I(.6,.645,e)),
+  o.saturnK=I(.045,.075,e)*(1-I(.64,.7,e)),
   o.saturnX=cx,o.saturnY=cy,o.saturnZ=0,o.saturnScale=S2,o.saturnTilt=tilt,
   o.saturnSpin=.55+I(.03,.2,u)*1.2,
   o.saturnSep1=I(.46,.62,u),o.saturnSep2=I(.8,.95,u),
   o.saturnThrust=thr,o.saturnNozzle=u<.46?0:u<.79?1:2,
   o.saturnPlume=I(.05,.9,u),o.saturnSmoke=I(.07,.1,e)*(1-I(.25,.5,u)),o.saturnShake=I(.07,.1,e)*(1-I(.15,.45,u));
 
-  /* The camera. Into the pad shot from where the last chapter left it; then a
-     chase in which the aim keeps up but the camera lags and falls back, so the
-     stack climbs out of the frame and then away; then, at injection, a swing
-     to look ahead to where the Moon is coming up. */
-  let k0=I(0,.07,e),camX=s(-6,AP.padC[0],k0),camY=s(2,AP.padC[1],k0),camZ=s(26,AP.padC[2],k0),
-      tX=s(0,AP.padT[0],k0),tY=s(-8,AP.padT[1],k0),tZ=0;
-  if(e>AP.lift){
-    let kt=I(.02,.3,u),kc=I(.08,.55,u),ko=I(.25,1,u);
-    tX=s(tX,cx-S2*.25,kt),tY=s(tY,cy+S2*.1,kt),
-    camX=s(camX,cx+s(11,26,ko),kc),camY=s(camY,cy+s(-4,-10,ko),kc),camZ=s(camZ,s(26,110,ko),kc)
+  /* The camera. */
+  let pre=apCamPre(e),post=apCamPost(e,pre),cw=I(.64,.72,e);
+  o.camX=post[0],o.camY=post[1],o.camZ=post[2],o.tgtX=post[3],o.tgtY=post[4],o.tgtZ=post[5],o.roll=0;
+
+  /* The handover. From .64 the camera leaves the stack for the deep-space
+     framing, and that swing used to throw everything across the screen -- the
+     Moon jumped from one corner to another and the lander appeared from
+     nowhere. Now whatever is on screen through the swing is placed where it
+     would appear to a camera that had stayed with the stack, and moved from
+     there on screen, so the swing itself never shows. */
+
+  /* The Moon is carried from where it appears at the end of the burn to where
+     it appears once the crossing framing has settled, along the top band and
+     at a matching apparent size. */
+  let MN=apMoon(e);
+  if(e>.6&&e<.8){
+    let k=I(.6,.8,e),A0=apMoon(.6),A1=apMoon(.8);
+    apLookAt(apCamPost(.6,apCamPre(.6)));let p0=apNdc(A0[0],A0[1],A0[2]);
+    apLookAt(apCamPost(.8,apCamPre(.8)));let p1=apNdc(A1[0],A1[1],A1[2]);
+    apLookAt(post);
+    let d=s(p0[2],p1[2],k),Wm=apAt(s(p0[0],p1[0],k),s(p0[1],p1[1],k),d);
+    MN=[Wm.x,Wm.y,Wm.z,s(A0[3]/p0[2],A1[3]/p1[2],k)*d]
   }
-  let ks=I(.5,.62,e);
-  tX=s(tX,cx+25,ks),tY=s(tY,cy+10,ks),tZ=s(tZ,-40,ks),
-  camX=s(camX,cx-30,ks),camY=s(camY,cy+14,ks),camZ=s(camZ,70,ks);
+  o.moonK=I(.52,.6,e),o.moonX=MN[0],o.moonY=MN[1],o.moonZ=MN[2],o.moonScale=MN[3];
 
-  /* The crossing: a deep-space framing, the Earth gone behind, the Moon coming
-     up ahead. */
-  let cw=I(.62,.68,e),pc=[camX,camY,camZ,tX,tY,tZ];
-  camX=s(camX,0,cw),camY=s(camY,6,cw),camZ=s(camZ,40,cw),tX=s(tX,0,cw),tY=s(tY,2,cw),tZ=s(tZ,-60,cw);
-  /* Lunar orbit: ease to the framing the glove chapter opens on. */
-  let ke2=I(.8,.9,e);
-  o.camX=s(camX,0,ke2),o.camY=s(camY,5,ke2),o.camZ=s(camZ,30,ke2),
-  o.tgtX=s(tX,0,ke2),o.tgtY=s(tY,-2,ke2),o.tgtZ=s(tZ,-18,ke2),o.roll=0;
-
-  /* The Moon: in ahead during the burn, closing along the top band through the
-     crossing -- the title card holds the middle then, and the Moon's approach
-     used to pass behind it -- down to its orbit right of centre once the card
-     has gone, and last of all, after the caption, to where the glove chapter
-     expects it. */
-  let mA=I(.52,.79,e),mf=I(.79,.87,e),mEnd=I(.975,1,e),
-      mx=s(s(s(170,120,mA),15,mf),-4,mEnd),my=s(s(s(140,95,mA),-5,mf),-14,mEnd),mz=s(s(s(-600,-300,mA),-45,mf),-30,mEnd);
-  o.moonK=I(.52,.6,e),o.moonX=mx,o.moonY=my,o.moonZ=mz,o.moonScale=s(s(1,1.25,mf),1.45,mEnd);
-
-  /* The lunar module: out of the top of the stack, pinned under the title card
-     for the crossing, then into an inclined orbit that carries it behind the
-     Moon. The move from the stack to the pinned spot is blended on screen, not
-     in the world: the stack stays where the camera had it before the swing, and
-     the module slides from there to its spot at a matching apparent size.
-     Blended in world space, the camera's swing flung it off the bottom-right
-     corner and back. */
-  let lx=cx+ax*S2*(.32+I(.6,.66,e)*.5),ly=cy+ay*S2*(.32+I(.6,.66,e)*.5),lz=0,lsc=S2*.13;
-  if(e>.6){
-    o.camX=pc[0],o.camY=pc[1],o.camZ=pc[2],o.tgtX=pc[3],o.tgtY=pc[4],o.tgtZ=pc[5],apLook();
-    apV.set(lx,ly,lz);
-    let d0=apV.distanceTo(apCam.position);apV.project(apCam);
-    let n0=apV.x,m0=apV.y,z0=lsc/d0;
-    o.camX=camX,o.camY=camY,o.camZ=camZ,o.tgtX=tX,o.tgtY=tY,o.tgtZ=tZ,apLook();
-    let c=re((e-.62)/.18),fh=2*22*Math.tan(Math.PI*21/180),d=s(d0,22,cw),
-        A=apAt(s(n0,s(-.72,.15,c),cw),s(m0,-.7,cw),d);
-    lx=A.x,ly=A.y,lz=A.z,lsc=s(z0,.075*fh/.78/22,cw)*d;
-    o.camX=s(camX,0,ke2),o.camY=s(camY,5,ke2),o.camZ=s(camZ,30,ke2),o.tgtX=s(tX,0,ke2),o.tgtY=s(tY,-2,ke2),o.tgtZ=s(tZ,-18,ke2)
+  /* The spent stage stays where it was on screen and falls away from there,
+     receding and turning as it fades. */
+  if(e>.64){
+    apLookAt(pre);let q=apNdc(cx,cy,0),k2=I(.64,.72,e);
+    apLookAt(post);
+    let d=q[2]*(1+.9*k2),Ws=apAt(q[0]+.3*k2,q[1]-.28*k2,d);
+    o.saturnX=Ws.x,o.saturnY=Ws.y,o.saturnZ=Ws.z,o.saturnScale=S2*d/q[2]*(1-.3*k2),o.saturnTilt=tilt+k2*.6
   }
-  let kr=I(.8,.86,e),ps=(e-.8)/.2*Math.PI*2*1.2-Math.PI/2,rho=14*o.moonScale*1.55;
+
+  /* The lunar module comes out of the top of the stack while the camera is
+     still with it, then slides on screen to its place under the title card at
+     a matching apparent size, and holds there through the crossing. */
+  let ext=I(.6,.66,e),lx=cx+ax*S2*(.34+ext*.55),ly=cy+ay*S2*(.34+ext*.55),lz=0,lsc=S2*.16;
+  if(e>.64){
+    apLookAt(pre);let q=apNdc(lx,ly,lz),z0=lsc/q[2];
+    apLookAt(post);
+    let c=re((e-.64)/.16),fh=2*22*Math.tan(Math.PI*21/180),d=s(q[2],22,cw),
+        A=apAt(s(q[0],s(.02,.2,c),cw),s(q[1],-.7,cw),d);
+    lx=A.x,ly=A.y,lz=A.z,lsc=s(z0,.075*fh/.78/22,cw)*d
+  }
+  /* Lunar orbit: a circle a little way off the surface, tipped toward the
+     camera and run so the module crosses in front of the Moon rather than
+     behind it. It starts once the title has gone and the Moon has mostly come
+     down to meet it; any sooner and the module crossed the words, then shrank
+     to a speck chasing a Moon still far off. A flattened ellipse used to carry
+     it inside the sphere, where the Moon's own core hid it. */
+  let kr=I(.84,.89,e),ps=Math.PI*(.95-(e-.84)/.12),rho=14*o.moonScale*1.25;
   o.lmK=I(.59,.635,e)*(1-I(.93,.97,e)),
-  o.lmX=s(lx,mx+Math.cos(ps)*rho,kr),o.lmY=s(ly,my+Math.sin(ps)*rho*.28,kr),o.lmZ=s(lz,mz+Math.sin(ps)*rho,kr),
-  o.lmScale=s(lsc,2.2,kr),o.lmSpin=e*9;
+  o.lmX=s(lx,o.moonX+Math.cos(ps)*rho,kr),
+  o.lmY=s(ly,o.moonY+Math.cos(ps)*rho*.22,kr),
+  o.lmZ=s(lz,o.moonZ+Math.sin(ps)*rho,kr),
+  o.lmScale=s(lsc,3,kr),o.lmSpin=e*9;
 
   o.starOpacity=s(.9,1,I(0,.07,e)),
-  o.bloom=s(.45,.7,I(.62,.8,e))+(e<AP.orb?thr*.22:0),o.exposure=1+(e<AP.orb?thr*.06:0);
+  o.bloom=s(.45,.55,I(.62,.8,e))+(e<AP.orb?thr*.22:0),o.exposure=1+(e<AP.orb?thr*.06:0);
 
   /* Words. */
   let sc=I(.03,.07,e)*(1-I(.2,.26,e));
   svCap&&(svCap.style.setProperty("--capO",sc.toFixed(3)),svCap.style.setProperty("--capY",((1-sc)*20).toFixed(1)+"px"));
-  let n=I(.645,.68,e)*(1-I(.77,.8,e));
+  let n=I(.69,.72,e)*(1-I(.785,.81,e));
   et.style.opacity=n.toFixed(3),
   et.style.transform="translateY("+((1-n)*18).toFixed(1)+"px) scale("+(.985+n*.015).toFixed(4)+")";
   let r=I(.86,.9,e)*(1-I(.95,.972,e));
@@ -2454,8 +2504,13 @@ function wireSlot(slot,url,opts,after){
 }
 var svSlot=wireSlot("saturn","assets/model/nasa-saturn-v.glb",
       {core:0x07080e,wire:0x9fb8e6,wireOp:.46,dot:0xd6e2f7,dotOp:.5,dotSize:.045,pts:2600,angle:20,bands:[.40,.62]}),
+    /* The lander's linework is far denser than the Saturn V's -- 157 meshes in
+       a small patch of screen -- so its additive lines piled up past the bloom
+       threshold and it rendered as a glowing ball. Its lines are blended
+       normally instead, in a colour just under the threshold, so it reads as
+       linework at any distance. */
     lmSlot=wireSlot("lm","assets/model/nasa-lunar-module.glb",
-      {core:0x06070c,wire:0x8fa8d4,wireOp:.4,dot:0xc3d3ee,dotOp:.45,dotSize:.04,pts:2400,angle:26});
+      {core:0x06070c,wire:0x8397bb,wireOp:.85,dot:0xa9b9d6,dotOp:.3,dotSize:.02,pts:600,angle:26,normal:!0});
 chapterModel(F("#stage-transit"),"assets/model/nasa-saturn-v.glb",svSlot.mount,svSlot.unmount);
 chapterModel(F("#stage-transit"),"assets/model/nasa-lunar-module.glb",lmSlot.mount,lmSlot.unmount);
 
