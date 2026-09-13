@@ -565,6 +565,59 @@ input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radiu
   .tpl{grid-column:1;margin-top:.3rem}
   .tpl span{font-size:.56rem;letter-spacing:0;white-space:normal;border-radius:.8rem}
 }
+/* ------------------------------------------------------------ background board
+   School and skills as one centred board of rounded cards. The script reveals
+   the cards in turn as the board scrolls in, counts the AP figure up, pops the
+   skill chips in down each group, and walks the dot round the orbit on the
+   "going into" card -- all from scroll progress, none of it on a timer. */
+.prof>.wrap{display:flex;flex-direction:column;align-items:center}
+.phead{text-align:center;margin-bottom:clamp(1.6rem,4vh,2.6rem)}
+.phead .kicker::after{content:"";width:26px;height:1px;background:currentColor;opacity:.6}
+.phead h2{margin-inline:auto}
+.bento{width:min(100%,66rem);display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:.9rem}
+.bcard{position:relative;overflow:hidden;text-align:left;
+  border:1px solid var(--line);border-radius:var(--r-lg);
+  background:radial-gradient(120% 90% at 0% 0%,rgba(77,141,255,.1),transparent 55%),var(--panel);
+  backdrop-filter:blur(14px);padding:clamp(1.2rem,2.2vw,1.7rem);
+  opacity:var(--bo,1);transform:translate3d(0,var(--by,0px),0);transition:border-color .35s,box-shadow .35s}
+.bcard:hover{border-color:rgba(77,141,255,.38);box-shadow:0 22px 50px -30px rgba(77,141,255,.6)}
+.blabel{display:block;font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+.bschool h3,.bgo h3{font-size:clamp(1.35rem,2.1vw,1.75rem);letter-spacing:-.03em;font-weight:600;margin-top:.9rem}
+.bmeta{font-size:.92rem;margin-top:.35rem}
+.bgrad{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+  margin-top:clamp(1.2rem,3vh,2rem);padding-top:1rem;border-top:1px solid var(--line)}
+.bgrad b{font-family:var(--mono);font-weight:400;font-size:clamp(1.4rem,2.3vw,1.9rem);letter-spacing:-.04em;color:var(--ink)}
+.bnum{display:block;font-size:clamp(3.4rem,6vw,5rem);line-height:.95;letter-spacing:-.06em;font-weight:600;
+  color:var(--ink);font-variant-numeric:tabular-nums;margin-top:.9rem}
+.bunit{display:block;font-size:.95rem;color:var(--dim);margin-top:.35rem}
+/* one tick per AP class, lit as the figure counts up */
+.bticks{display:flex;gap:4px;margin-top:1.2rem}
+.bticks i{flex:1;height:6px;border-radius:999px;background:var(--line-lit);transition:background-color .2s,box-shadow .2s}
+.bticks i.on{background:var(--blue);box-shadow:0 0 8px rgba(77,141,255,.55)}
+.bgo h3{position:relative;z-index:1;max-width:9ch}
+.bgo h3 em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--blue)}
+/* an orbit in the card's corner: a small planet and a dot that scroll walks round it */
+.borbit{position:absolute;right:1.1rem;bottom:1.1rem;width:6.6rem;height:6.6rem;border-radius:50%;
+  border:1px solid var(--line-lit);pointer-events:none}
+.borbit::before{content:"";position:absolute;inset:28%;border-radius:50%;border:1px solid var(--line);
+  background:radial-gradient(circle at 35% 35%,rgba(77,141,255,.38),rgba(77,141,255,.06) 60%,transparent 72%)}
+.borbit i{position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;
+  background:var(--blue);box-shadow:0 0 12px var(--blue);transform:rotate(var(--oa,-90deg)) translateX(3.3rem)}
+.bskills{grid-column:1/-1}
+.bgroups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1rem,2.4vw,2.2rem);margin-top:1.1rem}
+.bgroups h4{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--blue);font-weight:400;margin-bottom:.7rem}
+.chips{list-style:none;display:flex;flex-wrap:wrap;gap:.45rem}
+.chips li{font-size:.86rem;color:var(--ink);padding:.42rem .9rem;border:1px solid var(--line-lit);border-radius:999px;
+  background:rgba(255,255,255,.025);opacity:var(--co,1);transform:translate3d(0,var(--cy,0px),0) scale(var(--cs,1));
+  transition:border-color .25s,background-color .25s}
+.chips li:hover{border-color:rgba(77,141,255,.55);background-color:var(--blue-soft)}
+@media(max-width:900px){
+  .bento{grid-template-columns:1fr 1fr}
+  .bschool{grid-column:1/-1}
+  .bgroups{grid-template-columns:1fr;gap:1rem}
+}
+@media(max-width:520px){.bento{grid-template-columns:1fr}.bnum{font-size:3.2rem}}
 @media(max-width:700px){.award{grid-template-columns:1fr;gap:.3rem}.award .pl{text-align:left}}
 
 /* ------------------------------------------------------------ contact */
@@ -996,23 +1049,41 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
       </div>
     </div>
   </div>
-  <div class="vfull">
+  <!-- School and skills, as one centred board in the same rounded language as
+       the awards above it. Same facts as before, laid out as cards. -->
+  <div class="vfull prof">
     <div class="wrap">
-      <div class="grid2" style="margin-top:3.4rem">
-      <div class="panel fade"><h3>School</h3>
-        <dl class="rows">
-          <div><dt>High school</dt><dd>Lebanon Trail High School, Frisco ISD — Frisco, TX</dd></div>
-          <div><dt>Graduating</dt><dd>May 2027</dd></div>
-          <div><dt>Coursework</dt><dd>12 AP classes</dd></div>
-          <div><dt>Going into</dt><dd>Aerospace engineering</dd></div>
-        </dl></div>
-      <div class="panel fade"><h3>What I work with</h3>
-        <dl class="rows">
-          <div><dt>Languages</dt><dd>Python, Java, C++</dd></div>
-          <div><dt>Tools</dt><dd>Fusion 360, Arduino IDE, 3D printing</dd></div>
-          <div><dt>Areas</dt><dd>Embedded systems, real-time control logic, sensor filtering, physics modeling, failure analysis</dd></div>
-        </dl></div>
-    </div>
+      <header class="phead">
+        <div class="kicker fade">Background</div>
+        <h2 class="rv">School and <em>skills</em>.</h2>
+      </header>
+      <div class="bento">
+        <article class="bcard bschool">
+          <span class="blabel">High school</span>
+          <h3>Lebanon Trail High School</h3>
+          <p class="bmeta">Frisco ISD — Frisco, TX</p>
+          <div class="bgrad"><span class="blabel">Graduating</span><b>May 2027</b></div>
+        </article>
+        <article class="bcard bstat">
+          <span class="blabel">Coursework</span>
+          <span class="bnum" data-count="12">12</span>
+          <span class="bunit">AP classes</span>
+          <div class="bticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </article>
+        <article class="bcard bgo">
+          <span class="blabel">Going into</span>
+          <h3>Aerospace <em>engineering</em></h3>
+          <div class="borbit" aria-hidden="true"><i></i></div>
+        </article>
+        <article class="bcard bskills">
+          <span class="blabel">What I work with</span>
+          <div class="bgroups">
+            <div><h4>Languages</h4><ul class="chips"><li>Python</li><li>Java</li><li>C++</li></ul></div>
+            <div><h4>Tools</h4><ul class="chips"><li>Fusion 360</li><li>Arduino IDE</li><li>3D printing</li></ul></div>
+            <div><h4>Areas</h4><ul class="chips"><li>Embedded systems</li><li>Real-time control logic</li><li>Sensor filtering</li><li>Physics modeling</li><li>Failure analysis</li></ul></div>
+          </div>
+        </article>
+      </div>
     </div>
   </div>
 </section>
@@ -1768,6 +1839,27 @@ function buildTape(){
 buildDeck("#sec-rocketry",[[0,1,2],[3],[4],[5],[6]],130);
 buildDeck("#sec-glove",[[0,1,2],[3],[4]],130);
 buildTape();
+/* ---------------------------------------------------------------------------
+   The background board. Cards arrive in turn as it scrolls in, the AP figure
+   counts up with its card, the chips pop in down each group, and the dot on
+   the "going into" card walks its orbit for as long as the board is on screen.
+   Scroll progress only, so it reads the same however you arrive.
+   --------------------------------------------------------------------------- */
+(function(){
+  let bd=F(".bento");if(!bd)return;
+  let cards=Ee(".bcard"),chips=Ee(".chips li"),num=F(".bstat .bnum"),ticks=Ee(".bticks i"),orb=F(".borbit i"),N=num?+num.dataset.count:0;
+  ee(bd,{start:"top 92%",end:"top 38%",onUpdate(p){
+    Se&&(p=1);
+    cards.forEach((c,i)=>{let k=fe(re((p-i*.12)/.5));
+      c.style.setProperty("--bo",k.toFixed(3)),c.style.setProperty("--by",((1-k)*30).toFixed(1)+"px")});
+    chips.forEach((c,i)=>{let k=fe(re((p-.34-i*.03)/.34));
+      c.style.setProperty("--co",k.toFixed(3)),c.style.setProperty("--cy",((1-k)*10).toFixed(1)+"px"),
+      c.style.setProperty("--cs",(.92+k*.08).toFixed(3))});
+    let c=Math.round(N*fe(re((p-.12)/.55)));
+    num&&(num.textContent=String(c)),ticks.forEach((t,i)=>t.classList.toggle("on",i<c))
+  }});
+  orb&&ee(bd,{start:"top bottom",end:"bottom top",onUpdate(p){orb.style.setProperty("--oa",(-90+p*300).toFixed(1)+"deg")}})
+})();
 Ee(".rv").filter(e=>!e.closest(".deck,.tstage")).forEach(e=>{let t=We(e);ee(e,{start:"top 88%",end:"top 42%",onUpdate(n){let r=t.length,m=.5;for(let f=0;f<r;f++){let h=r>1?f/(r-1)*m:0,x=fe(re((n-h)/(1-m)));t[f].style.setProperty("--wo",x.toFixed(3)),t[f].style.setProperty("--wy",((1-x)*26).toFixed(1)+"px"),t[f].style.setProperty("--wr",((1-x)*1.6).toFixed(2)+"deg")}}})});Ee(".fade").filter(e=>!e.closest(".deck,.tstage")).forEach((e,t)=>{ee(e,{start:"top 92%",end:"top 62%",onUpdate(n){let r=fe(n);e.style.setProperty("--fo",r.toFixed(3)),e.style.setProperty("--fy",((1-r)*34).toFixed(1)+"px")}})});var Tt=F("#hudNum"),Mt=F("#hudName"),wt=F("#hudBar"),st=Ee(".railwrap a"),Xe=Ee("[data-chapter]");function St(e){let t=Xe[e];t&&(Tt.textContent=String(e+1).padStart(2,"0"),Mt.textContent=t.dataset.chapter,st.forEach((n,r)=>n.classList.toggle("on",r===e)),Ee(".nav ul a").forEach(n=>n.classList.toggle("on",n.dataset.ch===String(e))))}Xe.forEach((e,t)=>{ee(e,{start:"top 55%",end:"bottom 45%",onToggle(n){n&&St(t)}})});/* Only one scene trigger runs per frame, so a fast scroll can jump straight from
    one chapter to another without the ones in between ever getting a turn. Every
    handler therefore starts from this full baseline and then sets what it needs —
