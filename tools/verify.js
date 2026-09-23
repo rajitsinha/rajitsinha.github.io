@@ -55,9 +55,10 @@
     saturnScale: "saturnK", saturnTilt: "saturnK", saturnSpin: "saturnK",
     saturnThrust: "saturnK", saturnSmoke: "saturnK", saturnShake: "saturnK", saturnPlume: "saturnK",
     saturnSep1: "saturnK", saturnSep2: "saturnK", saturnNozzle: "saturnThrust",
-    lmX: "lmK", lmY: "lmK", lmZ: "lmK", lmScale: "lmK", lmSpin: "lmK"
+    lmX: "lmK", lmY: "lmK", lmZ: "lmK", lmScale: "lmK", lmSpin: "lmK",
+    morphK: "morphA"
   };
-  const GATES = ["rocketK", "gloveK", "earthK", "moonK", "saturnK", "lmK", "saturnThrust"];
+  const GATES = ["rocketK", "gloveK", "earthK", "moonK", "saturnK", "lmK", "saturnThrust", "morphA"];
   const VIS = 0.02;
 
   const keys = () => Object.keys(W.state).filter(k => typeof W.state[k] === "number").sort();
@@ -248,8 +249,11 @@
   }
   function rectOf(group) {
     group.updateMatrixWorld(true);
-    const T = W.THREE, b = new T.Box3().setFromObject(group);
-    if (b.isEmpty()) return null;
+    return rectOfBox(new W.THREE.Box3().setFromObject(group));
+  }
+  function rectOfBox(b) {
+    const T = W.THREE;
+    if (!b || b.isEmpty()) return null;
     let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, behind = 0;
     for (let i = 0; i < 8; i++) {
       const p = toPx(new T.Vector3(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z));
@@ -258,6 +262,16 @@
     }
     return behind === 8 ? null : { kind: "rect", x0, y0, x1, y1 };
   }
+  function rectOfPoints(pts) {
+    if (!pts || !pts.length) return null;
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, n = 0;
+    for (const v of pts) {
+      const p = toPx(v);
+      if (p.z > 1) continue;
+      n++; x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y);
+    }
+    return n ? { kind: "rect", x0, y0, x1, y1 } : null;
+  }
   function bodies() {
     const slot = s => { const g = W.slotGroup && W.slotGroup(s); return g && g.visible && g.children.length ? rectOf(g) : null; };
     return [
@@ -265,6 +279,8 @@
       { name: "moon",   k: "moonK",   shape: () => W.moonGroup && W.moonGroup.visible ? circleOf(W.moonGroup, 14.1) : null },
       { name: "saturn", k: "saturnK", shape: () => slot("saturn") },
       { name: "lm",     k: "lmK",     shape: () => slot("lm") },
+      /* the Saturn V breaking apart into the lunar module, where its pieces are in flight */
+      { name: "morph",  k: "morphA",  shape: () => W.morphPoints ? rectOfPoints(W.morphPoints()) : null },
       { name: "glove",  k: "gloveK",  shape: () => W.gloveGroup && W.gloveGroup.visible && W.gloveGroup.children.length ? rectOf(W.gloveGroup) : null }
     ];
   }

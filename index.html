@@ -83,6 +83,21 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 @media(max-width:860px){.railwrap{display:none}}
 .railwrap a{width:7px;height:7px;border-radius:50%;border:1px solid var(--line-lit);
   transition:.3s;position:relative}
+/* held-page cue, bottom centre. A pinned chapter holds the page still while
+   the scroll plays it, and with nothing to show for that a held page reads
+   as the end of the site. Shown only while a chapter holds the page: the ring
+   fills with the chapter's progress and the arrow moves with each scroll. */
+.hold{position:fixed;left:50%;bottom:1rem;z-index:55;width:36px;height:36px;margin-left:-18px;
+  pointer-events:none;opacity:var(--ho,0);transform:translateY(calc((1 - var(--ho,0)) * 6px))}
+.hold svg{display:block;width:100%;height:100%}
+/* phones: the chapter label and its bar run under the centre, so sit in the corner */
+@media(max-width:860px){.hold{left:auto;right:var(--pad);margin-left:0}}
+.hold circle{fill:none;stroke-width:1.3}
+.hold .t{stroke:var(--line-lit)}
+.hold .p{stroke:var(--blue);stroke-linecap:round;transform:rotate(-90deg);transform-origin:20px 20px;
+  opacity:calc(.7 + var(--hm,0) * .3)}
+.hold .a{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;
+  opacity:calc(.55 + var(--hm,0) * .45);transform:translateY(var(--hy,0px))}
 .railwrap a.on{background:var(--blue);border-color:var(--blue);box-shadow:0 0 12px var(--blue)}
 
 /* ------------------------------------------------------------ decks
@@ -676,6 +691,10 @@ footer{padding:2.4rem 0 3rem;border-top:1px solid var(--line);font-family:var(--
   <b id="hudName">Approach</b>
   <span class="bar" id="hudBar"><i></i></span>
 </div>
+<div class="hold" id="hold" aria-hidden="true">
+  <svg viewBox="0 0 40 40"><circle class="t" cx="20" cy="20" r="17"/><circle class="p" cx="20" cy="20" r="17"
+    stroke-dasharray="106.81" stroke-dashoffset="106.81"/><path class="a" d="M20 14v11M15.5 20.5 20 25l4.5-4.5"/></svg>
+</div>
 <div class="railwrap">
   <a href="#" aria-label="Approach"></a><a href="#" aria-label="Ascent"></a>
   <a href="#" aria-label="Flight computer"></a><a href="#" aria-label="Transit"></a>
@@ -1253,7 +1272,7 @@ function ee(e,t){
      until its bottom does — exactly the span its sticky child is held for. */
   let n={el:e,start:t.start??(t.pin?"top top":"top bottom"),end:t.end??(t.pin?"bottom bottom":"bottom top"),onUpdate:t.onUpdate||null,onToggle:t.onToggle||null,once:!!t.once,scene:!!t.scene,pin:!!t.pin,_s:0,_e:1,_p:-1,_active:!1,_done:!1};
   return Pe.push(n),n
-}function Ze(e,t,n){let[r,m]=e.split(/\s+/),f=t.top+n,h=t.height,x=r==="top"?f:r==="center"?f+h/2:r==="bottom"?f+h:f+h*(parseFloat(r)/100),E=m==="top"?0:m==="center"?innerHeight/2:m==="bottom"?innerHeight:innerHeight*(parseFloat(m)/100);return x-E}function ht(e){for(let t of Pe){let n=docRect(t.el);t._s=Ze(t.start,n,0),t._e=Ze(t.end,n,0),t._e-t._s<1&&(t._e=t._s+1)}qe=!1}function $e(e){qe&&ht(e);let t=null,ft2=null;for(let n of Pe)n.scene&&(e>=n._s&&e<=n._e?(!t||n._s>t._s)&&(t=n):n._e<e&&(!ft2||n._e>ft2._e)&&(ft2=n));if(t){let n=re((e-t._s)/(t._e-t._s));t.onUpdate(n)}else ft2&&ft2.onUpdate(1);for(let n of Pe){if(n.scene||n.once&&n._done)continue;let r=re((e-n._s)/(n._e-n._s)),m=r>0&&r<1;m!==n._active&&(n._active=m,n.onToggle&&n.onToggle(m,r)),r!==n._p&&(n._p=r,n.onUpdate&&n.onUpdate(r),n.once&&r>=1&&(n._done=!0))}}function We(e){return(function t(n){[].slice.call(n.childNodes).forEach(r=>{if(r.nodeType===3){let m=document.createDocumentFragment();r.nodeValue.split(/(\s+)/).filter(f=>f.length).forEach(f=>{let h=document.createElement("span");h.className="w",h.textContent=f,m.appendChild(h)}),n.replaceChild(m,r)}else r.nodeType===1&&!r.classList.contains("w")&&t(r)})})(e),[].slice.call(e.querySelectorAll(".w"))}function ke(e,t=128){let n=document.createElement("canvas");n.width=n.height=t;let r=n.getContext("2d"),m=r.createRadialGradient(t/2,t/2,0,t/2,t/2,t/2);e.forEach(([h,x])=>m.addColorStop(h,x)),r.fillStyle=m,r.fillRect(0,0,t,t);let f=new a.CanvasTexture(n);return f.colorSpace=a.SRGBColorSpace,f}function Ue(e,t){let{base:n,light:r,dark:m,octaves:f=5,contrast:h=1,craters:x=0}=t,E=document.createElement("canvas");E.width=e,E.height=e/2;let j=E.getContext("2d"),K=j.createImageData(E.width,E.height),H=v=>{let Y=Math.sin(v*127.1)*43758.5453;return Y-Math.floor(Y)},g=[];for(let v=0;v<f;v++){let Y=4<<v,u=new Float32Array(Y*Y);for(let b=0;b<Y*Y;b++)u[b]=H(b+v*9871);g.push({n:Y,g:u})}let B=(v,Y)=>{let u=0,b=.5,Z=0;for(let{n:T,g:_}of g){let U=v*T,R=Y*T,$=Math.floor(U),S=Math.floor(R),W=U-$,y=R-S,A=q=>q*q*(3-2*q),P=A(W),V=A(y),z=(q,i)=>_[(i%T+T)%T*T+(q%T+T)%T],ae=s(z($,S),z($+1,S),P),Q=s(z($,S+1),z($+1,S+1),P);u+=s(ae,Q,V)*b,Z+=b,b*=.5}return u/Z},G=[];for(let v=0;v<x;v++)G.push({x:H(v*3.3),y:H(v*7.7),r:.004+H(v*11.1)*.03});let X=v=>[v>>16&255,v>>8&255,v&255],J=X(n),D=X(r),te=X(m);for(let v=0;v<E.height;v++)for(let Y=0;Y<E.width;Y++){let u=Y/E.width,b=v/E.height,Z=B(u,b);Z=re((Z-.5)*h+.5);for(let S of G){let W=Math.min(Math.abs(u-S.x),1-Math.abs(u-S.x)),y=b-S.y,A=Math.sqrt(W*W+y*y);A<S.r?Z*=.58+.42*(A/S.r):A<S.r*1.25&&(Z*=1.06)}let T=Z,_=(v*E.width+Y)*4,U=T<.5?T*2:(T-.5)*2,R=T<.5?te:J,$=T<.5?J:D;K.data[_]=R[0]+($[0]-R[0])*U,K.data[_+1]=R[1]+($[1]-R[1])*U,K.data[_+2]=R[2]+($[2]-R[2])*U,K.data[_+3]=255}j.putImageData(K,0,0);let O=new a.CanvasTexture(E);return O.colorSpace=a.SRGBColorSpace,O.anisotropy=4,O}
+}function Ze(e,t,n){let[r,m]=e.split(/\s+/),f=t.top+n,h=t.height,x=r==="top"?f:r==="center"?f+h/2:r==="bottom"?f+h:f+h*(parseFloat(r)/100),E=m==="top"?0:m==="center"?innerHeight/2:m==="bottom"?innerHeight:innerHeight*(parseFloat(m)/100);return x-E}function ht(e){for(let t of Pe){let n=docRect(t.el);t._s=Ze(t.start,n,0),t._e=Ze(t.end,n,0),t._e-t._s<1&&(t._e=t._s+1)}qe=!1,hdSpans=null}function $e(e){qe&&ht(e);let t=null,ft2=null;for(let n of Pe)n.scene&&(e>=n._s&&e<=n._e?(!t||n._s>t._s)&&(t=n):n._e<e&&(!ft2||n._e>ft2._e)&&(ft2=n));if(t){let n=re((e-t._s)/(t._e-t._s));t.onUpdate(n)}else ft2&&ft2.onUpdate(1);for(let n of Pe){if(n.scene||n.once&&n._done)continue;let r=re((e-n._s)/(n._e-n._s)),m=r>0&&r<1;m!==n._active&&(n._active=m,n.onToggle&&n.onToggle(m,r)),r!==n._p&&(n._p=r,n.onUpdate&&n.onUpdate(r),n.once&&r>=1&&(n._done=!0))}}function We(e){return(function t(n){[].slice.call(n.childNodes).forEach(r=>{if(r.nodeType===3){let m=document.createDocumentFragment();r.nodeValue.split(/(\s+)/).filter(f=>f.length).forEach(f=>{let h=document.createElement("span");h.className="w",h.textContent=f,m.appendChild(h)}),n.replaceChild(m,r)}else r.nodeType===1&&!r.classList.contains("w")&&t(r)})})(e),[].slice.call(e.querySelectorAll(".w"))}function ke(e,t=128){let n=document.createElement("canvas");n.width=n.height=t;let r=n.getContext("2d"),m=r.createRadialGradient(t/2,t/2,0,t/2,t/2,t/2);e.forEach(([h,x])=>m.addColorStop(h,x)),r.fillStyle=m,r.fillRect(0,0,t,t);let f=new a.CanvasTexture(n);return f.colorSpace=a.SRGBColorSpace,f}function Ue(e,t){let{base:n,light:r,dark:m,octaves:f=5,contrast:h=1,craters:x=0}=t,E=document.createElement("canvas");E.width=e,E.height=e/2;let j=E.getContext("2d"),K=j.createImageData(E.width,E.height),H=v=>{let Y=Math.sin(v*127.1)*43758.5453;return Y-Math.floor(Y)},g=[];for(let v=0;v<f;v++){let Y=4<<v,u=new Float32Array(Y*Y);for(let b=0;b<Y*Y;b++)u[b]=H(b+v*9871);g.push({n:Y,g:u})}let B=(v,Y)=>{let u=0,b=.5,Z=0;for(let{n:T,g:_}of g){let U=v*T,R=Y*T,$=Math.floor(U),S=Math.floor(R),W=U-$,y=R-S,A=q=>q*q*(3-2*q),P=A(W),V=A(y),z=(q,i)=>_[(i%T+T)%T*T+(q%T+T)%T],ae=s(z($,S),z($+1,S),P),Q=s(z($,S+1),z($+1,S+1),P);u+=s(ae,Q,V)*b,Z+=b,b*=.5}return u/Z},G=[];for(let v=0;v<x;v++)G.push({x:H(v*3.3),y:H(v*7.7),r:.004+H(v*11.1)*.03});let X=v=>[v>>16&255,v>>8&255,v&255],J=X(n),D=X(r),te=X(m);for(let v=0;v<E.height;v++)for(let Y=0;Y<E.width;Y++){let u=Y/E.width,b=v/E.height,Z=B(u,b);Z=re((Z-.5)*h+.5);for(let S of G){let W=Math.min(Math.abs(u-S.x),1-Math.abs(u-S.x)),y=b-S.y,A=Math.sqrt(W*W+y*y);A<S.r?Z*=.58+.42*(A/S.r):A<S.r*1.25&&(Z*=1.06)}let T=Z,_=(v*E.width+Y)*4,U=T<.5?T*2:(T-.5)*2,R=T<.5?te:J,$=T<.5?J:D;K.data[_]=R[0]+($[0]-R[0])*U,K.data[_+1]=R[1]+($[1]-R[1])*U,K.data[_+2]=R[2]+($[2]-R[2])*U,K.data[_+3]=255}j.putImageData(K,0,0);let O=new a.CanvasTexture(E);return O.colorSpace=a.SRGBColorSpace,O.anisotropy=4,O}
 
 /* ---------------------------------------------------------------------------
    Planet surfaces.
@@ -1737,13 +1756,166 @@ function rkUpdate(){
   }
 }
 let lmG=new a.Group;lmG.visible=!1,n.add(lmG);
+/* ---------------------------------------------------------------------------
+   The hand-off from the Saturn V to the lunar module.
+
+   What is left of the stack after staging breaks apart into the lander. Its
+   lines are cut into about as many pieces as the lander has lines, and each
+   piece flies to one of them. Pieces are paired by rank -- the highest piece
+   of the rocket with the lowest line of the lander -- and leave in that
+   order, so the rocket peels away from the nose down while the lander builds
+   up from its feet. In flight a piece stretches into a streak along its own
+   path, fading toward its tail; only about one in twenty stays lit on the way
+   (the rest go dark until they land), or the stream fills in solid, since
+   the lander has some 25,000 lines.
+
+   All of it runs in the vertex shader from two matrices, where the rocket's
+   upper band and the lander are this frame, so it follows both through the
+   camera's swing. The rocket's lines add light; the lander's are blended
+   normally, or its dense linework blooms into a ball. Each piece's blend
+   slides from one to the other as it travels, so it matches the line it
+   replaces at the start and the line it becomes at the end.
+   --------------------------------------------------------------------------- */
+const MF_D=.35,MF_BOW=.12,MF_WANDER=.06,MF_TAIL=.07,MF_SHOW=.05,MF_LIT=.75;
+let mf=null;
+function mfFree(){mf&&mf.obj&&(n.remove(mf.obj),mf.obj.geometry.dispose(),mf.obj.material.dispose()),mf=null}
+function mfBuild(sw,lw){
+  let sb=sw.userData.bands&&sw.userData.bands[2],
+      src=sb&&sb.children.find(c=>c.isLineSegments),tgt=lw.children.find(c=>c.isLineSegments);
+  if(!src||!tgt)return null;
+  let S=src.geometry.attributes.position.array,T=tgt.geometry.attributes.position.array,
+      ns=S.length/6,nt=T.length/6,len=new Float32Array(ns),lo=0,hi=0,
+      /* a fixed sequence, so the break-up is the same on every visit */
+      seed=7,rnd=()=>(seed=seed*16807%2147483647)/2147483647;
+  for(let i=0;i<ns;i++){let j=i*6;len[i]=Math.hypot(S[j+3]-S[j],S[j+4]-S[j+1],S[j+5]-S[j+2]),hi=Math.max(hi,len[i])}
+  /* the shortest cut that still leaves no more pieces than the lander has lines */
+  let cnt=L=>{let c=0;for(let i=0;i<ns;i++)c+=Math.max(1,Math.ceil(len[i]/L));return c};
+  for(let it=0;it<40;it++){let m=(lo+hi)/2;cnt(m)>nt?lo=m:hi=m}
+  let P=[];
+  for(let i=0;i<ns;i++){
+    let j=i*6,c=Math.max(1,Math.ceil(len[i]/hi));
+    for(let q=0;q<c;q++){
+      let u0=q/c,u1=(q+1)/c;
+      P.push([S[j]+(S[j+3]-S[j])*u0,S[j+1]+(S[j+4]-S[j+1])*u0,S[j+2]+(S[j+5]-S[j+2])*u0,
+              S[j]+(S[j+3]-S[j])*u1,S[j+1]+(S[j+4]-S[j+1])*u1,S[j+2]+(S[j+5]-S[j+2])*u1])
+    }
+  }
+  /* rank the rocket's pieces nose first and the lander's lines feet first,
+     each with a little jitter so the peel has a soft edge */
+  let span=A=>{let x=1e9,y=-1e9;for(let v of A)x=Math.min(x,v),y=Math.max(y,v);return[x,y-x||1]},
+      ys=P.map(p=>(p[1]+p[4])/2),yt=[];
+  for(let i=0;i<nt;i++)yt.push((T[i*6+1]+T[i*6+4])/2);
+  let[s0,sh]=span(ys),[t0,th]=span(yt),
+      oS=ys.map((v,i)=>[1-(v-s0)/sh+rnd()*.08,i]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]),
+      oT=yt.map((v,i)=>[(v-t0)/th+rnd()*.08,i]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]),
+      np=P.length,N=Math.max(np,nt),
+      pos=new Float32Array(N*6),aT=new Float32Array(N*6),aSm=new Float32Array(N*6),aTm=new Float32Array(N*6),aR=new Float32Array(N*8),aV=new Float32Array(N*4);
+  for(let r2=0;r2<N;r2++){
+    let p=P[oS[Math.floor(r2*np/N)]],tj=oT[Math.floor(r2*nt/N)]*6,
+        smx=(p[0]+p[3])/2,smy=(p[1]+p[4])/2,smz=(p[2]+p[5])/2,
+        tmx=(T[tj]+T[tj+3])/2,tmy=(T[tj+1]+T[tj+4])/2,tmz=(T[tj+2]+T[tj+5])/2,
+        /* when this piece leaves, as a share of the hand-off, and a direction
+           of its own for the arc to wander in -- never upward, where the
+           title card comes in while the last pieces are still flying */
+        d0=(1-MF_D)*r2/Math.max(1,N-1),u=rnd()*2-1,ph=rnd()*Math.PI*2,w=Math.sqrt(1-u*u),lit=rnd()<MF_SHOW?1:0;
+    for(let v=0;v<2;v++){
+      let o3=r2*6+v*3,o4=r2*8+v*4;
+      /* which end of the piece this is (the streak's head or tail), and whether it stays lit in flight */
+      aV[r2*4+v*2]=v,aV[r2*4+v*2+1]=lit;
+      pos[o3]=p[v*3],pos[o3+1]=p[v*3+1],pos[o3+2]=p[v*3+2],
+      aT[o3]=T[tj+v*3],aT[o3+1]=T[tj+v*3+1],aT[o3+2]=T[tj+v*3+2],
+      aSm[o3]=smx,aSm[o3+1]=smy,aSm[o3+2]=smz,
+      aTm[o3]=tmx,aTm[o3+1]=tmy,aTm[o3+2]=tmz,
+      aR[o4]=d0,aR[o4+1]=w*Math.cos(ph),aR[o4+2]=-Math.abs(u),aR[o4+3]=w*Math.sin(ph)
+    }
+  }
+  let g=new a.BufferGeometry;
+  g.setAttribute("position",new a.BufferAttribute(pos,3)),g.setAttribute("aT",new a.BufferAttribute(aT,3)),
+  g.setAttribute("aSm",new a.BufferAttribute(aSm,3)),g.setAttribute("aTm",new a.BufferAttribute(aTm,3)),
+  g.setAttribute("aR",new a.BufferAttribute(aR,4)),g.setAttribute("aV",new a.BufferAttribute(aV,2));
+  let base=(grp,m)=>grp.userData.base[grp.userData.mats.indexOf(m)],
+      U={uSM:{value:new a.Matrix4},uTM:{value:new a.Matrix4},uK:{value:0},uA:{value:0},uCam:{value:new a.Vector3},
+         uCS:{value:src.material.color.clone()},uCT:{value:tgt.material.color.clone()},
+         uAS:{value:base(sb,src.material)},uAT:{value:base(lw,tgt.material)}},
+      /* colour times alpha is added, and the destination is kept by one minus
+         the second alpha: zero gives the rocket's additive lines, alpha gives
+         the lander's normal ones */
+      mat=new a.ShaderMaterial({uniforms:U,transparent:!0,depthWrite:!1,
+        blending:a.CustomBlending,blendEquation:a.AddEquation,blendSrc:a.OneFactor,blendDst:a.OneMinusSrcAlphaFactor,
+        blendSrcAlpha:a.OneFactor,blendDstAlpha:a.OneMinusSrcAlphaFactor,
+        vertexShader:`attribute vec3 aT;attribute vec3 aSm;attribute vec3 aTm;attribute vec4 aR;attribute vec2 aV;
+uniform mat4 uSM;uniform mat4 uTM;uniform float uK;uniform float uA;uniform vec3 uCam;
+uniform vec3 uCS;uniform vec3 uCT;uniform float uAS;uniform float uAT;
+varying vec3 vC;varying float vA;varying float vB;
+vec3 sm,tm,bow;
+vec3 path(float k){return mix(sm,tm,k*k*(3.-2.*k))+bow*sin(3.14159265*k);}
+void main(){
+  float k=clamp((uK-aR.x)/${MF_D.toFixed(3)},0.,1.),e=k*k*(3.-2.*k),f=min(1.,3.*sin(3.14159265*k));
+  sm=(uSM*vec4(aSm,1.)).xyz;tm=(uTM*vec4(aTm,1.)).xyz;
+  bow=(normalize(uCam-mix(sm,tm,.5))*${MF_BOW.toFixed(3)}+aR.yzw*${MF_WANDER.toFixed(3)})*length(tm-sm);
+  vec3 s=(uSM*vec4(position,1.)).xyz-sm,t=(uTM*vec4(aT,1.)).xyz-tm,
+       shape=path(k)+mix(s,t,e),streak=path(max(0.,k-${MF_TAIL.toFixed(3)}*aV.x));
+  gl_Position=projectionMatrix*viewMatrix*vec4(mix(shape,streak,f),1.);
+  vC=mix(uCS,uCT,e);vA=mix(uAS,uAT,e)*uA*mix(1.,aV.y*(1.-aV.x)*${MF_LIT.toFixed(3)},min(1.,2.*f));vB=vA*e;
+}`,
+        fragmentShader:`varying vec3 vC;varying float vA;varying float vB;
+void main(){
+  gl_FragColor=vec4(vC,1.);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+  gl_FragColor=vec4(gl_FragColor.rgb*vA,vB);
+}`}),
+      obj=new a.LineSegments(g,mat);
+  /* drawn after the models, so their dark bodies hide the pieces behind them */
+  obj.frustumCulled=!1,obj.visible=!1,obj.renderOrder=1,n.add(obj);
+  return{obj,U,src,tgt,sw,lw,pos,aT,aSm,aTm,aR,aV}
+}
+/* Built as soon as both models are in, so the cutting never lands on the
+   frame the hand-off starts, and dropped with either of them. */
+function mfUpdate(){
+  let sw=svG.userData.wire,lw=lmG.userData.wire;
+  if(!sw||!lw){mf&&mfFree();return}
+  mf&&(mf.sw!==sw||mf.lw!==lw)&&mfFree();
+  mf||(mf=mfBuild(sw,lw)||{sw,lw,obj:null});
+  if(!mf.obj)return;
+  let on=l.morphA>.004;
+  if(mf.obj.visible=on,!on)return;
+  svG.updateMatrixWorld(!0),lmG.updateMatrixWorld(!0);
+  let U=mf.U;
+  U.uSM.value.copy(mf.src.matrixWorld),U.uTM.value.copy(mf.tgt.matrixWorld),
+  U.uK.value=l.morphK,U.uA.value=l.morphA,U.uCam.value.copy(r.position)
+}
+/* Where the pieces are, worked out on the CPU the way the shader does it,
+   for the harness's occlusion walk: points rather than a box, since a box
+   around a diagonal stream projects far wider than the stream. Every seventh
+   piece is plenty. */
+function mfPoints(){
+  if(!mf||!mf.obj||!mf.obj.visible)return null;
+  svG.updateMatrixWorld(!0),lmG.updateMatrixWorld(!0);
+  let b=[],SM=mf.src.matrixWorld,TM=mf.tgt.matrixWorld,N=mf.pos.length/6,A=mf.aR,
+      sm=new a.Vector3,tm=new a.Vector3,bow=new a.Vector3,p=new a.Vector3,q=new a.Vector3,h=new a.Vector3,rv=new a.Vector3,
+      path=(k,out)=>out.copy(sm).lerp(tm,k*k*(3-2*k)).addScaledVector(bow,Math.sin(Math.PI*k));
+  for(let i=0;i<N;i+=7)for(let v=0;v<2;v++){
+    let o3=i*6+v*3,k=re((l.morphK-A[i*8])/MF_D),e=k*k*(3-2*k),f=Math.min(1,3*Math.sin(Math.PI*k));
+    sm.fromArray(mf.aSm,o3).applyMatrix4(SM),tm.fromArray(mf.aTm,o3).applyMatrix4(TM);
+    bow.copy(r.position).sub(h.copy(sm).lerp(tm,.5)).normalize().multiplyScalar(MF_BOW)
+       .add(rv.set(A[i*8+1],A[i*8+2],A[i*8+3]).multiplyScalar(MF_WANDER)).multiplyScalar(sm.distanceTo(tm));
+    p.fromArray(mf.pos,o3).applyMatrix4(SM).sub(sm),q.fromArray(mf.aT,o3).applyMatrix4(TM).sub(tm);
+    path(k,h).add(p.lerp(q,e)),path(Math.max(0,k-MF_TAIL*v),q),b.push(h.clone().lerp(q,f))
+  }
+  return b
+}
 let SLOT={saturn:svG,lm:lmG};
-let De=[],he=new mt(t);he.addPass(new pt(n,r));let Oe=new ft(new a.Vector2(innerWidth*.5,innerHeight*.5),.62,.72,.62);he.addPass(Oe),he.addPass(new gt);let l={camX:0,camY:2,camZ:26,tgtX:0,tgtY:0,tgtZ:0,roll:0,fov:42,starOpacity:1,earthK:1,earthY:-11,earthScale:1,earthX:-13,moonK:0,moonX:120,moonY:30,moonZ:-260,moonScale:1,rocketK:0,rocketY:-6,rocketX:0,rocketZ:0,rocketTilt:0,thrust:0,chuteK:0,sepK:0,hangK:0,flightT:0,groundK:0,gloveK:0,gloveSpin:0,gloveExplode:0,gloveLift:0,gloveFade:1,bloom:.62,exposure:1,trailOn:0,saturnK:0,saturnX:0,saturnY:0,saturnZ:0,saturnScale:1,saturnTilt:0,saturnSpin:0,lmK:0,lmX:0,lmY:0,lmZ:0,lmScale:1,lmSpin:0,saturnThrust:0,saturnNozzle:0,saturnPlume:0,saturnSmoke:0,saturnShake:0,saturnSep1:0,saturnSep2:0},Ft=new a.Vector3,ie=0,He=2,me=0,Me=16;function dt(M){Me=Me*.9+M*1e3*.1,Me>26?me+=Me>55?3:1:me=Math.max(0,me-1),me>12&&He===2?(He=1,me=0,Me=16,t.setPixelRatio(Math.min(devicePixelRatio||1,1)),he.setPixelRatio&&he.setPixelRatio(1),Be()):me>14&&He===1&&(He=0,me=0,Ye=!1)}let Ye=!0;function ut(M){ie+=M,H.uniforms.uTime.value=ie,H.uniforms.uOpacity.value=l.starOpacity,r.fov=l.fov,r.updateProjectionMatrix(),r.position.set(l.camX+Math.sin(ie*37.3)*l.saturnShake*.1,l.camY+Math.sin(ie*43.1+1.3)*l.saturnShake*.1,l.camZ),r.up.set(Math.sin(l.roll),Math.cos(l.roll),0),r.lookAt(l.tgtX+Math.sin(ie*31.7+.4)*l.saturnShake*.05,l.tgtY+Math.sin(ie*47.9)*l.saturnShake*.05,l.tgtZ),g.rotation.y=ie*.006,B.visible=l.earthK>.01,B.position.set(l.earthX,l.earthY,0),B.scale.setScalar(l.earthScale),X.rotation.y=ie*.012,bodyOpacity(X,l.earthK),J.material.uniforms.uInt.value=1.15*l.earthK,D.visible=l.moonK>.01,D.position.set(l.moonX,l.moonY,l.moonZ),D.scale.setScalar(l.moonScale),O.rotation.y=ie*.008,rkUpdate();svG.visible=l.saturnK>.01;
+let De=[],he=new mt(t);he.addPass(new pt(n,r));let Oe=new ft(new a.Vector2(innerWidth*.5,innerHeight*.5),.62,.72,.62);he.addPass(Oe),he.addPass(new gt);let l={camX:0,camY:2,camZ:26,tgtX:0,tgtY:0,tgtZ:0,roll:0,fov:42,starOpacity:1,earthK:1,earthY:-11,earthScale:1,earthX:-13,moonK:0,moonX:120,moonY:30,moonZ:-260,moonScale:1,rocketK:0,rocketY:-6,rocketX:0,rocketZ:0,rocketTilt:0,thrust:0,chuteK:0,sepK:0,hangK:0,flightT:0,groundK:0,gloveK:0,gloveSpin:0,gloveExplode:0,gloveLift:0,gloveFade:1,bloom:.62,exposure:1,trailOn:0,saturnK:0,saturnX:0,saturnY:0,saturnZ:0,saturnScale:1,saturnTilt:0,saturnSpin:0,lmK:0,lmX:0,lmY:0,lmZ:0,lmScale:1,lmSpin:0,morphK:0,morphA:0,saturnCoreK:0,lmCoreK:0,saturnThrust:0,saturnNozzle:0,saturnPlume:0,saturnSmoke:0,saturnShake:0,saturnSep1:0,saturnSep2:0},Ft=new a.Vector3,ie=0,He=2,me=0,Me=16;function dt(M){Me=Me*.9+M*1e3*.1,Me>26?me+=Me>55?3:1:me=Math.max(0,me-1),me>12&&He===2?(He=1,me=0,Me=16,t.setPixelRatio(Math.min(devicePixelRatio||1,1)),he.setPixelRatio&&he.setPixelRatio(1),Be()):me>14&&He===1&&(He=0,me=0,Ye=!1)}let Ye=!0;function ut(M){ie+=M,H.uniforms.uTime.value=ie,H.uniforms.uOpacity.value=l.starOpacity,r.fov=l.fov,r.updateProjectionMatrix(),r.position.set(l.camX+Math.sin(ie*37.3)*l.saturnShake*.1,l.camY+Math.sin(ie*43.1+1.3)*l.saturnShake*.1,l.camZ),r.up.set(Math.sin(l.roll),Math.cos(l.roll),0),r.lookAt(l.tgtX+Math.sin(ie*31.7+.4)*l.saturnShake*.05,l.tgtY+Math.sin(ie*47.9)*l.saturnShake*.05,l.tgtZ),g.rotation.y=ie*.006,B.visible=l.earthK>.01,B.position.set(l.earthX,l.earthY,0),B.scale.setScalar(l.earthScale),X.rotation.y=ie*.012,bodyOpacity(X,l.earthK),J.material.uniforms.uInt.value=1.15*l.earthK,D.visible=l.moonK>.01,D.position.set(l.moonX,l.moonY,l.moonZ),D.scale.setScalar(l.moonScale),O.rotation.y=ie*.008,rkUpdate();svG.visible=Math.max(l.saturnK,l.saturnCoreK)>.01;
+/* placed even while hidden: the hand-off reads where the stack is */
+svG.position.set(l.saturnX,l.saturnY,l.saturnZ),svG.scale.setScalar(l.saturnScale),svG.rotation.set(0,l.saturnSpin,l.saturnTilt);
 if(svG.visible){
-  svG.position.set(l.saturnX,l.saturnY,l.saturnZ),svG.scale.setScalar(l.saturnScale),svG.rotation.set(0,l.saturnSpin,l.saturnTilt);
   let w=svG.userData.wire;
   if(w){
     bodyOpacity(w,l.saturnK);
+    /* the dark body can outlast the lines, so the rocket stays solid while it
+       comes apart rather than showing its far side through itself */
+    w.userData.mats[0].opacity=w.userData.base[0]*Math.max(l.saturnK,l.saturnCoreK);
     let bands=w.userData.bands;
     if(bands){
       /* A spent stage drops back down the stack's own axis, tumbling about its
@@ -1788,8 +1960,11 @@ for(let pp of svPool){
   pp.life-=M*.55,pp.sp.position.addScaledVector(pp.v,M),pp.v.multiplyScalar(Math.max(0,1-M*.9)),pp.size+=M*l.saturnScale*.35,
   pp.sp.scale.setScalar(pp.size),pp.sp.material.opacity=svG.visible?Math.max(0,pp.life)*.42:0
 }
-lmG.visible=l.lmK>.01;
-if(lmG.visible){lmG.position.set(l.lmX,l.lmY,l.lmZ),lmG.scale.setScalar(l.lmScale),lmG.rotation.y=l.lmSpin;let w=lmG.userData.wire;w&&bodyOpacity(w,l.lmK)}
+lmG.visible=Math.max(l.lmK,l.lmCoreK)>.01;
+lmG.position.set(l.lmX,l.lmY,l.lmZ),lmG.scale.setScalar(l.lmScale),lmG.rotation.y=l.lmSpin;
+/* and the lander's arrives before its lines, so it is solid as it builds */
+if(lmG.visible){let w=lmG.userData.wire;w&&(bodyOpacity(w,l.lmK),w.userData.mats[0].opacity=w.userData.base[0]*Math.max(l.lmK,l.lmCoreK))}
+mfUpdate();
 if(d.visible=C.visible=l.groundK>.01,d.material.opacity=l.groundK*.72,C.material.opacity=l.groundK*.8,ue.visible=l.gloveK*l.gloveFade>.01,ue.visible){ue.rotation.y=l.gloveSpin,ue.position.y=l.gloveLift,ue.scale.setScalar(l.gloveK*l.gloveScale);for(let p of De)p.mesh.position.copy(p.dir).multiplyScalar(l.gloveExplode*p.f),p.mesh.material.opacity=l.gloveK*l.gloveFade}Oe.strength=Ye?l.bloom:0,Oe.enabled=Ye,t.toneMappingExposure=l.exposure,he.render(),dt(M)}function Be(){/* a hidden or not-yet-laid-out tab can report 0 here, which makes the bloom composer allocate zero-size render targets and spam GL warnings */let W2=Math.max(1,innerWidth),H2=Math.max(1,innerHeight);t.setSize(W2,H2,!1),he.setSize(W2,H2),r.aspect=W2/H2,r.updateProjectionMatrix()}/* Build the wire treatment for a loaded model and hang it in its slot. The
    host keeps a reference so the frame loop can fade it, and so unmounting can
    dispose the linework it generated — the model's own meshes are released by
@@ -1812,7 +1987,7 @@ function unmountWire(slot){
   w&&w.traverse(O2=>{(O2.isLineSegments||O2.isPoints)&&(O2.geometry.dispose(),O2.material.dispose())});
   host.clear(),host.userData.wire=null
 }
-return addEventListener("resize",Be,{passive:!0}),l.gloveScale=3.4,{scene:n,camera:r,renderer:t,state:l,update:ut,resize:Be,gloveGroup:ue,earthGroup:B,moonGroup:D,setGlovePieces(M){De=M},mountWire,unmountWire,slotGroup(s){return SLOT[s]},THREE:a}}import*as Ae from"./assets/vendor/three.bundle.js";import{GLTFLoader as bt}from"./assets/vendor/three.bundle.js";import{DRACOLoader as Dt}from"./assets/vendor/DRACOLoader.js";import*as w from"./assets/vendor/three.bundle.js";import{OrbitControls as Et,GLTFLoader as vt,RoomEnvironment as xt}from"./assets/vendor/three.bundle.js";(function(){let e=document.getElementById("codeOut");if(!e)return;let t=e.closest(".codecard"),n=document.getElementById("codeNote"),r=["A single bad pressure sample can fake a peak. Two filters stop that.","The part that matters: where will it stop, not where is it now.","Three independent triggers. Any one of them opens the chute."],m=/\b(if|else|for|while|return|void|float|int|long|bool|const|static|unsigned|true|false|break|continue|struct|define|include|byte|uint8_t|uint16_t|uint32_t)\b/,f=/(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|(#\w+)|(\b\d+\.?\d*f?\b)|([A-Za-z_]\w*)/g,h=H=>H.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");function x(H){return h(H).split(`
+return addEventListener("resize",Be,{passive:!0}),l.gloveScale=3.4,{scene:n,camera:r,renderer:t,state:l,update:ut,resize:Be,gloveGroup:ue,earthGroup:B,moonGroup:D,setGlovePieces(M){De=M},mountWire,unmountWire,slotGroup(s){return SLOT[s]},morphPoints:mfPoints,THREE:a}}import*as Ae from"./assets/vendor/three.bundle.js";import{GLTFLoader as bt}from"./assets/vendor/three.bundle.js";import{DRACOLoader as Dt}from"./assets/vendor/DRACOLoader.js";import*as w from"./assets/vendor/three.bundle.js";import{OrbitControls as Et,GLTFLoader as vt,RoomEnvironment as xt}from"./assets/vendor/three.bundle.js";(function(){let e=document.getElementById("codeOut");if(!e)return;let t=e.closest(".codecard"),n=document.getElementById("codeNote"),r=["A single bad pressure sample can fake a peak. Two filters stop that.","The part that matters: where will it stop, not where is it now.","Three independent triggers. Any one of them opens the chute."],m=/\b(if|else|for|while|return|void|float|int|long|bool|const|static|unsigned|true|false|break|continue|struct|define|include|byte|uint8_t|uint16_t|uint32_t)\b/,f=/(\/\/[^\n]*)|("(?:[^"\\]|\\.)*")|(#\w+)|(\b\d+\.?\d*f?\b)|([A-Za-z_]\w*)/g,h=H=>H.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");function x(H){return h(H).split(`
 `).map(g=>{let B=g.replace(f,(G,X,J,D,te,O)=>X?'<span class="tk-c">'+X+"</span>":J?'<span class="tk-s">'+J+"</span>":D?'<span class="tk-p">'+D+"</span>":te?'<span class="tk-n">'+te+"</span>":O?m.test(O)?'<span class="tk-k">'+O+"</span>":O:G);return'<span class="line">'+(B===""?" ":B)+"</span>"}).join("")}let E=0;function j(H){E=H;let g=document.getElementById("ex"+H).textContent.replace(/^\n/,"").replace(/\s+$/,"");e.innerHTML=x(g),n&&(n.textContent=r[H]||""),t.querySelectorAll(".codehead .tab").forEach(G=>G.classList.toggle("is-on",+G.dataset.tab===H));let B=e.closest(".codewrap");B&&(B.scrollTop=0)}t.querySelectorAll(".codehead .tab").forEach(H=>H.addEventListener("click",()=>j(+H.dataset.tab)));let K=document.getElementById("copyBtn");K&&K.addEventListener("click",async()=>{let H=document.getElementById("ex"+E).textContent.replace(/^\n/,"");try{await navigator.clipboard.writeText(H),K.textContent="Copied",setTimeout(()=>K.textContent="Copy",1400)}catch{K.textContent="Ctrl+C"}}),j(0)})();(function(){let e=document.getElementById("sim");if(!e)return;let t=9.81,n=1.225,r=3.280839895,m=.00367,f=.75,h={name:"AeroTech F50T",imp:76.8,avg:53.7,f0:75,burn:1.4,prop:.038};h.f1=2*h.avg-h.f0;let x={m:580,ap:.05,delay:.5,target:750,compensate:!0},E=JSON.parse(JSON.stringify(x));function j(u,b,Z){let T=.5*n*m,_=.5*n*(m+(b?f*u.ap:0)),U=u.target/r,R=u.m/1e3,$=R+h.prop,S=.001,W=0,y=0,A=0,P=0,V=null,z=[];for(;y<h.burn;){W++%20===0&&z.push([y,A*r]);let Q=y/h.burn,q=$-h.prop*Q,c=(h.f0+(h.f1-h.f0)*Q)/q-t-T/q*P*P;P+=c*S,A+=P*S,y+=S}let ae={v:P*r,h:A*r,t:y};for(;P>0&&y<30;){if(W++%20===0&&z.push([y,A*r]),b&&V===null){let i,c,L;if(Z){let d=Math.sqrt(R*t/T),C=Math.atan(P/d)-t/d*u.delay;C<0&&(C=0),c=d*Math.tan(C),i=R/(2*T)*Math.log((1+P*P/(d*d))/(1+c*c/(d*d))),L=R/(2*_)*Math.log(1+_*c*c/(R*t))}else i=0,L=R/(2*_)*Math.log(1+_*P*P/(R*t));A+i+L>=U&&(V={t:y,h:A})}let Q=V&&y>=V.t+u.delay?_:T,q=-t-Q/R*P*P;P+=q*S,A+=P*S,y+=S}return z.push([y,A*r]),{apogee:A*r,t:y,burnout:ae,dep:V?{t:V.t,ft:V.h*r}:null,trace:z}}let K=700,H=236,g=44,B=12,G=12,X=22,J=1e3,D=7.5,te=(u,b,Z)=>u.map((T,_)=>(_?"L":"M")+b(T[0]).toFixed(1)+" "+Z(T[1]).toFixed(1)).join("");function O(){let u=j(x,!0,x.compensate),b=j(x,!1,!1),Z=y=>g+Math.min(y,D)/D*(K-g-B),T=y=>Math.max(G,H-X-Math.min(y,J)/J*(H-G-X)),_="";for(let y=0;y<=4;y++){let A=J*y/4,P=T(A);_+=`<line class="grid-l" x1="${g}" y1="${P.toFixed(1)}" x2="${K-B}" y2="${P.toFixed(1)}"/><text class="axis-t" x="${g-7}" y="${(P+3).toFixed(1)}" text-anchor="end">${A}</text>`}for(let y=0;y<=Math.floor(D);y+=2)_+=`<text class="axis-t" x="${Z(y).toFixed(1)}" y="${H-X+14}" text-anchor="middle">${y}s</text>`;let U=Z(u.burnout.t);_+=`<line class="burn-l" x1="${U.toFixed(1)}" y1="${G}" x2="${U.toFixed(1)}" y2="${H-X}"/><text class="axis-t" x="${(U+5).toFixed(1)}" y="${G+9}">BURNOUT</text>`;let R=T(x.target);_+=`<line class="target" x1="${g}" y1="${R.toFixed(1)}" x2="${K-B}" y2="${R.toFixed(1)}"/><text class="axis-t" x="${K-B}" y="${(R-5).toFixed(1)}" text-anchor="end" style="fill:var(--blue)">TARGET ${x.target} FT</text>`,_+=`<path class="curve-off" d="${te(b.trace,Z,T)}"/><path class="curve-on" d="${te(u.trace,Z,T)}"/>`,u.dep&&(_+=`<circle class="dep" cx="${Z(u.dep.t).toFixed(1)}" cy="${T(u.dep.ft).toFixed(1)}" r="4.5"/>`),e.querySelector(".sim-plot").innerHTML=_;let $=Math.round(u.apogee-x.target),S=Math.round(b.apogee-x.target),W=$===S?"bad":"good";e.querySelector("[data-out=apogee]").innerHTML=Math.round(u.apogee)+" ft<small>"+(u.dep?"chute released at "+Math.round(u.dep.ft)+" ft":"never reached target &mdash; no deploy")+"</small>",e.querySelector("[data-out=miss]").innerHTML='<span class="'+W+'">'+($>0?"+":"")+$+" ft</span><small>off the "+x.target+" ft target</small>",e.querySelector("[data-out=off]").innerHTML=Math.round(b.apogee)+" ft<small>chute waits for apogee</small>",e.querySelector("[data-out=cost]").innerHTML='<span class="'+(S===0?"good":"bad")+'">'+(S>0?"+":"")+S+" ft</span><small>"+(S>=0?"past target without the release system":"it cannot reach the target at this mass")+"</small>",e.querySelector(".sim-motor").innerHTML=h.name+" &middot; "+h.imp+" N&middot;s over "+h.burn+" s &mdash; burns out at <b>"+Math.round(u.burnout.v)+" ft/s</b> and <b>"+Math.round(u.burnout.h)+" ft</b> at this mass"}let v={m:u=>u+" g"+(u>650?"  \xB7  over ARC limit":""),ap:u=>u.toFixed(3)+" m\xB2",delay:u=>u.toFixed(2)+" s",target:u=>u+" ft"};function Y(){Object.keys(v).forEach(u=>{let b=e.querySelector("[data-p="+u+"]");b&&(b.value=x[u],e.querySelector("[data-v="+u+"]").textContent=v[u](x[u]))}),e.querySelector("[data-p=compensate]").checked=x.compensate,O()}e.addEventListener("input",u=>{let b=u.target.dataset.p;b&&(x[b]=b==="compensate"?u.target.checked:parseFloat(u.target.value),b!=="compensate"&&(e.querySelector("[data-v="+b+"]").textContent=v[b](x[b])),O())}),e.querySelector(".sim-reset").addEventListener("click",()=>{x=JSON.parse(JSON.stringify(E)),Y()}),Y()})();var Ve={"Main glove":{color:8884390,group:"Main glove",explode:0},"Glove entrance":{color:10189823,group:"Glove entrance",explode:.85},Coupler:{color:13620964,group:"Coupler",explode:.85},"Thumb cover":{color:5082623,group:"Finger covers",explode:.85},"Index cover":{color:5082623,group:"Finger covers",explode:.85},"Middle cover":{color:5082623,group:"Finger covers",explode:.85},"Ring cover":{color:5082623,group:"Finger covers",explode:.85},"Pinky cover":{color:5082623,group:"Finger covers",explode:.85}},ze={Coupler:{axis:[-.0266,-.9655,-.2589],dist:.5305},"Glove entrance":{axis:[-.0266,-.9655,-.2589],dist:.7841},"Pinky cover":{axis:[.0072,.9993,-.0362],dist:.7966},"Ring cover":{axis:[-.0286,.9947,-.0987],dist:.8403},"Middle cover":{axis:[-.0215,.9982,.0559],dist:.9537},"Index cover":{axis:[-.0539,.998,.0344],dist:.8634},"Thumb cover":{axis:[-.5879,.7885,-.1808],dist:.532}},be=[{id:"all",label:"All parts",members:null,note:"Eight bodies, modelled in Fusion 360. Drag the slider to pull them apart."},{id:"covers",label:"Finger covers",members:["Thumb cover","Index cover","Middle cover","Ring cover","Pinky cover"],test:e=>/cover/i.test(e),note:"One per digit, each sized to its own finger. Hover any of them for the name."},{id:"main",label:"Main glove",members:["Main glove"],note:"The pressure envelope and everything wrapped around it \u2014 five layers between the hand and the lunar surface."},{id:"coupler",label:"Coupler",members:["Coupler"],note:"The joint that mates the glove to the suit sleeve."},{id:"entrance",label:"Glove entrance",members:["Glove entrance"],note:"The opening the hand passes through when donning the glove."}],se=e=>String(e).toLowerCase().replace(/[\s_]+/g," ").trim(),Le={};for(let e of Object.keys(Ve))Le[se(e)]=Object.assign({label:e},Ve[e]);var Fe={};for(let e of Object.keys(ze))Fe[se(e)]=ze[e];function yt(e){let t=e.dataset.src,n=e.querySelector(".v3d-tip"),r=e.querySelector(".v3d-explode"),m=e.querySelector(".v3d-legend"),f=e.querySelector(".v3d-load"),h;try{h=new w.WebGLRenderer({antialias:!0,alpha:!0,powerPreference:"high-performance"})}catch{f.textContent="WebGL unavailable";return}h.setPixelRatio(Math.min(devicePixelRatio||1,2)),h.toneMapping=w.ACESFilmicToneMapping,h.toneMappingExposure=1.05,e.appendChild(h.domElement);let x=new w.Scene,E=new w.PerspectiveCamera(35,1,.1,100),j=new w.PMREMGenerator(h);x.environment=j.fromScene(new xt,.04).texture;let K=new w.DirectionalLight(14477055,2.1);K.position.set(3,5,4);let H=new w.DirectionalLight(5082623,1.5);H.position.set(-4,1,-3),x.add(K,H,new w.HemisphereLight(9414092,658450,.7));let g=new Et(E,h.domElement);g.enableDamping=!0,g.dampingFactor=.07,g.enablePan=!1,g.minDistance=2.2,g.maxDistance=14,g.autoRotate=!Se,g.autoRotateSpeed=.55,g.enableZoom=Ce,g.enabled=!Ce,g.addEventListener("start",()=>{g.autoRotate=!1});let B=new w.Group;x.add(B);let G=[],X=!1,J=1.2,D=0,te=be[0],O=null,v=()=>{let c=J*(1+.62*D)/Math.sin(w.MathUtils.degToRad(E.fov)/2);return E.aspect<1&&(c/=E.aspect),c*1.02};function Y(){let i=e.clientWidth,c=e.clientHeight;!i||!c||(h.setSize(i,c,!1),E.aspect=i/c,E.updateProjectionMatrix())}new ResizeObserver(Y).observe(e);let u=e.parentElement.querySelector(".v3d-note"),b=e.parentElement.querySelector(".v3d-stat"),Z=e.querySelector(".v3d-ui");function T(i){f.innerHTML="<b>Model didn't load</b><br>"+i,f.classList.add("err"),console.error("[glove]",i)}function _(i){let c=[];if(i.scene.traverse(d=>{d.isMesh&&c.push(d)}),!c.length)return T("The file loaded but contains no meshes.");for(let d of c){let C=Le[se(d.name)]||{color:8884390,group:"Other",explode:.85,label:d.name};d.material=new w.MeshStandardMaterial({color:C.color,metalness:.22,roughness:.46,emissive:0,envMapIntensity:.9}),d.geometry.computeBoundingSphere();let N=Fe[se(C.label)];G.push({mesh:d,f:C.explode,label:C.label,group:C.group,dir:N?new w.Vector3(N.axis[0],N.axis[1],N.axis[2]).multiplyScalar(N.dist):d.geometry.boundingSphere.center.clone()}),B.add(d)}J=new w.Box3().setFromObject(B).getBoundingSphere(new w.Sphere).radius;let L=v();E.position.set(L*.42,L*.3,L*.86),g.target.set(0,0,0),g.update(),e.classList.add("ready"),S(be[0])}fetch(t).then(i=>{if(!i.ok)throw new Error("HTTP "+i.status+" &mdash; nothing at <code>"+t+"</code>");return i.arrayBuffer()}).then(i=>{let c=String.fromCharCode(...new Uint8Array(i,0,4));if(c!=="glTF")throw new Error("The server returned something that isn't a .glb (got <code>"+c.replace(/[^\x20-\x7e]/g,"?")+"</code>). Usually a 404 page.");new vt().parse(i,"",_,L=>T("Couldn't decode the model. "+(L&&L.message||"")))}).catch(i=>T(i.message||String(i)));function U(){let i=G.filter(c=>c.mesh.visible).length<2;for(let c of G)c.mesh.position.copy(c.dir).multiplyScalar(i?0:D*c.f)}function R(i){if(D=i,U(),D>0&&(O=null),!X&&(!te||te.id==="all")){let c=v();E.position.setLength(c),g.minDistance=Math.min(2.2,c*.55)}}r.addEventListener("input",()=>R(r.value/100));function $(){let i=G.filter(N=>N.mesh.visible);if(!i.length)return;let c=new w.Box3;for(let N of i)c.expandByObject(N.mesh);let L=c.getBoundingSphere(new w.Sphere),d=L.radius/Math.sin(w.MathUtils.degToRad(E.fov)/2);E.aspect<1&&(d/=E.aspect),d=oe(d*1.35,.05,40);let C=E.position.clone().sub(g.target).normalize();O={t0:performance.now(),dur:Se?0:620,p0:E.position.clone(),t0v:g.target.clone(),p1:L.center.clone().addScaledVector(C,d),t1v:L.center.clone()},g.minDistance=d*.35,g.maxDistance=d*4}function S(i){te=i;let c=!!i.members,L=c?i.members.map(se):null;for(let d of G)d.mesh.visible=!c||L.indexOf(se(d.label))!==-1||(i.test?i.test(d.label):!1),d.mesh.material.opacity=1,d.mesh.material.transparent=!1,d.mesh.material.emissive.setHex(0);if(U(),u&&(u.textContent=i.note),b){let d=G.filter(N=>N.mesh.visible),C=d.reduce((N,xe)=>N+(xe.mesh.geometry.index?xe.mesh.geometry.index.count:xe.mesh.geometry.attributes.position.count)/3,0);b.textContent=d.length+(d.length===1?" body \xB7 ":" bodies \xB7 ")+C.toLocaleString()+" triangles"}e.parentElement.querySelectorAll(".v3d-tabs .tab").forEach(d=>d.classList.toggle("is-on",d.dataset.view===i.id)),m.querySelectorAll("button").forEach(d=>d.classList.toggle("sel",d.dataset.group===i.label)),X=!1,g.autoRotate=!Se,$()}e.parentElement.querySelectorAll(".v3d-tabs .tab").forEach(i=>i.addEventListener("click",()=>{let c=be.find(L=>L.id===i.dataset.view);c&&e.classList.contains("ready")&&S(c)})),m.querySelectorAll("button").forEach(i=>i.addEventListener("click",()=>{let c=be.find(L=>L.label===i.dataset.group)||be[0];e.classList.contains("ready")&&S(c)})),e.querySelector("[data-act=in]").onclick=()=>W(.82),e.querySelector("[data-act=out]").onclick=()=>W(1.22),e.querySelector("[data-act=reset]").onclick=()=>{X=!1,r.value=0,R(0),S(be[0])};function W(i){X=!0,g.autoRotate=!1,E.position.setLength(oe(E.position.length()*i,g.minDistance,g.maxDistance))}let y=new w.Raycaster,A=new w.Vector2,P=null;function V(i){for(let c of G){let L=c.mesh.visible&&i&&c.group===i,d=c.mesh.visible&&i&&!L;c.mesh.material.emissive.setHex(L?2244718:0),c.mesh.material.opacity=d?.28:1,c.mesh.material.transparent=d}m.querySelectorAll("button").forEach(c=>c.classList.toggle("on",c.dataset.group===i))}h.domElement.addEventListener("pointermove",i=>{if(!e.classList.contains("ready"))return;let c=e.getBoundingClientRect();A.x=(i.clientX-c.left)/c.width*2-1,A.y=-((i.clientY-c.top)/c.height)*2+1,y.setFromCamera(A,E);let L=y.intersectObjects(G.filter(C=>C.mesh.visible).map(C=>C.mesh),!1)[0],d=L?L.object.name:null;if(d!==P){P=d;let C=G.find(N=>N.mesh.name===d);V(C?C.group:null),n.textContent=C?C.label:"",n.classList.toggle("on",!!C)}P&&(n.style.left=i.clientX-c.left+"px",n.style.top=i.clientY-c.top+"px")},{passive:!0}),h.domElement.addEventListener("pointerleave",()=>{P=null,V(null),n.classList.remove("on")}),m.querySelectorAll("button").forEach(i=>{i.addEventListener("pointerenter",()=>V(i.dataset.group)),i.addEventListener("pointerleave",()=>V(null))});let z=e.querySelector(".v3d-gate"),ae=e.querySelector(".v3d-exit");z&&z.addEventListener("click",()=>{e.classList.add("live"),g.enabled=!0}),ae&&ae.addEventListener("click",()=>{e.classList.remove("live"),g.enabled=!1});let Q=!1;function q(){if(Q){if(O){let i=O.dur?Math.min(1,(performance.now()-O.t0)/O.dur):1,c=1-Math.pow(1-i,3);E.position.lerpVectors(O.p0,O.p1,c),g.target.lerpVectors(O.t0v,O.t1v,c),i>=1&&(O=null)}g.update(),h.render(x,E),requestAnimationFrame(q)}}new IntersectionObserver(i=>{let c=i[0].isIntersecting;c&&!Q?(Q=!0,Y(),q()):c||(Q=!1)},{rootMargin:"200px"}).observe(e)}document.querySelectorAll(".v3d").forEach(e=>{new IntersectionObserver((t,n)=>{t[0].isIntersecting&&(n.disconnect(),yt(e))},{rootMargin:"600px"}).observe(e)});var Re=Ne(document.getElementById("gl")),o=Re.state;window.__world=Re;window.__scroller=ne;window.__applyScroll=$e;var F=e=>document.querySelector(e),Ee=e=>[].slice.call(document.querySelectorAll(e));
 /* ---------------------------------------------------------------------------
    Decks.
@@ -1990,7 +2165,7 @@ Ee(".rv").filter(e=>!e.closest(".deck,.tstage")).forEach(e=>{let t=We(e);ee(e,{s
    until reload. The positions here are the post-transit deep-space defaults so a
    reload part-way down the page still puts the bodies where that chapter wants
    them; chapters before the transit set their own. */
-function ve(){o.rocketK=0,o.chuteK=0,o.sepK=0,o.hangK=0,o.trailOn=0,o.thrust=0,o.groundK=0,o.gloveK=0,o.gloveLift=0,o.gloveFade=1,o.saturnK=0,o.saturnThrust=0,o.saturnSmoke=0,o.saturnShake=0,o.saturnSep1=0,o.saturnSep2=0,o.lmK=0,o.earthK=0,o.moonK=0,o.roll=0,o.exposure=1,o.earthX=20,o.earthY=-120,o.earthScale=.22,o.moonX=-9,o.moonY=-40,o.moonZ=-52,o.moonScale=1.9}ee(F("#hero"),{scene:!0,start:"top top",end:"bottom top",onUpdate(e){ve(),o.earthK=1,o.moonK=0,o.camX=s(0,3.2,e),o.camY=s(2,6.5,e),o.camZ=s(26,34,e),o.tgtX=0,o.tgtZ=0,o.tgtY=s(-2,-6,e),o.earthY=s(-15,-21,e),o.earthX=s(16,20,e),o.earthScale=s(1,.86,e),o.starOpacity=1,o.bloom=s(.62,.5,e),F(".cue").style.opacity=(1-re(e*4)).toFixed(2)}});var ge=.2,de=.55,Te=.68,Rt=F("#teleAlt"),Ht=F("#teleVel"),je=F("#telePhase"),Pt=F("#teleT"),Ct=F(".tele"),Je=F("#ascentCap");/* ---------------------------------------------------------------------------
+function ve(){o.rocketK=0,o.chuteK=0,o.sepK=0,o.hangK=0,o.trailOn=0,o.thrust=0,o.groundK=0,o.gloveK=0,o.gloveLift=0,o.gloveFade=1,o.saturnK=0,o.saturnThrust=0,o.saturnSmoke=0,o.saturnShake=0,o.saturnSep1=0,o.saturnSep2=0,o.lmK=0,o.earthK=0,o.moonK=0,o.roll=0,o.exposure=1,o.earthX=20,o.earthY=-120,o.earthScale=.22,o.moonX=-9,o.moonY=-40,o.moonZ=-52,o.moonScale=1.9,o.morphA=0,o.saturnCoreK=0,o.lmCoreK=0}ee(F("#hero"),{scene:!0,start:"top top",end:"bottom top",onUpdate(e){ve(),o.earthK=1,o.moonK=0,o.camX=s(0,3.2,e),o.camY=s(2,6.5,e),o.camZ=s(26,34,e),o.tgtX=0,o.tgtZ=0,o.tgtY=s(-2,-6,e),o.earthY=s(-15,-21,e),o.earthX=s(16,20,e),o.earthScale=s(1,.86,e),o.starOpacity=1,o.bloom=s(.62,.5,e),F(".cue").style.opacity=(1-re(e*4)).toFixed(2)}});var ge=.2,de=.55,Te=.68,Rt=F("#teleAlt"),Ht=F("#teleVel"),je=F("#telePhase"),Pt=F("#teleT"),Ct=F(".tele"),Je=F("#ascentCap");/* ---------------------------------------------------------------------------
    The flight, from the flight computer's own model.
 
    Every number the telemetry shows comes from the same physics as the apogee
@@ -2208,7 +2383,7 @@ ee(F("#stage-transit"),{scene:!0,pin:!0,onUpdate(e){
   let thr=e<=AP.lift?I(.065,.1,e)
          :e<AP.orb?(u<.46?1-I(.43,.46,u):u<.79?I(.5,.56,u)*(1-I(.76,.79,u)):I(.84,.9,u)*(1-I(.96,1,u)))
          :I(AP.tliA,AP.tliA+.02,e)*(1-I(AP.tliB-.03,AP.tliB,e));
-  o.saturnK=I(.045,.075,e)*(1-I(.64,.7,e)),
+  o.saturnK=I(.045,.075,e)*(1-I(.6,.615,e)),
   o.saturnX=cx,o.saturnY=cy,o.saturnZ=0,o.saturnScale=S2,o.saturnTilt=tilt,
   o.saturnSpin=.55+I(.03,.2,u)*1.2,
   o.saturnSep1=I(.46,.62,u),o.saturnSep2=I(.8,.95,u),
@@ -2240,26 +2415,26 @@ ee(F("#stage-transit"),{scene:!0,pin:!0,onUpdate(e){
   }
   o.moonK=I(.52,.6,e),o.moonX=MN[0],o.moonY=MN[1],o.moonZ=MN[2],o.moonScale=MN[3];
 
-  /* The spent stage stays where it was on screen and falls away from there,
-     receding and turning as it fades. */
+  /* The hand-off. What is left of the stack breaks apart into the lunar
+     module: the stack's own lines give way to fragments (the frame loop draws
+     them from morphK and morphA), the fragments stream across to the module's
+     place under the title card, and the module's own lines take over as the
+     last of them lands. The stack holds still on screen through the camera's
+     swing, so every piece leaves from where the stack was seen. */
   if(e>.64){
-    apLookAt(pre);let q=apNdc(cx,cy,0),k2=I(.64,.72,e);
-    apLookAt(post);
-    let d=q[2]*(1+.9*k2),Ws=apAt(q[0]+.3*k2,q[1]-.28*k2,d);
-    o.saturnX=Ws.x,o.saturnY=Ws.y,o.saturnZ=Ws.z,o.saturnScale=S2*d/q[2]*(1-.3*k2),o.saturnTilt=tilt+k2*.6
+    apLookAt(pre);let q=apNdc(cx,cy,0);
+    apLookAt(post);let Ws=apAt(q[0],q[1],q[2]);
+    o.saturnX=Ws.x,o.saturnY=Ws.y,o.saturnZ=Ws.z
   }
+  o.morphK=re((e-.6)/.11),o.morphA=I(.6,.615,e)*(1-I(.71,.725,e)),
+  o.saturnCoreK=I(.045,.075,e)*(1-I(.6,.66,e)),o.lmCoreK=I(.67,.71,e)*(1-I(.93,.97,e));
 
-  /* The lunar module comes out of the top of the stack while the camera is
-     still with it, then slides on screen to its place under the title card at
-     a matching apparent size, and holds there through the crossing. */
-  let ext=I(.6,.66,e),lx=cx+ax*S2*(.34+ext*.55),ly=cy+ay*S2*(.34+ext*.55),lz=0,lsc=S2*.16;
-  if(e>.64){
-    apLookAt(pre);let q=apNdc(lx,ly,lz),z0=lsc/q[2];
-    apLookAt(post);
-    let c=re((e-.64)/.16),fh=2*22*Math.tan(Math.PI*21/180),d=s(q[2],22,cw),
-        A=apAt(s(q[0],s(.02,.2,c),cw),s(q[1],-.7,cw),d);
-    lx=A.x,ly=A.y,lz=A.z,lsc=s(z0,.075*fh/.78/22,cw)*d
-  }
+  /* The lunar module forms at its place under the title card, low and just
+     right of centre, held there on screen through the swing at a constant
+     apparent size, and drifts right through the crossing. */
+  apLookAt(post);
+  let c=re((e-.64)/.16),fh=2*22*Math.tan(Math.PI*21/180),A=apAt(s(.02,.2,c),-.7,22),
+      lx=A.x,ly=A.y,lz=A.z,lsc=.075*fh/.78;
   /* Lunar orbit: a circle a little way off the surface, tipped toward the
      camera and run so the module crosses in front of the Moon rather than
      behind it. It starts once the title has gone and the Moon has mostly come
@@ -2267,7 +2442,7 @@ ee(F("#stage-transit"),{scene:!0,pin:!0,onUpdate(e){
      to a speck chasing a Moon still far off. A flattened ellipse used to carry
      it inside the sphere, where the Moon's own core hid it. */
   let kr=I(.84,.89,e),ps=Math.PI*(.95-(e-.84)/.12),rho=14*o.moonScale*1.25;
-  o.lmK=I(.59,.635,e)*(1-I(.93,.97,e)),
+  o.lmK=I(.71,.725,e)*(1-I(.93,.97,e)),
   o.lmX=s(lx,o.moonX+Math.cos(ps)*rho,kr),
   o.lmY=s(ly,o.moonY+Math.cos(ps)*rho*.22,kr),
   o.lmZ=s(lz,o.moonZ+Math.sin(ps)*rho,kr),
@@ -2393,7 +2568,24 @@ ot&&Ie&&ee(ot,{start:"top top",end:"bottom bottom",onUpdate(e){
   }
   F("#hProg").style.setProperty("--p",e.toFixed(3)),
   F("#hCount").textContent=String(Math.min(n,Math.round(a)+1)).padStart(2,"0")
-}});var nt=F(".nav"),at=0,_e=!1;st.forEach((e,t)=>e.addEventListener("click",n=>{n.preventDefault();let r=Xe[t];r&&ne.jump(r.getBoundingClientRect().top+ne.current)}));Ee('a[href^="#"]').forEach(e=>e.addEventListener("click",t=>{let n=document.querySelector(e.getAttribute("href"));n&&(t.preventDefault(),ne.jump(n.getBoundingClientRect().top+ne.current))}));var rt=performance.now();function ct(e){let t=Math.min(.05,(e-rt)/1e3);rt=e;let n=ne.update(t);$e(n),wt.style.setProperty("--p",(ne.max?re(n/ne.max):0).toFixed(4));let r=n-at;n>160&&r>1&&!_e?(nt.classList.add("away"),_e=!0):(r<-1||n<160)&&_e&&(nt.classList.remove("away"),_e=!1),at=n,it.forEach((m,f)=>{let h=m.scrollWidth/2||1;m._x=((m._x||0)-(.35+Math.abs(ne.velocity)*.05)*(f%2?-1:1))%h,m.style.setProperty("--mx",(f%2?m._x-h:m._x).toFixed(1)+"px")}),Re.update(t),requestAnimationFrame(ct)}requestAnimationFrame(ct);setTimeout(ye,400);addEventListener("load",()=>{ye(),ne._measure()});/* ---------------------------------------------------------------------------
+}});var nt=F(".nav"),at=0,_e=!1;st.forEach((e,t)=>e.addEventListener("click",n=>{n.preventDefault();let r=Xe[t];r&&ne.jump(r.getBoundingClientRect().top+ne.current)}));Ee('a[href^="#"]').forEach(e=>e.addEventListener("click",t=>{let n=document.querySelector(e.getAttribute("href"));n&&(t.preventDefault(),ne.jump(n.getBoundingClientRect().top+ne.current))}));/* The held-page cue (.hold). The spans are where each pinned chapter holds
+   the page, measured again whenever the triggers are. */
+var hdEl=F("#hold"),hdRing=hdEl&&hdEl.querySelector(".p"),hdSpans=null,hdV=0,hdLast="";
+function holdCue(y){
+  if(!hdEl)return;
+  hdSpans||(hdSpans=Ee(".stage").map(el=>{let r=docRect(el);return[r.top,r.top+r.height-innerHeight]}).filter(v=>v[1]-v[0]>innerHeight*.25));
+  let ho=0,hp=0;
+  for(let v of hdSpans)if(y>v[0]&&y<v[1]){hp=re((y-v[0])/(v[1]-v[0])),ho=re((y-v[0])/70)*re((v[1]-y)/70);break}
+  hdV+=((Se?0:Math.max(-14,Math.min(14,ne.velocity||0)))-hdV)*.18;
+  let key=ho.toFixed(3)+"|"+hp.toFixed(4)+"|"+hdV.toFixed(2);
+  if(key===hdLast)return;
+  hdLast=key,
+  hdEl.style.setProperty("--ho",ho.toFixed(3)),
+  hdEl.style.setProperty("--hm",Math.min(1,Math.abs(hdV)/5).toFixed(3)),
+  hdEl.style.setProperty("--hy",(hdV*.4).toFixed(2)+"px"),
+  hdRing.setAttribute("stroke-dashoffset",(106.81*(1-hp)).toFixed(2))
+}
+var rt=performance.now();function ct(e){let t=Math.min(.05,(e-rt)/1e3);rt=e;let n=ne.update(t);$e(n),holdCue(n),wt.style.setProperty("--p",(ne.max?re(n/ne.max):0).toFixed(4));let r=n-at;n>160&&r>1&&!_e?(nt.classList.add("away"),_e=!0):(r<-1||n<160)&&_e&&(nt.classList.remove("away"),_e=!1),at=n,it.forEach((m,f)=>{let h=m.scrollWidth/2||1;m._x=((m._x||0)-(.35+Math.abs(ne.velocity)*.05)*(f%2?-1:1))%h,m.style.setProperty("--mx",(f%2?m._x-h:m._x).toFixed(1)+"px")}),Re.update(t),requestAnimationFrame(ct)}requestAnimationFrame(ct);setTimeout(ye,400);addEventListener("load",()=>{ye(),ne._measure()});/* ---------------------------------------------------------------------------
    Model pipeline.
 
    Nothing here is needed at first paint, and four of the five NASA models ship
@@ -2510,7 +2702,12 @@ var svSlot=wireSlot("saturn","assets/model/nasa-saturn-v.glb",
        normally instead, in a colour just under the threshold, so it reads as
        linework at any distance. */
     lmSlot=wireSlot("lm","assets/model/nasa-lunar-module.glb",
-      {core:0x06070c,wire:0x8397bb,wireOp:.85,dot:0xa9b9d6,dotOp:.3,dotSize:.02,pts:600,angle:26,normal:!0});
+      {core:0x06070c,wire:0x8397bb,wireOp:.85,dot:0xa9b9d6,dotOp:.3,dotSize:.02,pts:600,angle:26,normal:!0},
+      /* Its lines are drawn after its body. Left to the depth sort, pieces of
+         the body that sorted later painted over near-side lines (lines write no
+         depth), and the lander looked hollow next to the one the Saturn V's
+         pieces build, which is drawn after it. */
+      w=>w.traverse(c=>{(c.isLineSegments||c.isPoints)&&(c.renderOrder=1)}));
 chapterModel(F("#stage-transit"),"assets/model/nasa-saturn-v.glb",svSlot.mount,svSlot.unmount);
 chapterModel(F("#stage-transit"),"assets/model/nasa-lunar-module.glb",lmSlot.mount,lmSlot.unmount);
 
