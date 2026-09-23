@@ -1,6 +1,6 @@
 // Headless screenshots of the scroll-driven site, since the preview pane is hidden
 // and cannot capture. Usage: node shot.mjs config.json
-// config: { url, width, height, prelude?, shots: [{ out, expr }] }
+// config: { url, width, height, prelude?, shots: [{ out, expr, wait?, clip? }] }
 // Each expr is evaluated in the page (may return a promise), then the frame is captured.
 import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
@@ -61,7 +61,14 @@ try {
   for (const s of cfg.shots) {
     const v = await evaluate(s.expr);
     await sleep(s.wait || 500);
-    const shot = await send("Page.captureScreenshot", { format: "png" });
+    // clip: { x, y, width, height, scale? } captures just that part of the viewport
+    // (CDP measures a clip from the top of the document, so add the scroll)
+    let clip = null;
+    if (s.clip) {
+      const [sx, sy] = await evaluate("[scrollX, scrollY]");
+      clip = { scale: 1, ...s.clip, x: s.clip.x + sx, y: s.clip.y + sy };
+    }
+    const shot = await send("Page.captureScreenshot", clip ? { format: "png", clip } : { format: "png" });
     mkdirSync(path.dirname(s.out), { recursive: true });
     writeFileSync(s.out, Buffer.from(shot.data, "base64"));
     console.log(path.basename(s.out), JSON.stringify(v));
