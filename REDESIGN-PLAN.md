@@ -16,21 +16,18 @@ is used in college applications, so licensing and professionalism matter.
 
 Live at `github.com/rajitsinha/rajitsinha.github.io` (GitHub Pages), tracked on `main`.
 
-**Live: `main` at `8afa13d`**, the merge of the first feedback batch. The version before it
-is tagged `live-before-feedback-fixes` (`a33fd6c`) and that tag is pushed. Undo that
-deploy with `git revert -m 1 8afa13d` and push.
+**Live: `main` at `8e32cd7`**, the merge that lets the wheel scroll the altitude_sensor.ino
+listing. Each deploy's previous live commit is tagged and pushed, newest first:
+`live-before-code-scroll` (`e12a33e`), `live-before-round2` (`8afa13d`),
+`live-before-feedback-fixes` (`a33fd6c`). Undo a deploy with `git revert -m 1 <merge>` and
+push.
 
-**Second batch: on `fixes/awards-round`, not merged, not deployed.** Newest first:
-
-```
-0eae569 Apollo: a lander you can see, and a handover from the stack that never jumps
-91621ff Ascent: his rocket in the outline style, flown on the apogee model
-bbb25ad School and skills: a centred board of rounded cards
-93fa719 Awards: rounded cards in one centred column
-```
+**Third batch: on `feat/handoff-and-hold`, not merged, not deployed** -- the Saturn V
+breaking apart into the lunar module, and the ring that shows while a chapter holds the page.
 
 To deploy: tag the live commit first (push the tag), merge with `--no-ff` so the whole batch
-reverts with `git revert -m 1 <merge>`, push, and give the owner that command.
+reverts with `git revert -m 1 <merge>`, push, give the owner that command, and update this
+section.
 
 Gitignored on purpose: `index_(25).html` (previous site, reference only, **never
 edit**), `threejs-skills/` (separate git clone), `eftgtsetgsetges.html` (byte-identical
@@ -77,6 +74,8 @@ chose "keep content, rebuild presentation" over a blank slate.
   when it covered the Apollo title (it was moved under the card instead); then he asked
   for less glow, because it rendered as a glowing ball. Its lines are normal-blended in a
   colour just under the bloom threshold (`normal:!0` in `lmSlot`). Don't make it additive.
+  Its lines draw after its body (`renderOrder` 1, set in `lmSlot`'s mount), or bits of the
+  body that sort later paint over near-side lines and it looks hollow.
 - **The Saturn V flies a mission, not a glide.** Ignition, two staging events with each
   stage's own plume, orbit, a translunar burn, then the lunar module into lunar orbit. He
   asked for it to feel like a real launch.
@@ -100,15 +99,25 @@ chose "keep content, rebuild presentation" over a blank slate.
 - **His rocket splits in the middle**, at the coupler, with the parachute between the
   sections (his answer when asked). Both halves hang under the canopy: upper nose-down,
   lower fins-down.
-- The Saturn V to lunar module handover must not jump. Through the camera's swing, what is
-  on screen is placed where it would appear to a camera that stayed with the stack, then
-  moved on screen (`apNdc`/`apAt`). The lunar orbit crosses in front of the Moon, clear of
-  its surface.
+- **The Saturn V becomes the lunar module.** His idea: the rocket's lines break apart and
+  form the lander. His choices when asked: the pieces stream into shape (not a burst, not a
+  swirl), and everything left of the stack after staging becomes the lander -- no spent
+  stage drifting away. The nose peels first and the lander builds from its feet; in flight
+  only about one piece in twenty stays lit, as a short streak (all ~25,000 lit filled the
+  stream in solid and it bloomed). The code is `mfBuild`/`mfUpdate` in the world and
+  `morphK`/`morphA` in the transit handler (.6 to .725).
+- The handover must not jump. Through the camera's swing, the stack and the lander are held
+  where they appear on screen (`apNdc`/`apAt`), so the pieces fly between two fixed points.
+  The lunar orbit crosses in front of the Moon, clear of its surface.
 - School and skills is a centred board of rounded cards, not two tables.
 - **The wheel scrolls the altitude_sensor.ino listing when the pointer is over it**, and the
   page takes over once the listing reaches its end (he had to drag its scrollbar before). The
   smooth-scroll engine lets a wheel through when it is over a box that can still scroll that
   way (`_inner` in the engine class); don't go back to swallowing every wheel event.
+- **A ring shows while a chapter holds the page** (`.hold`, bottom centre; bottom right on
+  phones, where the chapter label runs under the centre). He said a held page felt like the
+  end of the site. It fills with the chapter's progress, its arrow moves with the scroll,
+  and it is hidden everywhere the page scrolls normally. He chose the ring.
 
 ## Reference sites — what was actually found
 
@@ -339,6 +348,12 @@ Known and not fixed yet:
 - **An element whose opacity only a scene handler sets is visible until that handler first
   runs.** The Apollo title rose up the screen at full opacity as the chapter scrolled in.
   Give such elements a CSS starting value.
+- **Lines write no depth.** A transparent body that sorts after its own lines paints over
+  them. It made the finished lunar module look hollow beside the one the Saturn V's pieces
+  build (which draws after everything); both now draw lines after bodies.
+- **Occlusion of a stream needs its points, not a box.** A box around the Saturn V's
+  diagonal stream of pieces projects far wider than the stream and reported it behind the
+  title when it was clear of it. The harness projects sampled pieces (`morphPoints`).
 
 ## Already fixed — don't regress
 
@@ -394,10 +409,12 @@ leaves the parked coordinates behind them, so an off-screen prop's position is u
 by design and must not be tested. **The gate applies to the purity check too** — without
 it, purity reports ~900 false drifts on a healthy page.
 
-Last run at 1440×900, on the second batch: **seam 0 steps and purity 0 drift** across the
+Last run at 1440×900, on the third batch: **seam 0 steps and purity 0 drift** across the
 ascent and Apollo chapters, clampCheck clean, occlusion 0 across Apollo at 10 px steps
-with the models mounted, and whole-page occlusion reporting only the known Moon behind
-`#gloveCap`. At the end of the rebuild, also verified: hero + ascent + flight
+with the models mounted (the Saturn V's pieces included), and whole-page occlusion
+reporting only the known Moon behind `#gloveCap`. A whole-page seam at 3 px steps reports
+77 hits (bloom at the glove chapter's start, thrust and tilt in the ascent); the live
+site reports the same 77, so they predate this batch. At the end of the rebuild, also verified: hero + ascent + flight
 computer sampled every 25 px from 0 to 8000 against `2a70380` served side by side, 0
 differences over 25 keys; and `gloveK`/`gloveExplode` checked against their original
 formulas at 200 positions with progress recovered from `gloveSpin` so pixel rounding
